@@ -84,6 +84,8 @@ export default function Graph(props: GraphProps) {
   let tileIndex: TileIndex
 
   const fetchedTiles = new Set<string>()
+  const loadedNodes = new Set<number>()
+  const loadedEdges = new Set<[number, number]>()
 
   async function fetchTile(tilePath: string) {
     const dataUrl = import.meta.env.PUBLIC_DATA_URL
@@ -112,6 +114,9 @@ export default function Graph(props: GraphProps) {
     const nodeDict: { [key: number]: { x: number; y: number } } = {}
 
     for (const node of tileData.nodes) {
+      // Avoid loading nodes shared between tiles
+      if (loadedNodes.has(node.entity_id)) continue
+
       const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
       sprite.tint = 0x00ff00
       sprite.width = sprite.height = 10
@@ -126,6 +131,9 @@ export default function Graph(props: GraphProps) {
       const node2 = nodeDict[entity_id2]
 
       if (node1 && node2) {
+        // Avoid loading edges shared between tiles
+        if (loadedEdges.has([entity_id1, entity_id2])) continue
+
         const line = new PIXI.Graphics()
         line.moveTo(node1.x + 5, node1.y + 5)
         line.lineTo(node2.x + 5, node2.y + 5)
