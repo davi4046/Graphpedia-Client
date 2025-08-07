@@ -81,6 +81,8 @@ export default function Graph(props: GraphProps) {
   let viewport: PIXIViewport.Viewport
   let tileIndex: TileIndex
 
+  const fetchedTiles = new Set<string>()
+
   async function fetchTile(tilePath: string) {
     const dataUrl = import.meta.env.PUBLIC_DATA_URL
     const tileUrl = `${dataUrl}/graphs/${props.graphId}/tiles/${tilePath}.bin.gz`
@@ -183,6 +185,8 @@ export default function Graph(props: GraphProps) {
             bounds.y + bounds.height
           )
           .forEach(async (entry) => {
+            if (fetchedTiles.has(entry.path)) return
+            fetchedTiles.add(entry.path) // Do this before fetching
             const tileData = await fetchTile(entry.path)
             loadTile(tileData)
           })
