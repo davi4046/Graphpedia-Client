@@ -1,6 +1,7 @@
 import { Parser } from "binary-parser/lib/binary_parser.js"
 import Flatbush from "flatbush"
-import { Application } from "pixi.js"
+import * as PIXI from "pixi.js"
+import * as PIXIViewport from "pixi-viewport"
 import { onCleanup, onMount } from "solid-js"
 
 const tileEntryParser = new Parser()
@@ -66,20 +67,37 @@ type GraphProps = { graphId: string }
 
 export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
-  let app: Application
+  let app: PIXI.Application
   let tileIndex: TileIndex
 
   onMount(async () => {
-    app = new Application()
+    app = new PIXI.Application()
 
     await app.init({
       background: "#1099bb",
-      resizeTo: window,
+      resizeTo: containerRef,
     })
 
     if (containerRef) {
       containerRef.appendChild(app.canvas)
     }
+
+    const viewport = new PIXIViewport.Viewport({
+      screenWidth: app.screen.width,
+      screenHeight: app.screen.height,
+      worldWidth: 2000,
+      worldHeight: 2000,
+      events: app.renderer.events,
+    })
+
+    app.stage.addChild(viewport)
+
+    viewport.drag().pinch().wheel().decelerate()
+
+    const sprite = viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
+    sprite.tint = 0xff0000
+    sprite.width = sprite.height = 100
+    sprite.position.set(100, 100)
 
     try {
       const dataUrl = import.meta.env.PUBLIC_DATA_URL
