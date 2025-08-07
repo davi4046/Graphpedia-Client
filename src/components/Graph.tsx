@@ -68,6 +68,7 @@ type GraphProps = { graphId: string }
 export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
   let app: PIXI.Application
+  let viewport: PIXIViewport.Viewport
   let tileIndex: TileIndex
 
   onMount(() => {
@@ -109,7 +110,7 @@ export default function Graph(props: GraphProps) {
         containerRef.appendChild(app.canvas)
       }
 
-      const viewport = new PIXIViewport.Viewport({
+      viewport = new PIXIViewport.Viewport({
         screenWidth: app.screen.width,
         screenHeight: app.screen.height,
         worldWidth: 2000,
