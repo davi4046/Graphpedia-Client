@@ -20,6 +20,34 @@ const tileIndexParser = new Parser().array("entries", {
   readUntil: (_, buffer) => buffer.length === 0,
 })
 
+interface TileEntry {
+  path: string
+  xmin: number
+  ymin: number
+  xmax: number
+  ymax: number
+}
+
+class TileIndex {
+  private index: Flatbush
+  private entries: TileEntry[]
+
+  constructor(entries: TileEntry[]) {
+    this.entries = entries
+    this.index = new Flatbush(entries.length)
+
+    for (const entry of entries) {
+      this.index.add(entry.xmin, entry.ymin, entry.xmax, entry.ymax)
+    }
+    this.index.finish()
+  }
+
+  query(minX: number, minY: number, maxX: number, maxY: number): TileEntry[] {
+    const ids = this.index.search(minX, minY, maxX, maxY)
+    return ids.map((i) => this.entries[i])
+  }
+}
+
 const nodeParser = new Parser().uint32("entity_id").uint32("x").uint32("y")
 const edgeParser = new Parser().uint32("entity_id1").uint32("entity_id2")
 const tileParser = new Parser()
@@ -39,7 +67,7 @@ type GraphProps = { graphId: string }
 export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
   let app: Application
-  let index: Flatbush
+  let tileIndex: TileIndex
 
   onMount(async () => {
     app = new Application()
@@ -63,26 +91,17 @@ export default function Graph(props: GraphProps) {
       }
 
       const compressedData = await response.arrayBuffer()
-
       const blob = new Blob([compressedData])
 
       const decompressedStream = new DecompressionStream("gzip")
-
       const decompressedResponse = new Response(
         blob.stream().pipeThrough(decompressedStream)
       )
 
-      const tileIndexData = await decompressedResponse.arrayBuffer()
-      const tileIndex = tileIndexParser.parse(new Uint8Array(tileIndexData))
+      const tileData = await decompressedResponse.arrayBuffer()
+      const parsedTileData = tileIndexParser.parse(new Uint8Array(tileData))
 
-      index = new Flatbush(tileIndex.entries.length)
-
-      for (const entry of tileIndex.entries) {
-        const { xmin, ymin, xmax, ymax } = entry
-        index.add(xmin, ymin, xmax, ymax)
-      }
-
-      index.finish()
+      tileIndex = new TileIndex(parsedTileData.entries)
     } catch (error) {
       console.error("Error loading tile index:", error)
     }
