@@ -79,6 +79,8 @@ export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
   let app: PIXI.Application
   let viewport: PIXIViewport.Viewport
+  let edgeLayer: PIXI.Container
+  let nodeLayer: PIXI.Container
   let tileIndex: TileIndex
 
   const fetchedTiles = new Set<string>()
@@ -107,16 +109,29 @@ export default function Graph(props: GraphProps) {
   }
 
   function loadTile(tileData: any) {
+    const nodeDict: { [key: number]: { x: number; y: number } } = {}
+
     for (const node of tileData.nodes) {
       const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
       sprite.tint = 0x00ff00
       sprite.width = sprite.height = 10
       sprite.position.set(node.x, node.y)
-      viewport.addChild(sprite)
+      nodeLayer.addChild(sprite)
+      nodeDict[node.entity_id] = { x: node.x, y: node.y }
     }
 
     for (const edge of tileData.edges) {
-      // TODO
+      const { entity_id1, entity_id2 } = edge
+      const node1 = nodeDict[entity_id1]
+      const node2 = nodeDict[entity_id2]
+
+      if (node1 && node2) {
+        const line = new PIXI.Graphics()
+        line.moveTo(node1.x + 5, node1.y + 5)
+        line.lineTo(node2.x + 5, node2.y + 5)
+        line.stroke({ color: 0xff0000, pixelLine: true })
+        edgeLayer.addChild(line)
+      }
     }
 
     console.log(
@@ -174,6 +189,12 @@ export default function Graph(props: GraphProps) {
       app.stage.addChild(viewport)
 
       viewport.drag().pinch().wheel().decelerate()
+
+      edgeLayer = new PIXI.Container()
+      nodeLayer = new PIXI.Container()
+
+      viewport.addChild(edgeLayer)
+      viewport.addChild(nodeLayer)
 
       viewport.on("moved", () => {
         const bounds = viewport.getVisibleBounds()
