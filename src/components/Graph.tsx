@@ -81,6 +81,47 @@ export default function Graph(props: GraphProps) {
   let viewport: PIXIViewport.Viewport
   let tileIndex: TileIndex
 
+  async function fetchTile(tilePath: string) {
+    const dataUrl = import.meta.env.PUBLIC_DATA_URL
+    const tileUrl = `${dataUrl}/graphs/${props.graphId}/tiles/${tilePath}.bin.gz`
+    const response = await fetch(tileUrl)
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch tile: ${response.statusText}`)
+    }
+
+    const compressedData = await response.arrayBuffer()
+    const blob = new Blob([compressedData])
+
+    const decompressedStream = new DecompressionStream("gzip")
+    const decompressedResponse = new Response(
+      blob.stream().pipeThrough(decompressedStream)
+    )
+
+    const tileData = await decompressedResponse.arrayBuffer()
+    const parsedTileData = tileParser.parse(new Uint8Array(tileData))
+
+    return parsedTileData
+  }
+
+  function loadTile(tileData: any) {
+    for (const node of tileData.nodes) {
+      const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
+      sprite.tint = 0x00ff00
+      sprite.width = sprite.height = 10
+      sprite.position.set(node.x, node.y)
+      viewport.addChild(sprite)
+    }
+
+    for (const edge of tileData.edges) {
+      // TODO
+    }
+
+    console.log(
+      `Loaded tile with ${tileData.nodes.length} nodes and ${tileData.edges.length} edges`
+    )
+  }
+
   onMount(() => {
     const fetchTileIndex = (async () => {
       try {
@@ -100,10 +141,10 @@ export default function Graph(props: GraphProps) {
           blob.stream().pipeThrough(decompressedStream)
         )
 
-        const tileData = await decompressedResponse.arrayBuffer()
-        const parsedTileData = tileIndexParser.parse(new Uint8Array(tileData))
+        const indexData = await decompressedResponse.arrayBuffer()
+        const parsedIndexData = tileIndexParser.parse(new Uint8Array(indexData))
 
-        tileIndex = new TileIndex(parsedTileData.entries)
+        tileIndex = new TileIndex(parsedIndexData.entries)
       } catch (error) {
         console.error("Error loading tile index:", error)
       }
@@ -123,14 +164,29 @@ export default function Graph(props: GraphProps) {
       viewport = new PIXIViewport.Viewport({
         screenWidth: app.screen.width,
         screenHeight: app.screen.height,
-        worldWidth: 2000,
-        worldHeight: 2000,
+        worldWidth: 50000,
+        worldHeight: 50000,
         events: app.renderer.events,
       })
 
       app.stage.addChild(viewport)
 
       viewport.drag().pinch().wheel().decelerate()
+
+      viewport.on("moved", () => {
+        const bounds = viewport.getVisibleBounds()
+        tileIndex
+          .query(
+            bounds.x,
+            bounds.y,
+            bounds.x + bounds.width,
+            bounds.y + bounds.height
+          )
+          .forEach(async (entry) => {
+            const tileData = await fetchTile(entry.path)
+            loadTile(tileData)
+          })
+      })
 
       const sprite = viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
       sprite.tint = 0xff0000
