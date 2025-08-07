@@ -1,4 +1,5 @@
 import { Parser } from "binary-parser/lib/binary_parser.js"
+import Flatbush from "flatbush"
 import { Application } from "pixi.js"
 import { onCleanup, onMount } from "solid-js"
 
@@ -19,11 +20,26 @@ const tileIndexParser = new Parser().array("entries", {
   readUntil: (_, buffer) => buffer.length === 0,
 })
 
+const nodeParser = new Parser().uint32("entity_id").uint32("x").uint32("y")
+const edgeParser = new Parser().uint32("entity_id1").uint32("entity_id2")
+const tileParser = new Parser()
+  .uint32("numNodes")
+  .array("nodes", {
+    type: nodeParser,
+    length: "numNodes",
+  })
+  .uint32("numEdges")
+  .array("edges", {
+    type: edgeParser,
+    length: "numEdges",
+  })
+
 type GraphProps = { graphId: string }
 
 export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
   let app: Application
+  let index: Flatbush
 
   onMount(async () => {
     app = new Application()
@@ -59,7 +75,14 @@ export default function Graph(props: GraphProps) {
       const tileIndexData = await decompressedResponse.arrayBuffer()
       const tileIndex = tileIndexParser.parse(new Uint8Array(tileIndexData))
 
-      console.log("Tile Index Data:", tileIndex)
+      index = new Flatbush(tileIndex.entries.length)
+
+      for (const entry of tileIndex.entries) {
+        const { xmin, ymin, xmax, ymax } = entry
+        index.add(xmin, ymin, xmax, ymax)
+      }
+
+      index.finish()
     } catch (error) {
       console.error("Error loading tile index:", error)
     }
