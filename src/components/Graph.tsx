@@ -1,9 +1,25 @@
+import { Parser } from "binary-parser/lib/binary_parser.js"
 import { Application } from "pixi.js"
 import { onCleanup, onMount } from "solid-js"
 
-type GraphProps = {
-  graphId: string
-}
+const tileEntryParser = new Parser()
+  .endianess("little")
+  .uint16("pathLength")
+  .string("path", {
+    length: "pathLength",
+    encoding: "utf8",
+  })
+  .uint32("xmin")
+  .uint32("ymin")
+  .uint32("xmax")
+  .uint32("ymax")
+
+const tileIndexParser = new Parser().array("entries", {
+  type: tileEntryParser,
+  readUntil: (_, buffer) => buffer.length === 0,
+})
+
+type GraphProps = { graphId: string }
 
 export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
@@ -32,23 +48,18 @@ export default function Graph(props: GraphProps) {
 
       const compressedData = await response.arrayBuffer()
 
+      const blob = new Blob([compressedData])
+
       const decompressedStream = new DecompressionStream("gzip")
+
       const decompressedResponse = new Response(
-        new ReadableStream({
-          start(controller) {
-            controller.enqueue(new Uint8Array(compressedData))
-            controller.close()
-          },
-        }).pipeThrough(decompressedStream)
+        blob.stream().pipeThrough(decompressedStream)
       )
 
       const tileIndexData = await decompressedResponse.arrayBuffer()
+      const tileIndex = tileIndexParser.parse(new Uint8Array(tileIndexData))
 
-      // Process the tile index data
-      console.log("Loaded tile index:", tileIndexData.byteLength, "bytes")
-
-      // TODO: Parse tile index and create graph visualization
-      // You can now use tileIndexData to build your graph nodes
+      console.log("Tile Index Data:", tileIndex)
     } catch (error) {
       console.error("Error loading tile index:", error)
     }
