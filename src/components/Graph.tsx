@@ -248,6 +248,8 @@ class GraphLoader {
     }
 
     this.viewport.on("moved", this.moveHandler)
+
+    this.moveHandler(null)
   }
 }
 
