@@ -144,17 +144,11 @@ class TileLoader {
 
         const { p1, p2 } = TileLoader.findLineEndpoints(node1, node2, 10)
 
-        const g = new PIXI.Graphics()
-
-        g.moveTo(p1.x, p1.y)
-        g.lineTo(p2.x, p2.y)
-        g.stroke({ color: 0xff0000, pixelLine: true })
-
-        TileLoader.drawArrowHead(g, p2, p1, 5)
-
-        g.fill(0xffff00)
-
-        this.container.addChildAt(g, 0)
+        const line = new PIXI.Graphics()
+        line.moveTo(p1.x, p1.y)
+        line.lineTo(p2.x, p2.y)
+        line.stroke({ color: 0xff0000, pixelLine: true })
+        this.container.addChildAt(line, 0)
       }
     }
   }
@@ -194,33 +188,6 @@ class TileLoader {
       p1: TileLoader.intersectSquareBoundary(c1, halfSize, dir1),
       p2: TileLoader.intersectSquareBoundary(c2, halfSize, dir2),
     }
-  }
-
-  private static drawArrowHead(
-    g: PIXI.Graphics,
-    tip: Point,
-    from: Point,
-    size = 10,
-    angleDeg = 30
-  ) {
-    const dx = tip.x - from.x
-    const dy = tip.y - from.y
-    const length = Math.sqrt(dx * dx + dy * dy)
-    if (length === 0) return
-
-    const angle = Math.atan2(dy, dx)
-    const arrowAngle = (angleDeg * Math.PI) / 180
-
-    const leftX = tip.x - size * Math.cos(angle - arrowAngle)
-    const leftY = tip.y - size * Math.sin(angle - arrowAngle)
-
-    const rightX = tip.x - size * Math.cos(angle + arrowAngle)
-    const rightY = tip.y - size * Math.sin(angle + arrowAngle)
-
-    g.moveTo(tip.x, tip.y)
-    g.lineTo(leftX, leftY)
-    g.lineTo(rightX, rightY)
-    g.lineTo(tip.x, tip.y)
   }
 }
 
