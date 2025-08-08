@@ -110,14 +110,12 @@ interface Point {
 }
 
 class TileLoader {
-  private nodeLayer: PIXI.Container
-  private edgeLayer: PIXI.Container
+  private container: PIXI.Container
   private loadedNodes: Set<number> = new Set()
   private loadedEdges: Set<[number, number]> = new Set()
 
-  constructor(nodeLayer: PIXI.Container, edgeLayer: PIXI.Container) {
-    this.nodeLayer = nodeLayer
-    this.edgeLayer = edgeLayer
+  constructor(container: PIXI.Container) {
+    this.container = container
   }
 
   loadTile(tileData: any) {
@@ -131,7 +129,7 @@ class TileLoader {
       sprite.tint = 0x00ff00
       sprite.width = sprite.height = 10
       sprite.position.set(node.x - 5, node.y - 5)
-      this.nodeLayer.addChild(sprite)
+      this.container.addChild(sprite)
       nodeDict[node.entity_id] = { x: node.x, y: node.y }
     }
 
@@ -156,7 +154,7 @@ class TileLoader {
 
         g.fill(0xffff00)
 
-        this.edgeLayer.addChild(g)
+        this.container.addChildAt(g, 0)
       }
     }
   }
@@ -228,14 +226,10 @@ class TileLoader {
 
 class GraphLoader {
   private viewport: PIXIViewport.Viewport
-  private nodeLayer: PIXI.Container = new PIXI.Container()
-  private edgeLayer: PIXI.Container = new PIXI.Container()
   private moveHandler: ((event: any) => void) | null = null
 
   constructor(viewport: PIXIViewport.Viewport) {
     this.viewport = viewport
-    this.viewport.addChild(this.edgeLayer)
-    this.viewport.addChild(this.nodeLayer)
   }
 
   async loadGraph(graphId: string) {
@@ -244,8 +238,7 @@ class GraphLoader {
       this.moveHandler = null
     }
 
-    this.nodeLayer.removeChildren()
-    this.edgeLayer.removeChildren()
+    this.viewport.removeChildren()
 
     const dataUrl = import.meta.env.PUBLIC_DATA_URL
     const tileIndexUrl = `${dataUrl}/graphs/${graphId}/tile_index.bin.gz`
@@ -268,7 +261,7 @@ class GraphLoader {
 
     const tileIndex = new TileIndex(parsedIndexData.entries)
     const tileFetcher = new TileFetcher(graphId)
-    const tileLoader = new TileLoader(this.nodeLayer, this.edgeLayer)
+    const tileLoader = new TileLoader(this.viewport)
     const loadedTiles = new Set<string>()
 
     this.moveHandler = async () => {
