@@ -155,40 +155,34 @@ type GraphProps = { graphId: string }
 
 export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
-  let app: PIXI.Application
-  let viewport: PIXIViewport.Viewport
-  let tileIndex: TileIndex
+  let pixiApp: PIXI.Application
 
-  onMount(() => {
-    const fetchTileIndex = (async () => {
-      try {
-        const dataUrl = import.meta.env.PUBLIC_DATA_URL
-        const tileIndexUrl = `${dataUrl}/graphs/${props.graphId}/tile_index.bin.gz`
-        const response = await fetch(tileIndexUrl)
+  onMount(async () => {
+    const fetchTileIndex = async () => {
+      const dataUrl = import.meta.env.PUBLIC_DATA_URL
+      const tileIndexUrl = `${dataUrl}/graphs/${props.graphId}/tile_index.bin.gz`
+      const response = await fetch(tileIndexUrl)
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch tile index: ${response.statusText}`)
-        }
-
-        const compressedData = await response.arrayBuffer()
-        const blob = new Blob([compressedData])
-
-        const decompressedStream = new DecompressionStream("gzip")
-        const decompressedResponse = new Response(
-          blob.stream().pipeThrough(decompressedStream)
-        )
-
-        const indexData = await decompressedResponse.arrayBuffer()
-        const parsedIndexData = tileIndexParser.parse(new Uint8Array(indexData))
-
-        tileIndex = new TileIndex(parsedIndexData.entries)
-      } catch (error) {
-        console.error("Error loading tile index:", error)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch tile index: ${response.statusText}`)
       }
-    })()
 
-    const setupPixi = (async () => {
-      app = new PIXI.Application()
+      const compressedData = await response.arrayBuffer()
+      const blob = new Blob([compressedData])
+
+      const decompressedStream = new DecompressionStream("gzip")
+      const decompressedResponse = new Response(
+        blob.stream().pipeThrough(decompressedStream)
+      )
+
+      const indexData = await decompressedResponse.arrayBuffer()
+      const parsedIndexData = tileIndexParser.parse(new Uint8Array(indexData))
+
+      return new TileIndex(parsedIndexData.entries)
+    }
+
+    const setupPixi = async () => {
+      const app = new PIXI.Application()
       await app.init({
         background: "#1099bb",
         resizeTo: window,
@@ -198,7 +192,7 @@ export default function Graph(props: GraphProps) {
         containerRef.appendChild(app.canvas)
       }
 
-      viewport = new PIXIViewport.Viewport({
+      const viewport = new PIXIViewport.Viewport({
         screenWidth: app.screen.width,
         screenHeight: app.screen.height,
         worldWidth: 50000,
@@ -209,33 +203,40 @@ export default function Graph(props: GraphProps) {
       app.stage.addChild(viewport)
 
       viewport.drag().pinch().wheel().decelerate()
-    })()
 
-    Promise.all([fetchTileIndex, setupPixi]).then(() => {
-      const tileFetcher = new TileFetcher(props.graphId)
-      const tileLoader = new TileLoader(viewport)
-      const loadedTiles = new Set<string>()
+      return { app, viewport }
+    }
 
-      viewport.on("moved", async () => {
-        const bounds = viewport.getVisibleBounds()
-        const tiles = tileIndex.query(
-          bounds.x,
-          bounds.y,
-          bounds.x + bounds.width,
-          bounds.y + bounds.height
-        )
-        for (const tile of tiles) {
-          if (loadedTiles.has(tile.path)) continue
-          const tileData = await tileFetcher.fetchTile(tile.path)
-          tileLoader.loadTile(tileData)
-          loadedTiles.add(tile.path)
-        }
-      })
+    const [tileIndex, { app, viewport }] = await Promise.all([
+      fetchTileIndex(),
+      setupPixi(),
+    ])
+
+    pixiApp = app
+
+    const tileFetcher = new TileFetcher(props.graphId)
+    const tileLoader = new TileLoader(viewport)
+    const loadedTiles = new Set<string>()
+
+    viewport.on("moved", async () => {
+      const bounds = viewport.getVisibleBounds()
+      const tiles = tileIndex.query(
+        bounds.x,
+        bounds.y,
+        bounds.x + bounds.width,
+        bounds.y + bounds.height
+      )
+      for (const tile of tiles) {
+        if (loadedTiles.has(tile.path)) continue
+        const tileData = await tileFetcher.fetchTile(tile.path)
+        tileLoader.loadTile(tileData)
+        loadedTiles.add(tile.path)
+      }
     })
   })
 
   onCleanup(() => {
-    app?.destroy(true, { children: true })
+    pixiApp?.destroy(true, { children: true })
   })
 
   return (
