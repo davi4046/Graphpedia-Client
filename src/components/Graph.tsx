@@ -129,6 +129,7 @@ class TileLoader {
       sprite.tint = 0x00ff00
       sprite.width = sprite.height = 10
       sprite.position.set(node.x - 5, node.y - 5)
+      sprite.cullable = true
       this.container.addChild(sprite)
       nodeDict[node.entity_id] = { x: node.x, y: node.y }
     }
@@ -148,6 +149,7 @@ class TileLoader {
         line.moveTo(p1.x, p1.y)
         line.lineTo(p2.x, p2.y)
         line.stroke({ color: 0xff0000, pixelLine: true })
+        line.cullable = true
         this.container.addChildAt(line, 0)
       }
     }
@@ -262,10 +264,14 @@ export default function Graph(props: GraphProps) {
   let graphLoader: GraphLoader
 
   onMount(async () => {
+    PIXI.extensions.add(PIXI.CullerPlugin)
+
     app = new PIXI.Application()
     await app.init({
       background: "#1099bb",
       resizeTo: window,
+      preference: "webgpu",
+      antialias: false,
     })
 
     if (containerRef) {
@@ -283,6 +289,10 @@ export default function Graph(props: GraphProps) {
     app.stage.addChild(viewport)
 
     viewport.drag().pinch().wheel().decelerate()
+
+    if (app.renderer.type !== PIXI.RendererType.WEBGPU) {
+      viewport.cullableChildren = false
+    }
 
     graphLoader = new GraphLoader(viewport)
     graphLoader.loadGraph(props.graphId)
