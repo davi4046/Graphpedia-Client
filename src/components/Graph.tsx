@@ -73,23 +73,16 @@ const tileParser = new Parser()
     length: "numEdges",
   })
 
-type GraphProps = { graphId: string }
+class TileFetcher {
+  private graphId: string
 
-export default function Graph(props: GraphProps) {
-  let containerRef: HTMLDivElement | undefined
-  let app: PIXI.Application
-  let viewport: PIXIViewport.Viewport
-  let edgeLayer: PIXI.Container
-  let nodeLayer: PIXI.Container
-  let tileIndex: TileIndex
+  constructor(graphId: string) {
+    this.graphId = graphId
+  }
 
-  const fetchedTiles = new Set<string>()
-  const loadedNodes = new Set<number>()
-  const loadedEdges = new Set<[number, number]>()
-
-  async function fetchTile(tilePath: string) {
+  async fetchTile(tilePath: string): Promise<any> {
     const dataUrl = import.meta.env.PUBLIC_DATA_URL
-    const tileUrl = `${dataUrl}/graphs/${props.graphId}/tiles/${tilePath}.bin.gz`
+    const tileUrl = `${dataUrl}/graphs/${this.graphId}/tiles/${tilePath}.bin.gz`
     const response = await fetch(tileUrl)
 
     if (!response.ok) {
@@ -109,19 +102,33 @@ export default function Graph(props: GraphProps) {
 
     return parsedTileData
   }
+}
 
-  function loadTile(tileData: any) {
+class TileLoader {
+  private nodeLayer: PIXI.Container
+  private edgeLayer: PIXI.Container
+  private loadedNodes: Set<number> = new Set()
+  private loadedEdges: Set<[number, number]> = new Set()
+
+  constructor(viewport: PIXIViewport.Viewport) {
+    this.nodeLayer = new PIXI.Container()
+    this.edgeLayer = new PIXI.Container()
+    viewport.addChild(this.edgeLayer)
+    viewport.addChild(this.nodeLayer)
+  }
+
+  loadTile(tileData: any) {
     const nodeDict: { [key: number]: { x: number; y: number } } = {}
 
     for (const node of tileData.nodes) {
       // Avoid loading nodes shared between tiles
-      if (loadedNodes.has(node.entity_id)) continue
+      if (this.loadedNodes.has(node.entity_id)) continue
 
       const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
       sprite.tint = 0x00ff00
       sprite.width = sprite.height = 10
       sprite.position.set(node.x, node.y)
-      nodeLayer.addChild(sprite)
+      this.nodeLayer.addChild(sprite)
       nodeDict[node.entity_id] = { x: node.x, y: node.y }
     }
 
@@ -132,20 +139,25 @@ export default function Graph(props: GraphProps) {
 
       if (node1 && node2) {
         // Avoid loading edges shared between tiles
-        if (loadedEdges.has([entity_id1, entity_id2])) continue
+        if (this.loadedEdges.has([entity_id1, entity_id2])) continue
 
         const line = new PIXI.Graphics()
         line.moveTo(node1.x + 5, node1.y + 5)
         line.lineTo(node2.x + 5, node2.y + 5)
         line.stroke({ color: 0xff0000, pixelLine: true })
-        edgeLayer.addChild(line)
+        this.edgeLayer.addChild(line)
       }
     }
-
-    console.log(
-      `Loaded tile with ${tileData.nodes.length} nodes and ${tileData.edges.length} edges`
-    )
   }
+}
+
+type GraphProps = { graphId: string }
+
+export default function Graph(props: GraphProps) {
+  let containerRef: HTMLDivElement | undefined
+  let app: PIXI.Application
+  let viewport: PIXIViewport.Viewport
+  let tileIndex: TileIndex
 
   onMount(() => {
     const fetchTileIndex = (async () => {
@@ -197,38 +209,28 @@ export default function Graph(props: GraphProps) {
       app.stage.addChild(viewport)
 
       viewport.drag().pinch().wheel().decelerate()
-
-      edgeLayer = new PIXI.Container()
-      nodeLayer = new PIXI.Container()
-
-      viewport.addChild(edgeLayer)
-      viewport.addChild(nodeLayer)
-
-      viewport.on("moved", () => {
-        const bounds = viewport.getVisibleBounds()
-        tileIndex
-          .query(
-            bounds.x,
-            bounds.y,
-            bounds.x + bounds.width,
-            bounds.y + bounds.height
-          )
-          .forEach(async (entry) => {
-            if (fetchedTiles.has(entry.path)) return
-            fetchedTiles.add(entry.path) // Do this before fetching
-            const tileData = await fetchTile(entry.path)
-            loadTile(tileData)
-          })
-      })
-
-      const sprite = viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE))
-      sprite.tint = 0xff0000
-      sprite.width = sprite.height = 100
-      sprite.position.set(100, 100)
     })()
 
     Promise.all([fetchTileIndex, setupPixi]).then(() => {
-      console.log("App and tile index ready")
+      const tileFetcher = new TileFetcher(props.graphId)
+      const tileLoader = new TileLoader(viewport)
+      const loadedTiles = new Set<string>()
+
+      viewport.on("moved", async () => {
+        const bounds = viewport.getVisibleBounds()
+        const tiles = tileIndex.query(
+          bounds.x,
+          bounds.y,
+          bounds.x + bounds.width,
+          bounds.y + bounds.height
+        )
+        for (const tile of tiles) {
+          if (loadedTiles.has(tile.path)) continue
+          const tileData = await tileFetcher.fetchTile(tile.path)
+          tileLoader.loadTile(tileData)
+          loadedTiles.add(tile.path)
+        }
+      })
     })
   })
 
