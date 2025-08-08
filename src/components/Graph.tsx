@@ -153,6 +153,7 @@ class GraphLoader {
   private viewport: PIXIViewport.Viewport
   private nodeLayer: PIXI.Container = new PIXI.Container()
   private edgeLayer: PIXI.Container = new PIXI.Container()
+  private moveHandler: ((event: any) => void) | null = null
 
   constructor(viewport: PIXIViewport.Viewport) {
     this.viewport = viewport
@@ -161,6 +162,11 @@ class GraphLoader {
   }
 
   async loadGraph(graphId: string) {
+    if (this.moveHandler) {
+      this.viewport.off("moved", this.moveHandler)
+      this.moveHandler = null
+    }
+
     this.nodeLayer.removeChildren()
     this.edgeLayer.removeChildren()
 
@@ -186,10 +192,9 @@ class GraphLoader {
     const tileIndex = new TileIndex(parsedIndexData.entries)
     const tileFetcher = new TileFetcher(graphId)
     const tileLoader = new TileLoader(this.nodeLayer, this.edgeLayer)
-
     const loadedTiles = new Set<string>()
 
-    this.viewport.on("moved", async () => {
+    this.moveHandler = async () => {
       const bounds = this.viewport.getVisibleBounds()
       const tiles = tileIndex.query(
         bounds.x,
@@ -203,7 +208,9 @@ class GraphLoader {
         tileLoader.loadTile(tileData)
         loadedTiles.add(tile.path)
       }
-    })
+    }
+
+    this.viewport.on("moved", this.moveHandler)
   }
 }
 
