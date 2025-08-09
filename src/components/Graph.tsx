@@ -196,6 +196,8 @@ class TileLoader {
 class GraphLoader {
   private viewport: PIXIViewport.Viewport
   private moveHandler: ((event: any) => void) | null = null
+  private lastMoveTime = 0
+  private throttleDelay = 250 // milliseconds
 
   constructor(viewport: PIXIViewport.Viewport) {
     this.viewport = viewport
@@ -251,7 +253,7 @@ class GraphLoader {
     const tileLoader = new TileLoader(tileContainer)
     const loadedTiles = new Set<string>()
 
-    this.moveHandler = async () => {
+    const loadTiles = async () => {
       const bounds = this.viewport.getVisibleBounds()
       const tiles = tileIndex.query(
         bounds.x,
@@ -267,9 +269,18 @@ class GraphLoader {
       }
     }
 
+    this.moveHandler = () => {
+      const now = Date.now()
+      if (now - this.lastMoveTime >= this.throttleDelay) {
+        this.lastMoveTime = now
+        loadTiles()
+      }
+    }
+
     this.viewport.on("moved", this.moveHandler)
 
-    this.moveHandler(null)
+    // Load initial tiles
+    loadTiles()
   }
 }
 
