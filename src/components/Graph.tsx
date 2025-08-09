@@ -100,13 +100,14 @@ class TileLoader {
       // Avoid loading nodes shared between tiles
       if (this.loadedNodes.has(node.entity_id)) continue
 
+      nodeDict[node.entity_id] = { x: node.x, y: node.y }
+
       const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
       sprite.tint = 0x00ff00
       sprite.width = sprite.height = 10
       sprite.position.set(node.x - 5, node.y - 5)
       sprite.cullable = true
       this.container.addChild(sprite)
-      nodeDict[node.entity_id] = { x: node.x, y: node.y }
     }
 
     for (const edge of tileData.edges) {
@@ -118,52 +119,13 @@ class TileLoader {
         // Avoid loading edges shared between tiles
         if (this.loadedEdges.has([entity_id1, entity_id2])) continue
 
-        const { p1, p2 } = TileLoader.findLineEndpoints(node1, node2, 10)
-
         const line = new PIXI.Graphics()
-        line.moveTo(p1.x, p1.y)
-        line.lineTo(p2.x, p2.y)
+        line.moveTo(node1.x, node1.y)
+        line.lineTo(node2.x, node2.y)
         line.stroke({ color: 0xff0000, pixelLine: true })
         line.cullable = true
         this.container.addChildAt(line, 0)
       }
-    }
-  }
-
-  private static intersectSquareBoundary(
-    center: Point,
-    halfSize: number,
-    direction: Point
-  ): Point {
-    const { x: cx, y: cy } = center
-    const { x: dx, y: dy } = direction
-    let tX = dx !== 0 ? (dx > 0 ? halfSize / dx : -halfSize / dx) : Infinity
-    let tY = dy !== 0 ? (dy > 0 ? halfSize / dy : -halfSize / dy) : Infinity
-    const pX = { x: cx + tX * dx, y: cy + tX * dy }
-    const pY = { x: cx + tY * dx, y: cy + tY * dy }
-    const validPX = Math.abs(pX.y - cy) <= halfSize
-    const validPY = Math.abs(pY.x - cx) <= halfSize
-    if (validPX && validPY) return tX < tY ? pX : pY
-    if (validPX) return pX
-    if (validPY) return pY
-    return center
-  }
-
-  private static findLineEndpoints(
-    c1: Point,
-    c2: Point,
-    sideLength: number
-  ): { p1: Point; p2: Point } {
-    const halfSize = sideLength / 2
-    const dx = c2.x - c1.x
-    const dy = c2.y - c1.y
-    const length = Math.sqrt(dx * dx + dy * dy)
-    if (length === 0) return { p1: c1, p2: c2 }
-    const dir1 = { x: dx / length, y: dy / length }
-    const dir2 = { x: -dir1.x, y: -dir1.y }
-    return {
-      p1: TileLoader.intersectSquareBoundary(c1, halfSize, dir1),
-      p2: TileLoader.intersectSquareBoundary(c2, halfSize, dir2),
     }
   }
 }
