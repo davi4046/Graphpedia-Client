@@ -90,11 +90,9 @@ interface TileData {
   edges: Edge[]
 }
 
-type GridCell = Map<string, Set<any>>
-
-class Grid {
-  private cells = new Map<string, GridCell>()
-  private objIndex = new Map<object, string[]>()
+class GridSpatialIndex<T extends object> {
+  private cells = new Map<string, Set<T>>()
+  private objIndex = new Map<T, string>()
 
   private readonly CELL_SIZE
 
@@ -102,60 +100,28 @@ class Grid {
     this.CELL_SIZE = cellSize
   }
 
-  insert(
-    obj: object,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number,
-    tag: string
-  ) {
-    const minCellX = Math.floor(minX / this.CELL_SIZE)
-    const minCellY = Math.floor(minY / this.CELL_SIZE)
-    const maxCellX = Math.floor(maxX / this.CELL_SIZE)
-    const maxCellY = Math.floor(maxY / this.CELL_SIZE)
+  insert(obj: T, x: number, y: number) {
+    const cellX = Math.floor(x / this.CELL_SIZE)
+    const cellY = Math.floor(y / this.CELL_SIZE)
+    const cellKey = `${cellX},${cellY}`
 
-    const cellKeys: string[] = []
-
-    for (let x = minCellX; x <= maxCellX; x++) {
-      for (let y = minCellY; y <= maxCellY; y++) {
-        const cellKey = `${x},${y}`
-        cellKeys.push(cellKey)
-
-        if (!this.cells.has(cellKey)) {
-          this.cells.set(cellKey, new Map<string, Set<any>>())
-        }
-
-        const cell = this.cells.get(cellKey)!
-
-        if (!cell.has(tag)) {
-          cell.set(tag, new Set<any>())
-        }
-        cell.get(tag)!.add(obj)
-      }
+    if (!this.cells.has(cellKey)) {
+      this.cells.set(cellKey, new Set())
     }
 
-    this.objIndex.set(obj, cellKeys)
+    this.cells.get(cellKey)!.add(obj)
+    this.objIndex.set(obj, cellKey)
   }
 
-  remove(obj: object): boolean {
-    const cellKeys = this.objIndex.get(obj)
-    if (!cellKeys) return false
+  remove(obj: T): boolean {
+    const cellKey = this.objIndex.get(obj)
+    if (!cellKey) return false
 
-    for (const cellKey of cellKeys) {
-      const cell = this.cells.get(cellKey)
-      if (!cell) continue
+    const cell = this.cells.get(cellKey)
+    if (!cell) return false
 
-      for (const set of cell.values()) {
-        set.delete(obj)
-      }
-
-      for (const [tag, set] of cell) {
-        if (set.size === 0) cell.delete(tag)
-      }
-      if (cell.size === 0) this.cells.delete(cellKey)
-    }
-
+    cell.delete(obj)
+    if (cell.size === 0) this.cells.delete(cellKey)
     this.objIndex.delete(obj)
     return true
   }
@@ -166,7 +132,7 @@ class Grid {
     const maxCellX = Math.floor(maxX / this.CELL_SIZE)
     const maxCellY = Math.floor(maxY / this.CELL_SIZE)
 
-    const cells: GridCell[] = []
+    const cells: Set<T>[] = []
 
     for (let x = minCellX; x <= maxCellX; x++) {
       for (let y = minCellY; y <= maxCellY; y++) {
@@ -237,7 +203,7 @@ export default function Graph(props: GraphProps) {
     const tileIndex = await fetchTileIndex()
     const fetchedTiles = new Set<string>()
 
-    const grid = new Grid(256)
+    const grid = new GridSpatialIndex<Node>(256)
 
     viewport.on("moved", () => {
       const { x, y, width, height } = viewport.getBounds()
@@ -248,10 +214,16 @@ export default function Graph(props: GraphProps) {
         fetchedTiles.add(tileEntry.path)
 
         fetchTile(tileEntry.path).then((tile) => {
-          // TODO
+          for (const node of tile.nodes) {
+            grid.insert(node, node.x, node.y)
+          }
         })
       }
     })
+  })
+
+  onCleanup(() => {
+    app?.destroy(true, { children: true })
   })
 
   onCleanup(() => {
