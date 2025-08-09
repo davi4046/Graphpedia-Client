@@ -228,9 +228,27 @@ class GraphLoader {
     const indexData = await decompressedResponse.arrayBuffer()
     const parsedIndexData = tileIndexParser.parse(new Uint8Array(indexData))
 
+    const debugContainer = new PIXI.Container()
+    this.viewport.addChild(debugContainer)
+
+    for (const entry of parsedIndexData.entries) {
+      const sprite = PIXI.Sprite.from(PIXI.Texture.WHITE)
+      const r = Math.floor(128 + Math.random() * 127) // 128-255
+      const g = Math.floor(128 + Math.random() * 127) // 128-255
+      const b = Math.floor(128 + Math.random() * 127) // 128-255
+      sprite.tint = (r << 16) | (g << 8) | b
+      sprite.width = entry.xmax - entry.xmin
+      sprite.height = entry.ymax - entry.ymin
+      sprite.position.set(entry.xmin, entry.ymin)
+      debugContainer.addChild(sprite)
+    }
+
+    const tileContainer = new PIXI.Container()
+    this.viewport.addChild(tileContainer)
+
     const tileIndex = new TileIndex(parsedIndexData.entries)
     const tileFetcher = new TileFetcher(graphId)
-    const tileLoader = new TileLoader(this.viewport)
+    const tileLoader = new TileLoader(tileContainer)
     const loadedTiles = new Set<string>()
 
     this.moveHandler = async () => {
