@@ -87,6 +87,9 @@ interface Point {
 class TileLoader {
   private container: PIXI.Container
   private loadedObjects = new Set<string>()
+  private buckets: Map<string, PIXI.Container> = new Map()
+
+  private readonly CELL_SIZE = 2048
 
   constructor(container: PIXI.Container) {
     this.container = container
@@ -108,8 +111,9 @@ class TileLoader {
       sprite.tint = 0x00ff00
       sprite.width = sprite.height = 10
       sprite.position.set(node.x - 5, node.y - 5)
-      sprite.cullable = true
-      this.container.addChild(sprite)
+
+      const bucket = this.getBucketContainer(node.x, node.y)
+      bucket.addChild(sprite)
     }
 
     for (const edge of tileData.edges) {
@@ -128,9 +132,31 @@ class TileLoader {
       line.moveTo(node1.x, node1.y)
       line.lineTo(node2.x, node2.y)
       line.stroke({ color: 0xff0000, pixelLine: true })
-      line.cullable = true
-      this.container.addChildAt(line, 0)
+
+      const midX = (node1.x + node2.x) / 2
+      const midY = (node1.y + node2.y) / 2
+
+      const bucket = this.getBucketContainer(midX, midY)
+      bucket.addChildAt(line, 0)
     }
+  }
+
+  private getBucketContainer(x: number, y: number): PIXI.Container {
+    const key = this.getBucketKey(x, y)
+    let bucket = this.buckets.get(key)
+    if (!bucket) {
+      bucket = new PIXI.Container()
+      bucket.cullable = true // now we cull *whole* buckets
+      this.container.addChild(bucket)
+      this.buckets.set(key, bucket)
+    }
+    return bucket
+  }
+
+  private getBucketKey(x: number, y: number): string {
+    const cellX = Math.floor(x / this.CELL_SIZE)
+    const cellY = Math.floor(y / this.CELL_SIZE)
+    return `${cellX},${cellY}`
   }
 }
 
