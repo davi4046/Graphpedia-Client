@@ -79,6 +79,33 @@ class TileFetcher {
   }
 }
 
+class RefCountMap {
+  private map: Map<string, number>
+
+  constructor() {
+    this.map = new Map()
+  }
+
+  increment(id: string): number {
+    const current = this.map.get(id) || 0
+    const next = current + 1
+    this.map.set(id, next)
+    return next
+  }
+
+  decrement(id: string): number {
+    const current = this.map.get(id) || 0
+    if (current <= 1) {
+      this.map.delete(id)
+      return 0
+    } else {
+      const next = current - 1
+      this.map.set(id, next)
+      return next
+    }
+  }
+}
+
 interface Point {
   x: number
   y: number
@@ -86,21 +113,24 @@ interface Point {
 
 class TileLoader {
   private container: PIXI.Container
-  private loadedNodes: Set<number> = new Set()
-  private loadedEdges: Set<[number, number]> = new Set()
+  private refCount = new RefCountMap()
 
   constructor(container: PIXI.Container) {
     this.container = container
   }
 
-  loadTile(tileData: any) {
+  loadTile(tileData: any): {
+    unloadTile: () => void
+  } {
     const nodeDict: { [key: number]: Point } = {}
+    const tileObjs: [string, PIXI.Container][] = []
 
     for (const node of tileData.nodes) {
-      // Avoid loading nodes shared between tiles
-      if (this.loadedNodes.has(node.entity_id)) continue
-
       nodeDict[node.entity_id] = { x: node.x, y: node.y }
+
+      if (this.refCount.increment(node.entity_id) > 1) {
+        continue // Avoid loading nodes shared between tiles
+      }
 
       const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
       sprite.tint = 0x00ff00
@@ -108,6 +138,8 @@ class TileLoader {
       sprite.position.set(node.x - 5, node.y - 5)
       sprite.cullable = true
       this.container.addChild(sprite)
+
+      tileObjs.push([node.entity_id.toString(), sprite])
     }
 
     for (const edge of tileData.edges) {
@@ -115,18 +147,34 @@ class TileLoader {
       const node1 = nodeDict[entity_id1]
       const node2 = nodeDict[entity_id2]
 
-      if (node1 && node2) {
-        // Avoid loading edges shared between tiles
-        if (this.loadedEdges.has([entity_id1, entity_id2])) continue
+      if (node1 === undefined || node2 === undefined) {
+        continue
+      }
 
-        const line = new PIXI.Graphics()
-        line.moveTo(node1.x, node1.y)
-        line.lineTo(node2.x, node2.y)
-        line.stroke({ color: 0xff0000, pixelLine: true })
-        line.cullable = true
-        this.container.addChildAt(line, 0)
+      const edgeId = `${entity_id1}-${entity_id2}`
+
+      if (this.refCount.increment(edgeId) > 1) {
+        continue // Avoid loading edges shared between tiles
+      }
+
+      const line = new PIXI.Graphics()
+      line.moveTo(node1.x, node1.y)
+      line.lineTo(node2.x, node2.y)
+      line.stroke({ color: 0xff0000, pixelLine: true })
+      line.cullable = true
+      this.container.addChildAt(line, 0)
+
+      tileObjs.push([edgeId, line])
+    }
+
+    const unloadTile = () => {
+      for (const [id, obj] of tileObjs) {
+        if (this.refCount.decrement(id) > 0) continue
+        this.container.removeChild(obj)
       }
     }
+
+    return { unloadTile }
   }
 }
 
