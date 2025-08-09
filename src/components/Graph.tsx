@@ -56,6 +56,26 @@ export default function Graph(props: GraphProps) {
   let app: PIXI.Application
   let viewport: PIXIViewport.Viewport
 
+  const DATA_URL = import.meta.env.PUBLIC_DATA_URL
+
+  const fetchTileIndex = async () => {
+    const url = `${DATA_URL}/graphs/${props.graphId}/tile_index.bin.gz`
+    const response = await fetch(url)
+    const compressed = new Uint8Array(await response.arrayBuffer())
+    const decompressed = gunzipSync(compressed)
+    const parsed = tileIndexParser.parse(decompressed)
+    return new TileIndex(parsed.entries)
+  }
+
+  const fetchTile = async (tilePath: string) => {
+    const url = `${DATA_URL}/graphs/${props.graphId}/tiles/${tilePath}.bin.gz`
+    const response = await fetch(url)
+    const compressed = new Uint8Array(await response.arrayBuffer())
+    const decompressed = gunzipSync(compressed)
+    const parsed = tileParser.parse(decompressed)
+    return parsed as TileData
+  }
+
   onMount(async () => {
     PIXI.extensions.add(PIXI.CullerPlugin)
 
@@ -82,6 +102,25 @@ export default function Graph(props: GraphProps) {
     app.stage.addChild(viewport)
 
     viewport.drag().pinch().wheel().decelerate()
+
+    const tileIndex = await fetchTileIndex()
+    const fetchedTiles = new Set<string>()
+
+    const grid = new Grid(256)
+
+    viewport.on("moved", () => {
+      const { x, y, width, height } = viewport.getBounds()
+      const visibleTiles = tileIndex.query(x, y, x + width, y + height)
+
+      for (const tileEntry of visibleTiles) {
+        if (fetchedTiles.has(tileEntry.path)) continue
+        fetchedTiles.add(tileEntry.path)
+
+        fetchTile(tileEntry.path).then((tile) => {
+          // TODO
+        })
+      }
+    })
   })
 
   onCleanup(() => {

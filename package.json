@@ -10,6 +10,7 @@
     "@solidjs/router": "^0.15.0",
     "@solidjs/start": "^1.1.0",
     "binary-parser": "^2.2.1",
+    "fflate": "^0.8.2",
     "flatbush": "^4.4.1",
     "pixi-viewport": "^6.0.3",
     "pixi.js": "^8.12.0",
