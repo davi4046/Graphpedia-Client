@@ -3,6 +3,7 @@ import Flatbush from "flatbush"
 import * as PIXI from "pixi.js"
 import * as PIXIViewport from "pixi-viewport"
 import { onCleanup, onMount } from "solid-js"
+import TileParser from "../workers/tile-parser.worker?worker"
 
 const tileEntryParser = new Parser()
   .endianess("little")
@@ -49,30 +50,6 @@ class TileIndex {
   }
 }
 
-const nodeParser = new Parser()
-  .endianess("little")
-  .uint32("entity_id")
-  .uint32("x")
-  .uint32("y")
-
-const edgeParser = new Parser()
-  .endianess("little")
-  .uint32("entity_id1")
-  .uint32("entity_id2")
-
-const tileParser = new Parser()
-  .endianess("little")
-  .uint32("numNodes")
-  .array("nodes", {
-    type: nodeParser,
-    length: "numNodes",
-  })
-  .uint32("numEdges")
-  .array("edges", {
-    type: edgeParser,
-    length: "numEdges",
-  })
-
 class TileFetcher {
   private graphId: string
 
@@ -80,7 +57,7 @@ class TileFetcher {
     this.graphId = graphId
   }
 
-  async fetchTile(tilePath: string): Promise<any> {
+  async fetchTile(tilePath: string): Promise<ArrayBuffer> {
     const dataUrl = import.meta.env.PUBLIC_DATA_URL
     const tileUrl = `${dataUrl}/graphs/${this.graphId}/tiles/${tilePath}.bin.gz`
     const response = await fetch(tileUrl)
@@ -98,9 +75,7 @@ class TileFetcher {
     )
 
     const tileData = await decompressedResponse.arrayBuffer()
-    const parsedTileData = tileParser.parse(new Uint8Array(tileData))
-
-    return parsedTileData
+    return tileData
   }
 }
 
@@ -198,9 +173,11 @@ class GraphLoader {
   private moveHandler: ((event: any) => void) | null = null
   private lastMoveTime = 0
   private throttleDelay = 250 // milliseconds
+  private tileParser: Worker
 
-  constructor(viewport: PIXIViewport.Viewport) {
+  constructor(viewport: PIXIViewport.Viewport, tileParser: Worker) {
     this.viewport = viewport
+    this.tileParser = tileParser
   }
 
   async loadGraph(graphId: string) {
@@ -263,10 +240,14 @@ class GraphLoader {
       )
       for (const tile of tiles) {
         if (loadedTiles.has(tile.path)) continue
-        const tileData = await tileFetcher.fetchTile(tile.path)
-        tileLoader.loadTile(tileData)
         loadedTiles.add(tile.path)
+        const tileData = await tileFetcher.fetchTile(tile.path)
+        this.tileParser.postMessage(tileData, [tileData])
       }
+    }
+
+    this.tileParser.onmessage = (event) => {
+      tileLoader.loadTile(event.data)
     }
 
     this.moveHandler = () => {
@@ -290,6 +271,7 @@ export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
   let app: PIXI.Application
   let viewport: PIXIViewport.Viewport
+  let tileParser: Worker
   let graphLoader: GraphLoader
 
   onMount(async () => {
@@ -323,12 +305,14 @@ export default function Graph(props: GraphProps) {
       viewport.cullableChildren = false
     }
 
-    graphLoader = new GraphLoader(viewport)
+    tileParser = new TileParser()
+    graphLoader = new GraphLoader(viewport, tileParser)
     graphLoader.loadGraph(props.graphId)
   })
 
   onCleanup(() => {
     app?.destroy(true, { children: true })
+    tileParser?.terminate()
   })
 
   return (
