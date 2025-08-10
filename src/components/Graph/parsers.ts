@@ -1,0 +1,59 @@
+import { Parser } from "binary-parser/lib/binary_parser.js"
+import { Tile, TileIndex } from "./types"
+
+export abstract class TileIndexParser {
+  protected static readonly tileEntryParser = new Parser()
+    .endianess("little")
+    .uint16("pathLength")
+    .string("path", {
+      length: "pathLength",
+      encoding: "utf8",
+    })
+    .uint32("xmin")
+    .uint32("ymin")
+    .uint32("xmax")
+    .uint32("ymax")
+
+  protected static readonly tileIndexParser = new Parser().array("entries", {
+    type: TileIndexParser.tileEntryParser,
+    readUntil: (_, buffer) => buffer.length === 0,
+  })
+
+  static parse(
+    buffer: Buffer<ArrayBufferLike> | Uint8Array<ArrayBufferLike>
+  ): TileIndex {
+    return TileIndexParser.tileIndexParser.parse(buffer)
+  }
+}
+
+export abstract class TileParser {
+  protected static readonly nodeParser = new Parser()
+    .endianess("little")
+    .uint32("entity_id")
+    .uint32("x")
+    .uint32("y")
+
+  protected static readonly edgeParser = new Parser()
+    .endianess("little")
+    .uint32("entity_id1")
+    .uint32("entity_id2")
+
+  protected static readonly tileParser = new Parser()
+    .endianess("little")
+    .uint32("numNodes")
+    .array("nodes", {
+      type: TileParser.nodeParser,
+      length: "numNodes",
+    })
+    .uint32("numEdges")
+    .array("edges", {
+      type: TileParser.edgeParser,
+      length: "numEdges",
+    })
+
+  static parse(
+    buffer: Buffer<ArrayBufferLike> | Uint8Array<ArrayBufferLike>
+  ): Tile {
+    return TileParser.tileParser.parse(buffer)
+  }
+}
