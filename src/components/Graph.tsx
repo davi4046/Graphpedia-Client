@@ -1,9 +1,10 @@
+import { gunzipSync } from "fflate"
 import { Parser } from "binary-parser/lib/binary_parser.js"
 import Flatbush from "flatbush"
+import RBush from "rbush"
 import * as PIXI from "pixi.js"
 import * as PIXIViewport from "pixi-viewport"
 import { onCleanup, onMount } from "solid-js"
-import { gunzipSync } from "fflate"
 
 const tileEntryParser = new Parser()
   .endianess("little")
@@ -85,65 +86,87 @@ interface Edge {
   entity_id2: number
 }
 
-interface TileData {
+interface Tile {
   nodes: Node[]
   edges: Edge[]
 }
 
-class GridSpatialIndex<T extends object> {
-  private cells = new Map<string, Set<T>>()
-  private objIndex = new Map<T, string>()
+async function fetchTileIndex(
+  dataUrl: string,
+  graphId: string
+): Promise<TileIndex> {
+  const url = `${dataUrl}/graphs/${graphId}/tile_index.bin.gz`
+  const response = await fetch(url)
+  const compressed = new Uint8Array(await response.arrayBuffer())
+  const decompressed = gunzipSync(compressed)
+  const parsed = tileIndexParser.parse(decompressed)
+  return new TileIndex(parsed.entries)
+}
 
-  private readonly CELL_SIZE
+async function fetchTile(
+  dataUrl: string,
+  graphId: string,
+  tilePath: string
+): Promise<Tile> {
+  const url = `${dataUrl}/graphs/${graphId}/tiles/${tilePath}.bin.gz`
+  const response = await fetch(url)
+  const compressed = new Uint8Array(await response.arrayBuffer())
+  const decompressed = gunzipSync(compressed)
+  const parsed = tileParser.parse(decompressed)
+  return parsed
+}
 
-  constructor(cellSize: number) {
-    this.CELL_SIZE = cellSize
+class NodePosMap {
+  private map = new Map<number, [x: number, y: number]>()
+
+  insert(node: Node) {
+    this.map.set(node.entity_id, [node.x, node.y])
   }
+}
 
-  insert(obj: T, x: number, y: number) {
-    const cellX = Math.floor(x / this.CELL_SIZE)
-    const cellY = Math.floor(y / this.CELL_SIZE)
-    const cellKey = `${cellX},${cellY}`
+class NodeEdgesMap {
+  private map = new Map<number, Set<number>>()
 
-    if (!this.cells.has(cellKey)) {
-      this.cells.set(cellKey, new Set())
+  insert(edge: Edge) {
+    const source = edge.entity_id1
+    const target = edge.entity_id2
+
+    if (!this.map.has(source)) {
+      this.map.set(source, new Set())
     }
+    this.map.get(source)!.add(target)
 
-    this.cells.get(cellKey)!.add(obj)
-    this.objIndex.set(obj, cellKey)
-  }
-
-  remove(obj: T): boolean {
-    const cellKey = this.objIndex.get(obj)
-    if (!cellKey) return false
-
-    const cell = this.cells.get(cellKey)
-    if (!cell) return false
-
-    cell.delete(obj)
-    if (cell.size === 0) this.cells.delete(cellKey)
-    this.objIndex.delete(obj)
-    return true
-  }
-
-  query(minX: number, minY: number, maxX: number, maxY: number) {
-    const minCellX = Math.floor(minX / this.CELL_SIZE)
-    const minCellY = Math.floor(minY / this.CELL_SIZE)
-    const maxCellX = Math.floor(maxX / this.CELL_SIZE)
-    const maxCellY = Math.floor(maxY / this.CELL_SIZE)
-
-    const cells: Set<T>[] = []
-
-    for (let x = minCellX; x <= maxCellX; x++) {
-      for (let y = minCellY; y <= maxCellY; y++) {
-        const cellKey = `${x},${y}`
-        const cell = this.cells.get(cellKey)
-        if (cell) cells.push(cell)
-      }
+    if (!this.map.has(target)) {
+      this.map.set(target, new Set())
     }
-
-    return cells
+    this.map.get(target)!.add(source)
   }
+}
+
+interface NodeBBox {
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
+  entity_id: number
+}
+
+function renderNode(x: number, y: number) {
+  const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
+  sprite.tint = 0x00ff00
+  sprite.width = 10
+  sprite.height = 10
+  sprite.x = x
+  sprite.y = y
+  return sprite
+}
+
+function renderEdge(x1: number, y1: number, x2: number, y2: number) {
+  const graphics = new PIXI.Graphics()
+  graphics.moveTo(x1, y1)
+  graphics.lineTo(x2, y2)
+  graphics.stroke({ color: 0xff0000, width: 1 })
+  return graphics
 }
 
 type GraphProps = { graphId: string }
@@ -155,27 +178,14 @@ export default function Graph(props: GraphProps) {
 
   const DATA_URL = import.meta.env.PUBLIC_DATA_URL
 
-  const fetchTileIndex = async () => {
-    const url = `${DATA_URL}/graphs/${props.graphId}/tile_index.bin.gz`
-    const response = await fetch(url)
-    const compressed = new Uint8Array(await response.arrayBuffer())
-    const decompressed = gunzipSync(compressed)
-    const parsed = tileIndexParser.parse(decompressed)
-    return new TileIndex(parsed.entries)
-  }
+  const fetchedTiles = new Set<string>()
+  const nodeIndex = new RBush<NodeBBox>()
+  const nodePosMap = new NodePosMap()
+  const nodeEdgesMap = new NodeEdgesMap()
 
-  const fetchTile = async (tilePath: string) => {
-    const url = `${DATA_URL}/graphs/${props.graphId}/tiles/${tilePath}.bin.gz`
-    const response = await fetch(url)
-    const compressed = new Uint8Array(await response.arrayBuffer())
-    const decompressed = gunzipSync(compressed)
-    const parsed = tileParser.parse(decompressed)
-    return parsed as TileData
-  }
+  const drawnNodes = new Map<number, PIXI.Sprite>()
 
   onMount(async () => {
-    PIXI.extensions.add(PIXI.CullerPlugin)
-
     app = new PIXI.Application()
     await app.init({
       background: "#1099bb",
@@ -200,30 +210,62 @@ export default function Graph(props: GraphProps) {
 
     viewport.drag().pinch().wheel().decelerate()
 
-    const tileIndex = await fetchTileIndex()
-    const fetchedTiles = new Set<string>()
+    const tileIndex = await fetchTileIndex(DATA_URL, props.graphId)
 
-    const grid = new GridSpatialIndex<Node>(256)
-
-    viewport.on("moved", () => {
-      const { x, y, width, height } = viewport.getBounds()
+    viewport.on("moved", async () => {
+      const { x, y, width, height } = viewport.getVisibleBounds()
       const visibleTiles = tileIndex.query(x, y, x + width, y + height)
 
       for (const tileEntry of visibleTiles) {
         if (fetchedTiles.has(tileEntry.path)) continue
         fetchedTiles.add(tileEntry.path)
 
-        fetchTile(tileEntry.path).then((tile) => {
-          for (const node of tile.nodes) {
-            grid.insert(node, node.x, node.y)
+        fetchTile(DATA_URL, props.graphId, tileEntry.path).then(
+          ({ nodes, edges }) => {
+            for (const node of nodes) {
+              nodePosMap.insert(node)
+
+              const nodeBBox: NodeBBox = {
+                minX: node.x,
+                minY: node.y,
+                maxX: node.x,
+                maxY: node.y,
+                entity_id: node.entity_id,
+              }
+              nodeIndex.insert(nodeBBox)
+            }
+            for (const edge of edges) {
+              nodeEdgesMap.insert(edge)
+            }
           }
-        })
+        )
+      }
+
+      const result = nodeIndex.search({
+        minX: x,
+        minY: y,
+        maxX: x + width,
+        maxY: y + height,
+      })
+
+      const visibleNodeIds = new Set<number>()
+
+      for (const nodeBBox of result) {
+        if (!drawnNodes.has(nodeBBox.entity_id)) {
+          const sprite = renderNode(nodeBBox.minX, nodeBBox.minY)
+          drawnNodes.set(nodeBBox.entity_id, sprite)
+          viewport.addChild(sprite)
+        }
+        visibleNodeIds.add(nodeBBox.entity_id)
+      }
+
+      for (const [entityId, sprite] of drawnNodes) {
+        if (!visibleNodeIds.has(entityId)) {
+          drawnNodes.delete(entityId)
+          viewport.removeChild(sprite)
+        }
       }
     })
-  })
-
-  onCleanup(() => {
-    app?.destroy(true, { children: true })
   })
 
   onCleanup(() => {
