@@ -116,33 +116,6 @@ async function fetchTile(
   return parsed
 }
 
-class NodePosMap {
-  private map = new Map<number, [x: number, y: number]>()
-
-  insert(node: Node) {
-    this.map.set(node.entity_id, [node.x, node.y])
-  }
-}
-
-class NodeEdgesMap {
-  private map = new Map<number, Set<number>>()
-
-  insert(edge: Edge) {
-    const source = edge.entity_id1
-    const target = edge.entity_id2
-
-    if (!this.map.has(source)) {
-      this.map.set(source, new Set())
-    }
-    this.map.get(source)!.add(target)
-
-    if (!this.map.has(target)) {
-      this.map.set(target, new Set())
-    }
-    this.map.get(target)!.add(source)
-  }
-}
-
 interface NodeBBox {
   minX: number
   minY: number
@@ -151,11 +124,11 @@ interface NodeBBox {
   entity_id: number
 }
 
-function renderNode(x: number, y: number) {
+function renderNode(x: number, y: number, size: number) {
   const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
   sprite.tint = 0x00ff00
-  sprite.width = 10
-  sprite.height = 10
+  sprite.width = size
+  sprite.height = size
   sprite.x = x
   sprite.y = y
   return sprite
@@ -165,8 +138,12 @@ function renderEdge(x1: number, y1: number, x2: number, y2: number) {
   const graphics = new PIXI.Graphics()
   graphics.moveTo(x1, y1)
   graphics.lineTo(x2, y2)
-  graphics.stroke({ color: 0xff0000, width: 1 })
+  graphics.stroke({ color: 0xff0000, width: 2 })
   return graphics
+}
+
+function cantorPairing(a: number, b: number): number {
+  return ((a + b) * (a + b + 1)) / 2 + b
 }
 
 type GraphProps = { graphId: string }
@@ -177,13 +154,14 @@ export default function Graph(props: GraphProps) {
   let viewport: PIXIViewport.Viewport
 
   const DATA_URL = import.meta.env.PUBLIC_DATA_URL
+  const NODE_SIZE = 10
 
   const fetchedTiles = new Set<string>()
   const nodeIndex = new RBush<NodeBBox>()
-  const nodePosMap = new NodePosMap()
-  const nodeEdgesMap = new NodeEdgesMap()
-
+  const nodePosMap = new Map<number, [x: number, y: number]>()
+  const nodeEdgesMap = new Map<number, Set<number>>()
   const drawnNodes = new Map<number, PIXI.Sprite>()
+  const drawnEdges = new Map<number, PIXI.Graphics>()
 
   onMount(async () => {
     app = new PIXI.Application()
@@ -210,7 +188,13 @@ export default function Graph(props: GraphProps) {
 
     viewport.drag().pinch().wheel().decelerate()
 
+    const edgeContainer = new PIXI.Container()
+    const nodeContainer = new PIXI.Container()
+    viewport.addChild(edgeContainer)
+    viewport.addChild(nodeContainer)
+
     const tileIndex = await fetchTileIndex(DATA_URL, props.graphId)
+    const nodeHalfSize = NODE_SIZE / 2
 
     viewport.on("moved", async () => {
       const { x, y, width, height } = viewport.getVisibleBounds()
@@ -223,7 +207,7 @@ export default function Graph(props: GraphProps) {
         fetchTile(DATA_URL, props.graphId, tileEntry.path).then(
           ({ nodes, edges }) => {
             for (const node of nodes) {
-              nodePosMap.insert(node)
+              nodePosMap.set(node.entity_id, [node.x, node.y])
 
               const nodeBBox: NodeBBox = {
                 minX: node.x,
@@ -235,7 +219,18 @@ export default function Graph(props: GraphProps) {
               nodeIndex.insert(nodeBBox)
             }
             for (const edge of edges) {
-              nodeEdgesMap.insert(edge)
+              const source = edge.entity_id1
+              const target = edge.entity_id2
+
+              if (!nodeEdgesMap.has(source)) {
+                nodeEdgesMap.set(source, new Set())
+              }
+              nodeEdgesMap.get(source)!.add(target)
+
+              if (!nodeEdgesMap.has(target)) {
+                nodeEdgesMap.set(target, new Set())
+              }
+              nodeEdgesMap.get(target)!.add(source)
             }
           }
         )
@@ -251,18 +246,39 @@ export default function Graph(props: GraphProps) {
       const visibleNodeIds = new Set<number>()
 
       for (const nodeBBox of result) {
-        if (!drawnNodes.has(nodeBBox.entity_id)) {
-          const sprite = renderNode(nodeBBox.minX, nodeBBox.minY)
-          drawnNodes.set(nodeBBox.entity_id, sprite)
-          viewport.addChild(sprite)
-        }
         visibleNodeIds.add(nodeBBox.entity_id)
+        if (drawnNodes.has(nodeBBox.entity_id)) continue
+
+        const sprite = renderNode(nodeBBox.minX, nodeBBox.minY, NODE_SIZE)
+        drawnNodes.set(nodeBBox.entity_id, sprite)
+        nodeContainer.addChild(sprite)
+
+        const edges = nodeEdgesMap.get(nodeBBox.entity_id)!
+        for (const targetId of edges) {
+          const targetPos = nodePosMap.get(targetId)!
+          const edge = renderEdge(
+            nodeBBox.minX + nodeHalfSize,
+            nodeBBox.minY + nodeHalfSize,
+            targetPos[0] + nodeHalfSize,
+            targetPos[1] + nodeHalfSize
+          )
+          const cantorKey = cantorPairing(nodeBBox.entity_id, targetId)
+          drawnEdges.set(cantorKey, edge)
+          edgeContainer.addChild(edge)
+        }
       }
 
       for (const [entityId, sprite] of drawnNodes) {
-        if (!visibleNodeIds.has(entityId)) {
-          drawnNodes.delete(entityId)
-          viewport.removeChild(sprite)
+        if (visibleNodeIds.has(entityId)) continue
+        drawnNodes.delete(entityId)
+        nodeContainer.removeChild(sprite)
+
+        const edges = nodeEdgesMap.get(entityId)!
+        for (const targetId of edges) {
+          const cantorKey = cantorPairing(entityId, targetId)
+          const edge = drawnEdges.get(cantorKey)!
+          drawnEdges.delete(cantorKey)
+          edgeContainer.removeChild(edge)
         }
       }
     })
