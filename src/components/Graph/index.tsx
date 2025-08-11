@@ -24,7 +24,7 @@ export default function Graph(props: GraphProps) {
   const DATA_URL = import.meta.env.PUBLIC_DATA_URL
   const NODE_SIZE = 10
 
-  const fetchedTiles = new Set<string>()
+  const fetchedTiles = new Set<number>()
   const nodeIndex = new RBush<NodeBBox>()
   const nodePosMap = new Map<number, [x: number, y: number]>()
   const nodeEdgesMap = new Map<number, Set<number>>()
@@ -70,10 +70,10 @@ export default function Graph(props: GraphProps) {
       const visibleTiles = tileIndexSvc.query(x, y, x + width, y + height)
 
       for (const tileEntry of visibleTiles) {
-        if (fetchedTiles.has(tileEntry.path)) continue
-        fetchedTiles.add(tileEntry.path)
+        if (fetchedTiles.has(tileEntry.tileId)) continue
+        fetchedTiles.add(tileEntry.tileId)
 
-        fetchTile(DATA_URL, props.graphId, tileEntry.path).then(
+        fetchTile(DATA_URL, props.graphId, tileEntry.tileId).then(
           ({ nodes, edges }) => {
             for (const node of nodes) {
               nodePosMap.set(node.entity_id, [node.x, node.y])

@@ -1,9 +1,9 @@
 export interface TileEntry {
-  path: string
-  xmin: number
-  ymin: number
-  xmax: number
-  ymax: number
+  tileId: number
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
 }
 
 export interface TileIndex {

@@ -19,9 +19,9 @@ export async function fetchTileIndex(
 export async function fetchTile(
   dataUrl: string,
   graphId: string,
-  tilePath: string
+  tileId: number
 ): Promise<Tile> {
-  const url = `${dataUrl}/graphs/${graphId}/tiles/${tilePath}.bin.gz`
+  const url = `${dataUrl}/graphs/${graphId}/tiles/${tileId}.bin.gz`
   const response = await fetch(url)
   const compressed = new Uint8Array(await response.arrayBuffer())
   const decompressed = gunzipSync(compressed)
@@ -60,7 +60,7 @@ export class TileIndexService {
     this.index = new Flatbush(tileIndex.entries.length)
 
     for (const entry of this.entries) {
-      this.index.add(entry.xmin, entry.ymin, entry.xmax, entry.ymax)
+      this.index.add(entry.minX, entry.minY, entry.maxX, entry.maxY)
     }
     this.index.finish()
   }

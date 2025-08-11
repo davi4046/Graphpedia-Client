@@ -4,19 +4,15 @@ import { Tile, TileIndex } from "./types"
 export abstract class TileIndexParser {
   protected static readonly tileEntryParser = new Parser()
     .endianess("little")
-    .uint16("pathLength")
-    .string("path", {
-      length: "pathLength",
-      encoding: "utf8",
-    })
-    .uint32("xmin")
-    .uint32("ymin")
-    .uint32("xmax")
-    .uint32("ymax")
+    .uint32("tileId")
+    .uint32("minX")
+    .uint32("minY")
+    .uint32("maxX")
+    .uint32("maxY")
 
   protected static readonly tileIndexParser = new Parser().array("entries", {
     type: TileIndexParser.tileEntryParser,
-    readUntil: (_, buffer) => buffer.length === 0,
+    readUntil: "eof",
   })
 
   static parse(
