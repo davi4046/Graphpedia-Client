@@ -75,20 +75,20 @@ export default function Graph(props: GraphProps) {
         fetchTile(DATA_URL, props.graphId, tileEntry.tileId).then(
           ({ nodes, edges }) => {
             for (const node of nodes) {
-              nodePosMap.set(node.entity_id, [node.x, node.y])
+              nodePosMap.set(node.entityId, [node.x, node.y])
 
               const nodeBBox: NodeBBox = {
                 minX: node.x,
                 minY: node.y,
                 maxX: node.x,
                 maxY: node.y,
-                entity_id: node.entity_id,
+                entityId: node.entityId,
               }
               nodeIndex.insert(nodeBBox)
             }
             for (const edge of edges) {
-              const source = edge.entity_id1
-              const target = edge.entity_id2
+              const source = edge.sourceId
+              const target = edge.targetId
 
               if (!nodeEdgesMap.has(source)) {
                 nodeEdgesMap.set(source, new Set())
@@ -114,25 +114,25 @@ export default function Graph(props: GraphProps) {
       const visibleNodeIds = new Set<number>()
 
       for (const nodeBBox of result) {
-        visibleNodeIds.add(nodeBBox.entity_id)
-        if (drawnNodes.has(nodeBBox.entity_id)) continue
+        visibleNodeIds.add(nodeBBox.entityId)
+        if (drawnNodes.has(nodeBBox.entityId)) continue
 
         const sprite = renderNode(nodeBBox.minX, nodeBBox.minY, NODE_SIZE)
-        drawnNodes.set(nodeBBox.entity_id, sprite)
+        drawnNodes.set(nodeBBox.entityId, sprite)
         nodeContainer.addChild(sprite)
 
-        const edges = nodeEdgesMap.get(nodeBBox.entity_id)!
+        const edges = nodeEdgesMap.get(nodeBBox.entityId)!
         for (const edge of edges) {
           if (drawnEdges.has(edge)) continue
           let x1, y1, x2, y2
-          if (nodeBBox.entity_id === edge.entity_id1) {
-            const targetPos = nodePosMap.get(edge.entity_id2)!
+          if (nodeBBox.entityId === edge.sourceId) {
+            const targetPos = nodePosMap.get(edge.targetId)!
             x1 = nodeBBox.minX + nodeHalfSize
             y1 = nodeBBox.minY + nodeHalfSize
             x2 = targetPos[0] + nodeHalfSize
             y2 = targetPos[1] + nodeHalfSize
           } else {
-            const sourcePos = nodePosMap.get(edge.entity_id1)!
+            const sourcePos = nodePosMap.get(edge.sourceId)!
             x1 = sourcePos[0] + nodeHalfSize
             y1 = sourcePos[1] + nodeHalfSize
             x2 = nodeBBox.minX + nodeHalfSize

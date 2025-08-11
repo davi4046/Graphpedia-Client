@@ -11,14 +11,14 @@ export interface TileIndex {
 }
 
 export interface Node {
-  entity_id: number
+  entityId: number
   x: number
   y: number
 }
 
 export interface Edge {
-  entity_id1: number
-  entity_id2: number
+  sourceId: number
+  targetId: number
 }
 
 export interface Tile {
@@ -31,5 +31,5 @@ export interface NodeBBox {
   minY: number
   maxX: number
   maxY: number
-  entity_id: number
+  entityId: number
 }
