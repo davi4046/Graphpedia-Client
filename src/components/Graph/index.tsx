@@ -2,9 +2,8 @@ import * as PIXI from "pixi.js"
 import * as PIXIViewport from "pixi-viewport"
 import { onMount, onCleanup } from "solid-js"
 import RBush from "rbush"
-import { NodeBBox } from "./types"
+import { Edge, NodeBBox } from "./types"
 import {
-  cantorPairing,
   fetchTile,
   fetchTileIndex,
   renderEdge,
@@ -27,9 +26,9 @@ export default function Graph(props: GraphProps) {
   const fetchedTiles = new Set<number>()
   const nodeIndex = new RBush<NodeBBox>()
   const nodePosMap = new Map<number, [x: number, y: number]>()
-  const nodeEdgesMap = new Map<number, Set<number>>()
+  const nodeEdgesMap = new Map<number, Set<Edge>>()
   const drawnNodes = new Map<number, PIXI.Sprite>()
-  const drawnEdges = new Map<number, PIXI.Graphics>()
+  const drawnEdges = new Map<Edge, PIXI.Graphics>()
 
   onMount(async () => {
     app = new PIXI.Application()
@@ -94,12 +93,12 @@ export default function Graph(props: GraphProps) {
               if (!nodeEdgesMap.has(source)) {
                 nodeEdgesMap.set(source, new Set())
               }
-              nodeEdgesMap.get(source)!.add(target)
+              nodeEdgesMap.get(source)!.add(edge)
 
               if (!nodeEdgesMap.has(target)) {
                 nodeEdgesMap.set(target, new Set())
               }
-              nodeEdgesMap.get(target)!.add(source)
+              nodeEdgesMap.get(target)!.add(edge)
             }
           }
         )
@@ -123,17 +122,25 @@ export default function Graph(props: GraphProps) {
         nodeContainer.addChild(sprite)
 
         const edges = nodeEdgesMap.get(nodeBBox.entity_id)!
-        for (const targetId of edges) {
-          const targetPos = nodePosMap.get(targetId)!
-          const edge = renderEdge(
-            nodeBBox.minX + nodeHalfSize,
-            nodeBBox.minY + nodeHalfSize,
-            targetPos[0] + nodeHalfSize,
-            targetPos[1] + nodeHalfSize
-          )
-          const cantorKey = cantorPairing(nodeBBox.entity_id, targetId)
-          drawnEdges.set(cantorKey, edge)
-          edgeContainer.addChild(edge)
+        for (const edge of edges) {
+          if (drawnEdges.has(edge)) continue
+          let x1, y1, x2, y2
+          if (nodeBBox.entity_id === edge.entity_id1) {
+            const targetPos = nodePosMap.get(edge.entity_id2)!
+            x1 = nodeBBox.minX + nodeHalfSize
+            y1 = nodeBBox.minY + nodeHalfSize
+            x2 = targetPos[0] + nodeHalfSize
+            y2 = targetPos[1] + nodeHalfSize
+          } else {
+            const sourcePos = nodePosMap.get(edge.entity_id1)!
+            x1 = sourcePos[0] + nodeHalfSize
+            y1 = sourcePos[1] + nodeHalfSize
+            x2 = nodeBBox.minX + nodeHalfSize
+            y2 = nodeBBox.minY + nodeHalfSize
+          }
+          const edgeGraphics = renderEdge(x1, y1, x2, y2)
+          drawnEdges.set(edge, edgeGraphics)
+          edgeContainer.addChild(edgeGraphics)
         }
       }
 
@@ -143,11 +150,10 @@ export default function Graph(props: GraphProps) {
         nodeContainer.removeChild(sprite)
 
         const edges = nodeEdgesMap.get(entityId)!
-        for (const targetId of edges) {
-          const cantorKey = cantorPairing(entityId, targetId)
-          const edge = drawnEdges.get(cantorKey)!
-          drawnEdges.delete(cantorKey)
-          edgeContainer.removeChild(edge)
+        for (const edge of edges) {
+          const edgeGraphics = drawnEdges.get(edge)!
+          drawnEdges.delete(edge)
+          edgeContainer.removeChild(edgeGraphics)
         }
       }
     })
