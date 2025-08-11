@@ -6,6 +6,7 @@ import { NodeBBox } from "./types"
 import {
   fetchTile,
   fetchTileIndex,
+  renderArrowHead,
   renderEdge,
   renderNode,
   TileIndexService,
@@ -22,6 +23,7 @@ export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
   let app: PIXI.Application
   let viewport: PIXIViewport.Viewport
+  let arrowHeadTexture: PIXI.Texture
 
   const DATA_URL = import.meta.env.PUBLIC_DATA_URL
   const NODE_SIZE = 10
@@ -45,6 +47,9 @@ export default function Graph(props: GraphProps) {
     if (containerRef) {
       containerRef.appendChild(app.canvas)
     }
+
+    const arrowHeadGraphics = renderArrowHead()
+    arrowHeadTexture = app.renderer.generateTexture(arrowHeadGraphics)
 
     viewport = new PIXIViewport.Viewport({
       screenWidth: app.screen.width,
@@ -148,6 +153,18 @@ export default function Graph(props: GraphProps) {
           const edgeGraphics = renderEdge(x1, y1, x2, y2)
           drawnEdges.set(edge, edgeGraphics)
           edgeContainer.addChild(edgeGraphics)
+
+          const dx = x2 - x1
+          const dy = y2 - y1
+          const angle = Math.atan2(dy, dx)
+
+          const arrowHeadSprite = new PIXI.Sprite(arrowHeadTexture)
+          arrowHeadSprite.scale.set(0.2)
+          arrowHeadSprite.anchor.set(1, 0.5)
+          arrowHeadSprite.x = x2
+          arrowHeadSprite.y = y2
+          arrowHeadSprite.rotation = angle
+          edgeGraphics.addChild(arrowHeadSprite)
         }
       }
 

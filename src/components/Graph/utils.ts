@@ -47,6 +47,18 @@ export function renderEdge(x1: number, y1: number, x2: number, y2: number) {
   return graphics
 }
 
+export function renderArrowHead() {
+  const triangle = new PIXI.Graphics()
+  triangle.moveTo(0, 0)
+  triangle.lineTo(40, 20)
+  triangle.lineTo(0, 40)
+  triangle.closePath()
+  triangle.fill({
+    color: 0xff0000,
+  })
+  return triangle
+}
+
 export type PackedEdge = bigint & { __brand: "PackedEdge" }
 
 export function packEdge(sourceId: number, targetId: number): PackedEdge {
