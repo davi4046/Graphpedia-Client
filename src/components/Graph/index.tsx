@@ -2,13 +2,16 @@ import * as PIXI from "pixi.js"
 import * as PIXIViewport from "pixi-viewport"
 import { onMount, onCleanup } from "solid-js"
 import RBush from "rbush"
-import { Edge, NodeBBox } from "./types"
+import { NodeBBox } from "./types"
 import {
   fetchTile,
   fetchTileIndex,
   renderEdge,
   renderNode,
   TileIndexService,
+  packEdge,
+  unpackEdge,
+  PackedEdge,
 } from "./utils"
 
 type GraphProps = {
@@ -26,9 +29,9 @@ export default function Graph(props: GraphProps) {
   const fetchedTiles = new Set<number>()
   const nodeIndex = new RBush<NodeBBox>()
   const nodePosMap = new Map<number, [x: number, y: number]>()
-  const nodeEdgesMap = new Map<number, Set<Edge>>()
+  const nodeEdgesMap = new Map<number, Set<PackedEdge>>()
   const drawnNodes = new Map<number, PIXI.Sprite>()
-  const drawnEdges = new Map<Edge, PIXI.Graphics>()
+  const drawnEdges = new Map<PackedEdge, PIXI.Graphics>()
 
   onMount(async () => {
     app = new PIXI.Application()
@@ -76,6 +79,7 @@ export default function Graph(props: GraphProps) {
           ({ nodes, edges }) => {
             for (const node of nodes) {
               nodePosMap.set(node.entityId, [node.x, node.y])
+              nodePosMap.set(node.entityId, [node.x, node.y])
 
               const nodeBBox: NodeBBox = {
                 minX: node.x,
@@ -86,19 +90,18 @@ export default function Graph(props: GraphProps) {
               }
               nodeIndex.insert(nodeBBox)
             }
-            for (const edge of edges) {
-              const source = edge.sourceId
-              const target = edge.targetId
+            for (const { sourceId, targetId } of edges) {
+              const edge = packEdge(sourceId, targetId)
 
-              if (!nodeEdgesMap.has(source)) {
-                nodeEdgesMap.set(source, new Set())
+              if (!nodeEdgesMap.has(sourceId)) {
+                nodeEdgesMap.set(sourceId, new Set())
               }
-              nodeEdgesMap.get(source)!.add(edge)
+              nodeEdgesMap.get(sourceId)!.add(edge)
 
-              if (!nodeEdgesMap.has(target)) {
-                nodeEdgesMap.set(target, new Set())
+              if (!nodeEdgesMap.has(targetId)) {
+                nodeEdgesMap.set(targetId, new Set())
               }
-              nodeEdgesMap.get(target)!.add(edge)
+              nodeEdgesMap.get(targetId)!.add(edge)
             }
           }
         )
@@ -113,31 +116,35 @@ export default function Graph(props: GraphProps) {
 
       const visibleNodeIds = new Set<number>()
 
-      for (const nodeBBox of result) {
-        visibleNodeIds.add(nodeBBox.entityId)
-        if (drawnNodes.has(nodeBBox.entityId)) continue
+      for (const { entityId, minX: nodeX, minY: nodeY } of result) {
+        visibleNodeIds.add(entityId)
+        if (drawnNodes.has(entityId)) continue
 
-        const sprite = renderNode(nodeBBox.minX, nodeBBox.minY, NODE_SIZE)
-        drawnNodes.set(nodeBBox.entityId, sprite)
+        const sprite = renderNode(nodeX, nodeY, NODE_SIZE)
+        drawnNodes.set(entityId, sprite)
         nodeContainer.addChild(sprite)
 
-        const edges = nodeEdgesMap.get(nodeBBox.entityId)!
+        const edges = nodeEdgesMap.get(entityId)!
         for (const edge of edges) {
           if (drawnEdges.has(edge)) continue
+
+          const [sourceId, targetId] = unpackEdge(edge)
+
           let x1, y1, x2, y2
-          if (nodeBBox.entityId === edge.sourceId) {
-            const targetPos = nodePosMap.get(edge.targetId)!
-            x1 = nodeBBox.minX + nodeHalfSize
-            y1 = nodeBBox.minY + nodeHalfSize
+          if (entityId === sourceId) {
+            const targetPos = nodePosMap.get(targetId)!
+            x1 = nodeX + nodeHalfSize
+            y1 = nodeY + nodeHalfSize
             x2 = targetPos[0] + nodeHalfSize
             y2 = targetPos[1] + nodeHalfSize
           } else {
-            const sourcePos = nodePosMap.get(edge.sourceId)!
+            const sourcePos = nodePosMap.get(sourceId)!
             x1 = sourcePos[0] + nodeHalfSize
             y1 = sourcePos[1] + nodeHalfSize
-            x2 = nodeBBox.minX + nodeHalfSize
-            y2 = nodeBBox.minY + nodeHalfSize
+            x2 = nodeX + nodeHalfSize
+            y2 = nodeY + nodeHalfSize
           }
+
           const edgeGraphics = renderEdge(x1, y1, x2, y2)
           drawnEdges.set(edge, edgeGraphics)
           edgeContainer.addChild(edgeGraphics)
@@ -146,11 +153,16 @@ export default function Graph(props: GraphProps) {
 
       for (const [entityId, sprite] of drawnNodes) {
         if (visibleNodeIds.has(entityId)) continue
+
         drawnNodes.delete(entityId)
         nodeContainer.removeChild(sprite)
 
         const edges = nodeEdgesMap.get(entityId)!
         for (const edge of edges) {
+          const [sourceId, targetId] = unpackEdge(edge)
+          const otherId = sourceId === entityId ? targetId : sourceId
+          if (drawnNodes.has(otherId)) continue
+
           const edgeGraphics = drawnEdges.get(edge)!
           drawnEdges.delete(edge)
           edgeContainer.removeChild(edgeGraphics)

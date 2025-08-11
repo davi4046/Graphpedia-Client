@@ -47,6 +47,20 @@ export function renderEdge(x1: number, y1: number, x2: number, y2: number) {
   return graphics
 }
 
+export type PackedEdge = bigint & { __brand: "PackedEdge" }
+
+export function packEdge(sourceId: number, targetId: number): PackedEdge {
+  // Both sourceId and targetId are 32-bit unsigned integers
+  const edgeHash = (BigInt(sourceId) << 32n) | BigInt(targetId)
+  return edgeHash as PackedEdge
+}
+
+export function unpackEdge(packedEdge: PackedEdge): [number, number] {
+  const sourceId = Number(packedEdge >> 32n)
+  const targetId = Number(packedEdge & 0xffffffffn)
+  return [sourceId, targetId]
+}
+
 export class TileIndexService {
   private index: Flatbush
   private entries: TileEntry[]
