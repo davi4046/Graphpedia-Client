@@ -1,16 +1,16 @@
-import * as PIXI from "pixi.js"
 import * as PIXIViewport from "pixi-viewport"
-import { onMount, onCleanup } from "solid-js"
+import * as PIXI from "pixi.js"
+import { onCleanup, onMount } from "solid-js"
 import { Tile, TileEntry } from "./types"
+import { createGraphUpdateHandler, EraseFn } from "./update-handler"
 import {
   fetchTile,
   fetchTileIndex,
   renderArrowHead,
+  renderEdge,
   renderNode,
   TileIndexService,
-  renderEdge,
 } from "./utils"
-import { createGraphUpdateHandler, EraseFn } from "./update-handler"
 
 type GraphProps = {
   graphId: string

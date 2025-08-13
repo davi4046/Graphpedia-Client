@@ -1,5 +1,5 @@
 import RBush from "rbush"
-import { TileEntry, Tile, NodeBBox } from "./types"
+import { NodeBBox, Tile, TileEntry } from "./types"
 import { PackedEdge, loadTile, unpackEdge } from "./utils"
 
 export type EraseFn = () => void

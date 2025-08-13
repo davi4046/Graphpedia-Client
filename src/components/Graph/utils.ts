@@ -1,9 +1,9 @@
 import { gunzipSync } from "fflate"
-import { TileIndexParser, TileParser } from "./parsers"
-import * as PIXI from "pixi.js"
-import { NodeBBox, Tile, TileEntry, TileIndex } from "./types"
 import Flatbush from "flatbush"
+import * as PIXI from "pixi.js"
 import RBush from "rbush"
+import { TileIndexParser, TileParser } from "./parsers"
+import { NodeBBox, Tile, TileEntry, TileIndex } from "./types"
 
 export async function fetchTileIndex(
   dataUrl: string,
