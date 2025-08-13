@@ -2,7 +2,7 @@ import * as PIXI from "pixi.js"
 import * as PIXIViewport from "pixi-viewport"
 import { onMount, onCleanup } from "solid-js"
 import RBush from "rbush"
-import { NodeBBox } from "./types"
+import { NodeBBox, Tile } from "./types"
 import {
   fetchTile,
   fetchTileIndex,
@@ -10,9 +10,9 @@ import {
   renderEdge,
   renderNode,
   TileIndexService,
-  packEdge,
   unpackEdge,
   PackedEdge,
+  loadTile,
 } from "./utils"
 
 type GraphProps = {
@@ -80,35 +80,8 @@ export default function Graph(props: GraphProps) {
         if (fetchedTiles.has(tileEntry.tileId)) continue
         fetchedTiles.add(tileEntry.tileId)
 
-        fetchTile(DATA_URL, props.graphId, tileEntry.tileId).then(
-          ({ nodes, edges }) => {
-            for (const node of nodes) {
-              nodePosMap.set(node.entityId, [node.x, node.y])
-              nodePosMap.set(node.entityId, [node.x, node.y])
-
-              const nodeBBox: NodeBBox = {
-                minX: node.x,
-                minY: node.y,
-                maxX: node.x,
-                maxY: node.y,
-                entityId: node.entityId,
-              }
-              nodeIndex.insert(nodeBBox)
-            }
-            for (const { sourceId, targetId } of edges) {
-              const edge = packEdge(sourceId, targetId)
-
-              if (!nodeEdgesMap.has(sourceId)) {
-                nodeEdgesMap.set(sourceId, new Set())
-              }
-              nodeEdgesMap.get(sourceId)!.add(edge)
-
-              if (!nodeEdgesMap.has(targetId)) {
-                nodeEdgesMap.set(targetId, new Set())
-              }
-              nodeEdgesMap.get(targetId)!.add(edge)
-            }
-          }
+        fetchTile(DATA_URL, props.graphId, tileEntry.tileId).then((tile) =>
+          loadTile(nodePosMap, nodeEdgesMap, nodeIndex, tile)
         )
       }
 

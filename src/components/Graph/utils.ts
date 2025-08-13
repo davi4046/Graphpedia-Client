@@ -1,8 +1,9 @@
 import { gunzipSync } from "fflate"
 import { TileIndexParser, TileParser } from "./parsers"
 import * as PIXI from "pixi.js"
-import { Tile, TileEntry, TileIndex } from "./types"
+import { NodeBBox, Tile, TileEntry, TileIndex } from "./types"
 import Flatbush from "flatbush"
+import RBush from "rbush"
 
 export async function fetchTileIndex(
   dataUrl: string,
@@ -27,6 +28,40 @@ export async function fetchTile(
   const decompressed = gunzipSync(compressed)
   const parsed = TileParser.parse(decompressed)
   return parsed
+}
+
+export function loadTile(
+  nodePosMap: Map<number, [number, number]>,
+  nodeEdgesMap: Map<number, Set<PackedEdge>>,
+  nodeIndex: RBush<NodeBBox>,
+  tile: Tile
+) {
+  const { nodes, edges } = tile
+  for (const node of nodes) {
+    nodePosMap.set(node.entityId, [node.x, node.y])
+
+    const nodeBBox: NodeBBox = {
+      minX: node.x,
+      minY: node.y,
+      maxX: node.x,
+      maxY: node.y,
+      entityId: node.entityId,
+    }
+    nodeIndex.insert(nodeBBox)
+  }
+  for (const { sourceId, targetId } of edges) {
+    const edge = packEdge(sourceId, targetId)
+
+    if (!nodeEdgesMap.has(sourceId)) {
+      nodeEdgesMap.set(sourceId, new Set())
+    }
+    nodeEdgesMap.get(sourceId)!.add(edge)
+
+    if (!nodeEdgesMap.has(targetId)) {
+      nodeEdgesMap.set(targetId, new Set())
+    }
+    nodeEdgesMap.get(targetId)!.add(edge)
+  }
 }
 
 export function renderNode(x: number, y: number, size: number) {
