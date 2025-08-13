@@ -30,6 +30,20 @@ export async function fetchTile(
   return parsed
 }
 
+export type PackedEdge = bigint & { __brand: "PackedEdge" }
+
+export function packEdge(sourceId: number, targetId: number): PackedEdge {
+  // Both sourceId and targetId are 32-bit unsigned integers
+  const edgeHash = (BigInt(sourceId) << 32n) | BigInt(targetId)
+  return edgeHash as PackedEdge
+}
+
+export function unpackEdge(packedEdge: PackedEdge): [number, number] {
+  const sourceId = Number(packedEdge >> 32n)
+  const targetId = Number(packedEdge & 0xffffffffn)
+  return [sourceId, targetId]
+}
+
 export function loadTile(
   nodePosMap: Map<number, [number, number]>,
   nodeEdgesMap: Map<number, Set<PackedEdge>>,
@@ -92,20 +106,6 @@ export function renderArrowHead() {
     color: 0xff0000,
   })
   return triangle
-}
-
-export type PackedEdge = bigint & { __brand: "PackedEdge" }
-
-export function packEdge(sourceId: number, targetId: number): PackedEdge {
-  // Both sourceId and targetId are 32-bit unsigned integers
-  const edgeHash = (BigInt(sourceId) << 32n) | BigInt(targetId)
-  return edgeHash as PackedEdge
-}
-
-export function unpackEdge(packedEdge: PackedEdge): [number, number] {
-  const sourceId = Number(packedEdge >> 32n)
-  const targetId = Number(packedEdge & 0xffffffffn)
-  return [sourceId, targetId]
 }
 
 export class TileIndexService {
