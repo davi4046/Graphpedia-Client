@@ -2,17 +2,17 @@ import * as PIXI from "pixi.js"
 import * as PIXIViewport from "pixi-viewport"
 import { onMount, onCleanup } from "solid-js"
 import RBush from "rbush"
-import { NodeBBox, Tile } from "./types"
+import { NodeBBox } from "./types"
 import {
   fetchTile,
   fetchTileIndex,
   renderArrowHead,
-  renderLine,
   renderNode,
   TileIndexService,
   unpackEdge,
   PackedEdge,
   loadTile,
+  renderEdge,
 } from "./utils"
 
 type GraphProps = {
@@ -109,41 +109,28 @@ export default function Graph(props: GraphProps) {
           const [sourceId, targetId] = unpackEdge(edge)
 
           let x1, y1, x2, y2
+
           if (entityId === sourceId) {
-            const targetPos = nodePosMap.get(targetId)!
-            x1 = nodeX + nodeHalfSize
-            y1 = nodeY + nodeHalfSize
-            x2 = targetPos[0] + nodeHalfSize
-            y2 = targetPos[1] + nodeHalfSize
+            ;[x1, y1] = [nodeX, nodeY]
+            ;[x2, y2] = nodePosMap.get(targetId)!
           } else {
-            const sourcePos = nodePosMap.get(sourceId)!
-            x1 = sourcePos[0] + nodeHalfSize
-            y1 = sourcePos[1] + nodeHalfSize
-            x2 = nodeX + nodeHalfSize
-            y2 = nodeY + nodeHalfSize
+            ;[x1, y1] = nodePosMap.get(sourceId)!
+            ;[x2, y2] = [nodeX, nodeY]
           }
 
-          const edgeGraphics = renderLine(x1, y1, x2, y2)
+          x1 += nodeHalfSize
+          y1 += nodeHalfSize
+          x2 += nodeHalfSize
+          y2 += nodeHalfSize
+
+          const edgeGraphics = renderEdge(x1, y1, x2, y2, arrowHeadTexture)
           drawnEdges.set(edge, edgeGraphics)
           edgeContainer.addChild(edgeGraphics)
-
-          const dx = x2 - x1
-          const dy = y2 - y1
-          const angle = Math.atan2(dy, dx)
-
-          const arrowHeadSprite = new PIXI.Sprite(arrowHeadTexture)
-          arrowHeadSprite.scale.set(0.2)
-          arrowHeadSprite.anchor.set(1, 0.5)
-          arrowHeadSprite.x = x2
-          arrowHeadSprite.y = y2
-          arrowHeadSprite.rotation = angle
-          edgeGraphics.addChild(arrowHeadSprite)
         }
       }
 
       for (const [entityId, sprite] of drawnNodes) {
         if (visibleNodeIds.has(entityId)) continue
-
         drawnNodes.delete(entityId)
         nodeContainer.removeChild(sprite)
 
