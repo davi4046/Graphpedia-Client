@@ -1,19 +1,16 @@
 import * as PIXI from "pixi.js"
 import * as PIXIViewport from "pixi-viewport"
 import { onMount, onCleanup } from "solid-js"
-import RBush from "rbush"
-import { NodeBBox } from "./types"
+import { Tile, TileEntry } from "./types"
 import {
   fetchTile,
   fetchTileIndex,
   renderArrowHead,
   renderNode,
   TileIndexService,
-  unpackEdge,
-  PackedEdge,
-  loadTile,
   renderEdge,
 } from "./utils"
+import { createGraphUpdateHandler, EraseFn } from "./update-handler"
 
 type GraphProps = {
   graphId: string
@@ -27,13 +24,6 @@ export default function Graph(props: GraphProps) {
 
   const DATA_URL = import.meta.env.PUBLIC_DATA_URL
   const NODE_SIZE = 10
-
-  const fetchedTiles = new Set<number>()
-  const nodeIndex = new RBush<NodeBBox>()
-  const nodePosMap = new Map<number, [x: number, y: number]>()
-  const nodeEdgesMap = new Map<number, Set<PackedEdge>>()
-  const drawnNodes = new Map<number, PIXI.Sprite>()
-  const drawnEdges = new Map<PackedEdge, PIXI.Graphics>()
 
   onMount(async () => {
     app = new PIXI.Application()
@@ -72,79 +62,53 @@ export default function Graph(props: GraphProps) {
     const tileIndexSvc = new TileIndexService(tileIndex)
     const nodeHalfSize = NODE_SIZE / 2
 
-    viewport.on("moved", async () => {
-      const { x, y, width, height } = viewport.getVisibleBounds()
-      const visibleTiles = tileIndexSvc.query(x, y, x + width, y + height)
+    const queryTiles = (
+      minX: number,
+      minY: number,
+      maxX: number,
+      maxY: number
+    ): [TileEntry, Promise<Tile>][] => {
+      const visibleTiles = tileIndexSvc.query(minX, minY, maxX, maxY)
+      return visibleTiles.map((tileEntry) => [
+        tileEntry,
+        fetchTile(DATA_URL, props.graphId, tileEntry.tileId),
+      ])
+    }
 
-      for (const tileEntry of visibleTiles) {
-        if (fetchedTiles.has(tileEntry.tileId)) continue
-        fetchedTiles.add(tileEntry.tileId)
-
-        fetchTile(DATA_URL, props.graphId, tileEntry.tileId).then((tile) =>
-          loadTile(nodePosMap, nodeEdgesMap, nodeIndex, tile)
-        )
-      }
-
-      const result = nodeIndex.search({
-        minX: x,
-        minY: y,
-        maxX: x + width,
-        maxY: y + height,
-      })
-
-      const visibleNodeIds = new Set<number>()
-
-      for (const { entityId, minX: nodeX, minY: nodeY } of result) {
-        visibleNodeIds.add(entityId)
-        if (drawnNodes.has(entityId)) continue
-
-        const sprite = renderNode(nodeX, nodeY, NODE_SIZE)
-        drawnNodes.set(entityId, sprite)
-        nodeContainer.addChild(sprite)
-
-        const edges = nodeEdgesMap.get(entityId)!
-        for (const edge of edges) {
-          if (drawnEdges.has(edge)) continue
-
-          const [sourceId, targetId] = unpackEdge(edge)
-
-          let x1, y1, x2, y2
-
-          if (entityId === sourceId) {
-            ;[x1, y1] = [nodeX, nodeY]
-            ;[x2, y2] = nodePosMap.get(targetId)!
-          } else {
-            ;[x1, y1] = nodePosMap.get(sourceId)!
-            ;[x2, y2] = [nodeX, nodeY]
-          }
-
-          x1 += nodeHalfSize
-          y1 += nodeHalfSize
-          x2 += nodeHalfSize
-          y2 += nodeHalfSize
-
-          const edgeGraphics = renderEdge(x1, y1, x2, y2, arrowHeadTexture)
-          drawnEdges.set(edge, edgeGraphics)
-          edgeContainer.addChild(edgeGraphics)
-        }
-      }
-
-      for (const [entityId, sprite] of drawnNodes) {
-        if (visibleNodeIds.has(entityId)) continue
-        drawnNodes.delete(entityId)
+    const drawNode = (x: number, y: number): EraseFn => {
+      const sprite = renderNode(x, y, NODE_SIZE)
+      nodeContainer.addChild(sprite)
+      return () => {
         nodeContainer.removeChild(sprite)
-
-        const edges = nodeEdgesMap.get(entityId)!
-        for (const edge of edges) {
-          const [sourceId, targetId] = unpackEdge(edge)
-          const otherId = sourceId === entityId ? targetId : sourceId
-          if (drawnNodes.has(otherId)) continue
-
-          const edgeGraphics = drawnEdges.get(edge)!
-          drawnEdges.delete(edge)
-          edgeContainer.removeChild(edgeGraphics)
-        }
       }
+    }
+
+    const drawEdge = (
+      x1: number,
+      y1: number,
+      x2: number,
+      y2: number
+    ): EraseFn => {
+      x1 += nodeHalfSize
+      y1 += nodeHalfSize
+      x2 += nodeHalfSize
+      y2 += nodeHalfSize
+      const graphics = renderEdge(x1, y1, x2, y2, arrowHeadTexture)
+      edgeContainer.addChild(graphics)
+      return () => {
+        edgeContainer.removeChild(graphics)
+      }
+    }
+
+    const graphUpdateHandler = createGraphUpdateHandler(
+      queryTiles,
+      drawNode,
+      drawEdge
+    )
+
+    viewport.on("moved", () => {
+      const { x, y, width, height } = viewport.getVisibleBounds()
+      graphUpdateHandler(x, y, x + width, y + height)
     })
   })
 
