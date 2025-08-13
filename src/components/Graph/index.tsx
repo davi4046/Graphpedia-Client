@@ -7,7 +7,7 @@ import {
   fetchTile,
   fetchTileIndex,
   renderArrowHead,
-  renderEdge,
+  renderLine,
   renderNode,
   TileIndexService,
   unpackEdge,
@@ -123,7 +123,7 @@ export default function Graph(props: GraphProps) {
             y2 = nodeY + nodeHalfSize
           }
 
-          const edgeGraphics = renderEdge(x1, y1, x2, y2)
+          const edgeGraphics = renderLine(x1, y1, x2, y2)
           drawnEdges.set(edge, edgeGraphics)
           edgeContainer.addChild(edgeGraphics)
 

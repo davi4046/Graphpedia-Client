@@ -74,7 +74,7 @@ export function renderNode(x: number, y: number, size: number) {
   return sprite
 }
 
-export function renderEdge(x1: number, y1: number, x2: number, y2: number) {
+export function renderLine(x1: number, y1: number, x2: number, y2: number) {
   const graphics = new PIXI.Graphics()
   graphics.moveTo(x1, y1)
   graphics.lineTo(x2, y2)
