@@ -23,6 +23,7 @@ export function createGraphUpdateHandler(
   const drawnEdges = new Map<PackedEdge, EraseFn>()
 
   return async (minX: number, minY: number, maxX: number, maxY: number) => {
+    // Load tiles that are currently visible
     for (const [tileEntry, tilePromise] of queryTiles(minX, minY, maxX, maxY)) {
       if (loadedTiles.has(tileEntry.tileId)) continue
       loadedTiles.add(tileEntry.tileId)
@@ -31,6 +32,8 @@ export function createGraphUpdateHandler(
         loadTile(nodePosMap, nodeEdgesMap, nodeIndex, tile)
       })
     }
+
+    // Draw nodes and edges that are currently visible
 
     const visibleNodes = nodeIndex.search({ minX, minY, maxX, maxY })
     const visibleNodeIds = new Set<number>()
@@ -62,6 +65,8 @@ export function createGraphUpdateHandler(
         drawnEdges.set(edge, eraseEdge)
       }
     }
+
+    // Remove nodes and edges that are no longer visible
 
     for (const [entityId, eraseNode] of drawnNodes) {
       if (visibleNodeIds.has(entityId)) continue
