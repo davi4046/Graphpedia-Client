@@ -100,11 +100,15 @@ export default function Graph(props: GraphProps) {
       }
     }
 
-    const viewCtrl = new GraphViewController(queryTiles, drawNode, drawEdge)
+    const graphViewCtrl = new GraphViewController(
+      queryTiles,
+      drawNode,
+      drawEdge
+    )
 
     viewport.on("moved", () => {
       const { x, y, width, height } = viewport.getVisibleBounds()
-      viewCtrl.update(x, y, x + width, y + height)
+      graphViewCtrl.update(x, y, x + width, y + height)
     })
   })
 

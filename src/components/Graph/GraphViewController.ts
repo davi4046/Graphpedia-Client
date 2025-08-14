@@ -1,6 +1,53 @@
 import RBush from "rbush"
 import { NodeBBox, Tile, TileEntry } from "./types"
-import { PackedEdge, loadTile, unpackEdge } from "./utils"
+
+type PackedEdge = bigint & { __brand: "PackedEdge" }
+
+function packEdge(sourceId: number, targetId: number): PackedEdge {
+  // Both sourceId and targetId are 32-bit unsigned integers
+  const edgeHash = (BigInt(sourceId) << 32n) | BigInt(targetId)
+  return edgeHash as PackedEdge
+}
+
+function unpackEdge(packedEdge: PackedEdge): [number, number] {
+  const sourceId = Number(packedEdge >> 32n)
+  const targetId = Number(packedEdge & 0xffffffffn)
+  return [sourceId, targetId]
+}
+
+function loadTile(
+  nodePosMap: Map<number, [number, number]>,
+  nodeEdgesMap: Map<number, Set<PackedEdge>>,
+  nodeIndex: RBush<NodeBBox>,
+  tile: Tile
+) {
+  const { nodes, edges } = tile
+  for (const node of nodes) {
+    nodePosMap.set(node.entityId, [node.x, node.y])
+
+    const nodeBBox: NodeBBox = {
+      minX: node.x,
+      minY: node.y,
+      maxX: node.x,
+      maxY: node.y,
+      entityId: node.entityId,
+    }
+    nodeIndex.insert(nodeBBox)
+  }
+  for (const { sourceId, targetId } of edges) {
+    const edge = packEdge(sourceId, targetId)
+
+    if (!nodeEdgesMap.has(sourceId)) {
+      nodeEdgesMap.set(sourceId, new Set())
+    }
+    nodeEdgesMap.get(sourceId)!.add(edge)
+
+    if (!nodeEdgesMap.has(targetId)) {
+      nodeEdgesMap.set(targetId, new Set())
+    }
+    nodeEdgesMap.get(targetId)!.add(edge)
+  }
+}
 
 export type EraseFn = () => void
 
