@@ -99,10 +99,14 @@ export default function Graph(props: GraphProps) {
       drawEdge
     )
 
-    viewport.on("moved", () => {
+    const update = () => {
       const { x, y, width, height } = viewport.getVisibleBounds()
       graphViewCtrl.update(x - NODE_SIZE, y - NODE_SIZE, x + width, y + height)
-    })
+    }
+
+    viewport.on("moved", update)
+
+    update()
   })
 
   onCleanup(() => {

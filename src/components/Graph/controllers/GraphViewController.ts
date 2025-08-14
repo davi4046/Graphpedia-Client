@@ -67,6 +67,11 @@ export default class GraphViewController {
   private drawnNodes = new Map<number, EraseFn>()
   private drawnEdges = new Map<PackedEdge, EraseFn>()
 
+  private minX: number = 0
+  private minY: number = 0
+  private maxX: number = 0
+  private maxY: number = 0
+
   constructor(
     private queryTiles: (
       minX: number,
@@ -83,26 +88,42 @@ export default class GraphViewController {
     ) => EraseFn
   ) {}
 
-  async update(minX: number, minY: number, maxX: number, maxY: number) {
-    // Load tiles that are currently visible
+  update(minX: number, minY: number, maxX: number, maxY: number) {
+    this.minX = minX
+    this.minY = minY
+    this.maxX = maxX
+    this.maxY = maxY
+    this.loadTiles()
+    this.render()
+  }
+
+  private loadTiles() {
     for (const [tileEntry, tilePromise] of this.queryTiles(
-      minX,
-      minY,
-      maxX,
-      maxY
+      this.minX,
+      this.minY,
+      this.maxX,
+      this.maxY
     )) {
       if (this.loadedTiles.has(tileEntry.tileId)) continue
       this.loadedTiles.add(tileEntry.tileId)
 
       tilePromise.then((tile) => {
         loadTile(this.nodePosMap, this.nodeEdgesMap, this.nodeIndex, tile)
+        this.render()
       })
     }
+  }
 
-    const visibleNodes = this.nodeIndex.search({ minX, minY, maxX, maxY })
+  private render() {
+    const visibleNodes = this.nodeIndex.search({
+      minX: this.minX,
+      minY: this.minY,
+      maxX: this.maxX,
+      maxY: this.maxY,
+    })
     const visibleNodeIds = new Set<number>()
 
-    // Draw nodes and edges that are currently visible
+    // Draw nodes and edges that are currently within bounds
     for (const { entityId, minX: nodeX, minY: nodeY } of visibleNodes) {
       visibleNodeIds.add(entityId)
       if (this.drawnNodes.has(entityId)) continue
@@ -131,7 +152,7 @@ export default class GraphViewController {
       }
     }
 
-    // Remove nodes and edges that are no longer visible
+    // Cull nodes and edges that are no longer within bounds
     for (const [entityId, eraseNode] of this.drawnNodes) {
       if (visibleNodeIds.has(entityId)) continue
       eraseNode()
