@@ -1,7 +1,7 @@
 import Flatbush from "flatbush"
 import { TileEntry, TileIndex } from "../types"
 
-export class TileIndexService {
+export default class TileIndexService {
   private index: Flatbush
   private entries: TileEntry[]
 

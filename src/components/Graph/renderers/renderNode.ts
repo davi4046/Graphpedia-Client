@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js"
 
-export function renderNode(x: number, y: number, size: number) {
+export default function renderNode(x: number, y: number, size: number) {
   const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
   sprite.tint = 0x00ff00
   sprite.width = size

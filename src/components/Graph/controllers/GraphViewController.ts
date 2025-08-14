@@ -59,7 +59,7 @@ function loadTile(
   }
 }
 
-export class GraphViewController {
+export default class GraphViewController {
   private loadedTiles = new Set<number>()
   private nodeIndex = new RBush<NodeBBox>()
   private nodePosMap = new Map<number, [x: number, y: number]>()

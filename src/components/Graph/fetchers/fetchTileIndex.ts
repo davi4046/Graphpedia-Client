@@ -15,7 +15,7 @@ const tileIndexParser = new Parser().array("entries", {
   readUntil: "eof",
 })
 
-export async function fetchTileIndex(
+export default async function fetchTileIndex(
   dataUrl: string,
   graphId: string
 ): Promise<TileIndex> {

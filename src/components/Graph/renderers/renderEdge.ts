@@ -8,7 +8,7 @@ function renderLine(x1: number, y1: number, x2: number, y2: number) {
   return graphics
 }
 
-export function renderEdge(
+export default function renderEdge(
   x1: number,
   y1: number,
   x2: number,

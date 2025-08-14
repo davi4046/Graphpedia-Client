@@ -26,7 +26,7 @@ const tileParser = new Parser()
     length: "numEdges",
   })
 
-export async function fetchTile(
+export default async function fetchTile(
   dataUrl: string,
   graphId: string,
   tileId: number

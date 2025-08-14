@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js"
 
-export function renderArrowHead() {
+export default function renderArrowHead() {
   const triangle = new PIXI.Graphics()
   triangle.moveTo(0, 0)
   triangle.lineTo(40, 20)
