@@ -1,8 +1,8 @@
 import * as PIXIViewport from "pixi-viewport"
 import * as PIXI from "pixi.js"
 import { onCleanup, onMount } from "solid-js"
+import { EraseFn, GraphViewController } from "./GraphViewController"
 import { Tile, TileEntry } from "./types"
-import { createGraphUpdateHandler, EraseFn } from "./update-handler"
 import {
   fetchTile,
   fetchTileIndex,
@@ -100,15 +100,11 @@ export default function Graph(props: GraphProps) {
       }
     }
 
-    const graphUpdateHandler = createGraphUpdateHandler(
-      queryTiles,
-      drawNode,
-      drawEdge
-    )
+    const viewCtrl = new GraphViewController(queryTiles, drawNode, drawEdge)
 
     viewport.on("moved", () => {
       const { x, y, width, height } = viewport.getVisibleBounds()
-      graphUpdateHandler(x, y, x + width, y + height)
+      viewCtrl.update(x, y, x + width, y + height)
     })
   })
 
