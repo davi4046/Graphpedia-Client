@@ -14,14 +14,14 @@ type GraphProps = {
   graphId: string
 }
 
+const DATA_URL = import.meta.env.PUBLIC_DATA_URL
+const NODE_SIZE = 10
+
 export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
   let app: PIXI.Application
   let viewport: PIXIViewport.Viewport
   let arrowHeadTexture: PIXI.Texture
-
-  const DATA_URL = import.meta.env.PUBLIC_DATA_URL
-  const NODE_SIZE = 10
 
   onMount(async () => {
     app = new PIXI.Application()
