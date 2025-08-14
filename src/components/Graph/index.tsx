@@ -101,7 +101,7 @@ export default function Graph(props: GraphProps) {
 
     viewport.on("moved", () => {
       const { x, y, width, height } = viewport.getVisibleBounds()
-      graphViewCtrl.update(x, y, x + width, y + height)
+      graphViewCtrl.update(x - NODE_SIZE, y - NODE_SIZE, x + width, y + height)
     })
   })
 
