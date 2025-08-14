@@ -1,7 +1,15 @@
 import RBush from "rbush"
-import { NodeBBox, Tile, TileEntry } from "./types"
+import { Tile, TileEntry } from "./types"
 
 type PackedEdge = bigint & { __brand: "PackedEdge" }
+
+interface NodeBBox {
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
+  entityId: number
+}
 
 function packEdge(sourceId: number, targetId: number): PackedEdge {
   // Both sourceId and targetId are 32-bit unsigned integers

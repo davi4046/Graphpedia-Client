@@ -25,11 +25,3 @@ export interface Tile {
   nodes: Node[]
   edges: Edge[]
 }
-
-export interface NodeBBox {
-  minX: number
-  minY: number
-  maxX: number
-  maxY: number
-  entityId: number
-}
