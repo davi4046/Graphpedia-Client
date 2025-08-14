@@ -1,5 +1,7 @@
 import RBush from "rbush"
-import { Tile, TileEntry } from "./types"
+import { Tile, TileEntry } from "../types"
+
+type EraseFn = () => void
 
 type PackedEdge = bigint & { __brand: "PackedEdge" }
 
@@ -56,8 +58,6 @@ function loadTile(
     nodeEdgesMap.get(targetId)!.add(edge)
   }
 }
-
-export type EraseFn = () => void
 
 export class GraphViewController {
   private loadedTiles = new Set<number>()

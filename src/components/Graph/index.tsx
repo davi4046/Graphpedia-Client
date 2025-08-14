@@ -1,16 +1,14 @@
 import * as PIXIViewport from "pixi-viewport"
 import * as PIXI from "pixi.js"
 import { onCleanup, onMount } from "solid-js"
-import { EraseFn, GraphViewController } from "./GraphViewController"
+import { GraphViewController } from "./controllers/GraphViewController"
+import { fetchTile } from "./fetchers/fetchTile"
+import { fetchTileIndex } from "./fetchers/fetchTileIndex"
+import { renderArrowHead } from "./renderers/renderArrowHead"
+import { renderEdge } from "./renderers/renderEdge"
+import { renderNode } from "./renderers/renderNode"
+import { TileIndexService } from "./services/TileIndexService"
 import { Tile, TileEntry } from "./types"
-import {
-  fetchTile,
-  fetchTileIndex,
-  renderArrowHead,
-  renderEdge,
-  renderNode,
-  TileIndexService,
-} from "./utils"
 
 type GraphProps = {
   graphId: string
@@ -75,7 +73,7 @@ export default function Graph(props: GraphProps) {
       ])
     }
 
-    const drawNode = (x: number, y: number): EraseFn => {
+    const drawNode = (x: number, y: number) => {
       const sprite = renderNode(x, y, NODE_SIZE)
       nodeContainer.addChild(sprite)
       return () => {
@@ -83,12 +81,7 @@ export default function Graph(props: GraphProps) {
       }
     }
 
-    const drawEdge = (
-      x1: number,
-      y1: number,
-      x2: number,
-      y2: number
-    ): EraseFn => {
+    const drawEdge = (x1: number, y1: number, x2: number, y2: number) => {
       x1 += nodeHalfSize
       y1 += nodeHalfSize
       x2 += nodeHalfSize
