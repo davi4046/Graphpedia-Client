@@ -5,12 +5,12 @@ import GraphViewController from "./controllers/GraphViewController"
 import fetchEntities from "./fetchers/fetchEntities"
 import fetchTile from "./fetchers/fetchTile"
 import fetchTileIndex from "./fetchers/fetchTileIndex"
+import EdgeVisual from "./renderers/EdgeVisual"
+import NodeVisual from "./renderers/NodeVisual"
 import renderArrowHead from "./renderers/renderArrowHead"
-import renderEdge from "./renderers/renderEdge"
-import renderNode from "./renderers/renderNode"
 import BatchProcessor from "./services/BatchProcessor"
 import TileIndexService from "./services/TileIndexService"
-import { EntityData, Tile, TileEntry } from "./types"
+import { GraphVisuals, Tile, TileEntry } from "./types"
 
 type GraphProps = {
   graphId: string
@@ -38,9 +38,6 @@ export default function Graph(props: GraphProps) {
       containerRef.appendChild(app.canvas)
     }
 
-    const arrowHeadGraphics = renderArrowHead()
-    arrowHeadTexture = app.renderer.generateTexture(arrowHeadGraphics)
-
     viewport = new PIXIViewport.Viewport({
       screenWidth: app.screen.width,
       screenHeight: app.screen.height,
@@ -60,7 +57,7 @@ export default function Graph(props: GraphProps) {
 
     const tileIndex = await fetchTileIndex(DATA_URL, props.graphId)
     const tileIndexSvc = new TileIndexService(tileIndex)
-    const nodeHalfSize = NODE_SIZE / 2
+    const entityFetcher = new BatchProcessor(fetchEntities)
 
     const queryTiles = (
       minX: number,
@@ -75,39 +72,25 @@ export default function Graph(props: GraphProps) {
       ])
     }
 
-    const entityFetcher = new BatchProcessor<EntityData>(fetchEntities)
+    const arrowHeadGraphics = renderArrowHead()
+    arrowHeadTexture = app.renderer.generateTexture(arrowHeadGraphics)
+
+    const config: GraphVisuals = {
+      nodeSize: NODE_SIZE,
+      arrowHeadTexture: arrowHeadTexture,
+    }
 
     const drawNode = (entityId: number, x: number, y: number) => {
-      const sprite = renderNode(x, y, NODE_SIZE)
-      nodeContainer.addChild(sprite)
-
-      const unregister = entityFetcher.register(
-        entityId.toString(),
-        (entityData) => {
-          console.log(entityData)
-        }
-      )
-
-      return {
-        remove: () => {
-          nodeContainer.removeChild(sprite)
-          unregister()
-        },
-      }
+      const dataPromise = entityFetcher.enqueue(entityId)
+      const nodeVisual = new NodeVisual(x, y, dataPromise, config)
+      nodeVisual.addToContainer(nodeContainer)
+      return nodeVisual
     }
 
     const drawEdge = (x1: number, y1: number, x2: number, y2: number) => {
-      x1 += nodeHalfSize
-      y1 += nodeHalfSize
-      x2 += nodeHalfSize
-      y2 += nodeHalfSize
-      const graphics = renderEdge(x1, y1, x2, y2, arrowHeadTexture)
-      edgeContainer.addChild(graphics)
-      return {
-        remove: () => {
-          edgeContainer.removeChild(graphics)
-        },
-      }
+      const edgeVisual = new EdgeVisual(x1, y1, x2, y2, config)
+      edgeVisual.addToContainer(edgeContainer)
+      return edgeVisual
     }
 
     const graphViewCtrl = new GraphViewController(

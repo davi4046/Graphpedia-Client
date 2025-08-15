@@ -1,7 +1,7 @@
 import { EntityData } from "../types"
 
 export default async function fetchEntities(
-  ids: string[]
+  ids: number[]
 ): Promise<EntityData[]> {
   const sparqlQuery = `
     SELECT ?item ?itemLabel ?itemDescription ?image WHERE {

@@ -1,3 +1,5 @@
+import * as PIXI from "pixi.js"
+
 export interface TileEntry {
   tileId: number
   minX: number
@@ -35,4 +37,9 @@ export interface EntityData {
   name: string
   description: string
   imageUrl?: string
+}
+
+export interface GraphVisuals {
+  nodeSize: number
+  arrowHeadTexture: PIXI.Texture
 }

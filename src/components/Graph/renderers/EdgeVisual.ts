@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js"
+import { DrawHandle, GraphVisuals } from "../types"
 
 function renderLine(x1: number, y1: number, x2: number, y2: number) {
   const graphics = new PIXI.Graphics()
@@ -8,7 +9,7 @@ function renderLine(x1: number, y1: number, x2: number, y2: number) {
   return graphics
 }
 
-export default function renderEdge(
+function renderEdge(
   x1: number,
   y1: number,
   x2: number,
@@ -31,4 +32,30 @@ export default function renderEdge(
   edgeGraphics.addChild(arrowHeadSprite)
 
   return edgeGraphics
+}
+
+export default class EdgeVisual implements DrawHandle {
+  private graphics: PIXI.Graphics
+
+  constructor(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    config: GraphVisuals
+  ) {
+    x1 = x1 + config.nodeSize / 2
+    y1 = y1 + config.nodeSize / 2
+    x2 = x2 + config.nodeSize / 2
+    y2 = y2 + config.nodeSize / 2
+    this.graphics = renderEdge(x1, y1, x2, y2, config.arrowHeadTexture)
+  }
+
+  addToContainer(container: PIXI.Container) {
+    container.addChild(this.graphics)
+  }
+
+  remove() {
+    this.graphics.removeFromParent()
+  }
 }

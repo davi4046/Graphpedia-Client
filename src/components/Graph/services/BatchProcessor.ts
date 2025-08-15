@@ -1,21 +1,57 @@
-export default class BatchProcessor<T> {
-  private subscribers: Map<string, (data: T | undefined) => void> = new Map()
+type CancellablePromise<T> = Promise<T> & { cancel: () => void }
 
-  constructor(private processFn: (ids: string[]) => Promise<T[]>) {}
+export default class BatchProcessor<T, U> {
+  private queue: {
+    data: T
+    resolve: (value: U) => void
+    reject: (reason?: any) => void
+    cancelled: boolean
+  }[] = []
 
-  register(id: string, cb: (data: T | undefined) => void) {
-    this.subscribers.set(id, cb)
-    return () => {
-      this.subscribers.delete(id)
+  constructor(private processFn: (data: T[]) => Promise<U[]>) {}
+
+  enqueue(data: T): CancellablePromise<U> {
+    let cancelled = false
+
+    const promise = new Promise<U>((resolve, reject) => {
+      this.queue.push({ data, resolve, reject, cancelled })
+    }) as CancellablePromise<U>
+
+    promise.cancel = () => {
+      cancelled = true
+      // mark the queued item as cancelled so process() will skip it
+      const item = this.queue.find(
+        (q) => q.resolve === (promise as any).resolve
+      )
+      if (item) item.cancelled = true
     }
+
+    return promise
   }
 
-  async processAll() {
-    const ids = Array.from(this.subscribers.keys())
-    const results = await this.processFn(ids)
-    ids.forEach((id, index) => {
-      const cb = this.subscribers.get(id)
-      cb?.(results[index])
-    })
+  async process(n?: number) {
+    const items = n ? this.queue.splice(0, n) : this.queue.splice(0)
+    this.queue = [] // clear queue before processing
+
+    if (items.length === 0) return
+
+    const dataArray = items.map((item) => item.data)
+
+    try {
+      const results = await this.processFn(dataArray)
+
+      results.forEach((result, index) => {
+        const item = items[index]
+        if (!item.cancelled) {
+          item.resolve(result)
+        }
+      })
+    } catch (err) {
+      items.forEach((item) => {
+        if (!item.cancelled) {
+          item.reject(err)
+        }
+      })
+    }
   }
 }
