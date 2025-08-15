@@ -29,3 +29,10 @@ export interface Tile {
 export interface DrawHandle {
   remove(): void
 }
+
+export interface EntityData {
+  id: number
+  name: string
+  description: string
+  imageUrl?: string
+}

@@ -2,13 +2,15 @@ import * as PIXIViewport from "pixi-viewport"
 import * as PIXI from "pixi.js"
 import { onCleanup, onMount } from "solid-js"
 import GraphViewController from "./controllers/GraphViewController"
+import fetchEntities from "./fetchers/fetchEntities"
 import fetchTile from "./fetchers/fetchTile"
 import fetchTileIndex from "./fetchers/fetchTileIndex"
 import renderArrowHead from "./renderers/renderArrowHead"
 import renderEdge from "./renderers/renderEdge"
 import renderNode from "./renderers/renderNode"
+import BatchProcessor from "./services/BatchProcessor"
 import TileIndexService from "./services/TileIndexService"
-import { Tile, TileEntry } from "./types"
+import { EntityData, Tile, TileEntry } from "./types"
 
 type GraphProps = {
   graphId: string
@@ -73,12 +75,23 @@ export default function Graph(props: GraphProps) {
       ])
     }
 
+    const entityFetcher = new BatchProcessor<EntityData>(fetchEntities)
+
     const drawNode = (entityId: number, x: number, y: number) => {
       const sprite = renderNode(x, y, NODE_SIZE)
       nodeContainer.addChild(sprite)
+
+      const unregister = entityFetcher.register(
+        entityId.toString(),
+        (entityData) => {
+          console.log(entityData)
+        }
+      )
+
       return {
         remove: () => {
           nodeContainer.removeChild(sprite)
+          unregister()
         },
       }
     }
