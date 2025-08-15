@@ -73,7 +73,7 @@ export default function Graph(props: GraphProps) {
       ])
     }
 
-    const drawNode = (x: number, y: number) => {
+    const drawNode = (entityId: number, x: number, y: number) => {
       const sprite = renderNode(x, y, NODE_SIZE)
       nodeContainer.addChild(sprite)
       return () => {

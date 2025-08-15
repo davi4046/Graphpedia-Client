@@ -79,7 +79,7 @@ export default class GraphViewController {
       maxX: number,
       maxY: number
     ) => [TileEntry, Promise<Tile>][],
-    private drawNode: (x: number, y: number) => EraseFn,
+    private drawNode: (entityId: number, x: number, y: number) => EraseFn,
     private drawEdge: (
       x1: number,
       y1: number,
@@ -128,7 +128,7 @@ export default class GraphViewController {
       visibleNodeIds.add(entityId)
       if (this.drawnNodes.has(entityId)) continue
 
-      const eraseNode = this.drawNode(nodeX, nodeY)
+      const eraseNode = this.drawNode(entityId, nodeX, nodeY)
       this.drawnNodes.set(entityId, eraseNode)
 
       const edges = this.nodeEdgesMap.get(entityId)!
