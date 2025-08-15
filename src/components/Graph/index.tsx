@@ -76,8 +76,10 @@ export default function Graph(props: GraphProps) {
     const drawNode = (entityId: number, x: number, y: number) => {
       const sprite = renderNode(x, y, NODE_SIZE)
       nodeContainer.addChild(sprite)
-      return () => {
-        nodeContainer.removeChild(sprite)
+      return {
+        remove: () => {
+          nodeContainer.removeChild(sprite)
+        },
       }
     }
 
@@ -88,8 +90,10 @@ export default function Graph(props: GraphProps) {
       y2 += nodeHalfSize
       const graphics = renderEdge(x1, y1, x2, y2, arrowHeadTexture)
       edgeContainer.addChild(graphics)
-      return () => {
-        edgeContainer.removeChild(graphics)
+      return {
+        remove: () => {
+          edgeContainer.removeChild(graphics)
+        },
       }
     }
 

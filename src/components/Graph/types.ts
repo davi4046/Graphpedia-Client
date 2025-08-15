@@ -25,3 +25,7 @@ export interface Tile {
   nodes: Node[]
   edges: Edge[]
 }
+
+export interface DrawHandle {
+  remove(): void
+}

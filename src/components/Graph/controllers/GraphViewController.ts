@@ -1,17 +1,7 @@
 import RBush from "rbush"
-import { Tile, TileEntry } from "../types"
-
-type EraseFn = () => void
+import { DrawHandle, Tile, TileEntry } from "../types"
 
 type PackedEdge = bigint & { __brand: "PackedEdge" }
-
-interface NodeBBox {
-  minX: number
-  minY: number
-  maxX: number
-  maxY: number
-  entityId: number
-}
 
 function packEdge(sourceId: number, targetId: number): PackedEdge {
   // Both sourceId and targetId are 32-bit unsigned integers
@@ -23,6 +13,14 @@ function unpackEdge(packedEdge: PackedEdge): [number, number] {
   const sourceId = Number(packedEdge >> 32n)
   const targetId = Number(packedEdge & 0xffffffffn)
   return [sourceId, targetId]
+}
+
+interface NodeBBox {
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
+  entityId: number
 }
 
 function loadTile(
@@ -64,8 +62,8 @@ export default class GraphViewController {
   private nodeIndex = new RBush<NodeBBox>()
   private nodePosMap = new Map<number, [x: number, y: number]>()
   private nodeEdgesMap = new Map<number, Set<PackedEdge>>()
-  private drawnNodes = new Map<number, EraseFn>()
-  private drawnEdges = new Map<PackedEdge, EraseFn>()
+  private drawnNodes = new Map<number, DrawHandle>()
+  private drawnEdges = new Map<PackedEdge, DrawHandle>()
 
   private minX: number = 0
   private minY: number = 0
@@ -79,13 +77,13 @@ export default class GraphViewController {
       maxX: number,
       maxY: number
     ) => [TileEntry, Promise<Tile>][],
-    private drawNode: (entityId: number, x: number, y: number) => EraseFn,
+    private drawNode: (entityId: number, x: number, y: number) => DrawHandle,
     private drawEdge: (
       x1: number,
       y1: number,
       x2: number,
       y2: number
-    ) => EraseFn
+    ) => DrawHandle
   ) {}
 
   update(minX: number, minY: number, maxX: number, maxY: number) {
@@ -128,8 +126,8 @@ export default class GraphViewController {
       visibleNodeIds.add(entityId)
       if (this.drawnNodes.has(entityId)) continue
 
-      const eraseNode = this.drawNode(entityId, nodeX, nodeY)
-      this.drawnNodes.set(entityId, eraseNode)
+      const nodeHandle = this.drawNode(entityId, nodeX, nodeY)
+      this.drawnNodes.set(entityId, nodeHandle)
 
       const edges = this.nodeEdgesMap.get(entityId)!
       for (const edge of edges) {
@@ -147,15 +145,15 @@ export default class GraphViewController {
           ;[x2, y2] = [nodeX, nodeY]
         }
 
-        const eraseEdge = this.drawEdge(x1, y1, x2, y2)
-        this.drawnEdges.set(edge, eraseEdge)
+        const edgeHandle = this.drawEdge(x1, y1, x2, y2)
+        this.drawnEdges.set(edge, edgeHandle)
       }
     }
 
     // Cull nodes and edges that are no longer within bounds
-    for (const [entityId, eraseNode] of this.drawnNodes) {
+    for (const [entityId, nodeHandle] of this.drawnNodes) {
       if (visibleNodeIds.has(entityId)) continue
-      eraseNode()
+      nodeHandle.remove()
       this.drawnNodes.delete(entityId)
 
       const edges = this.nodeEdgesMap.get(entityId)!
@@ -164,8 +162,8 @@ export default class GraphViewController {
         const otherId = sourceId === entityId ? targetId : sourceId
         if (this.drawnNodes.has(otherId)) continue
 
-        const eraseEdge = this.drawnEdges.get(edge)!
-        eraseEdge()
+        const edgeHandle = this.drawnEdges.get(edge)!
+        edgeHandle.remove()
         this.drawnEdges.delete(edge)
       }
     }
