@@ -1,5 +1,10 @@
 import * as PIXI from "pixi.js"
-import { DrawHandle, EntityData, GraphVisuals } from "../types"
+import {
+  CancellablePromise,
+  DrawHandle,
+  EntityData,
+  GraphVisuals,
+} from "../types"
 
 function renderNode(x: number, y: number, size: number) {
   const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
@@ -13,14 +18,16 @@ function renderNode(x: number, y: number, size: number) {
 
 export default class NodeVisual implements DrawHandle {
   private sprite: PIXI.Sprite
+  private data: CancellablePromise<EntityData>
 
   constructor(
     x: number,
     y: number,
-    data: Promise<EntityData>,
+    data: CancellablePromise<EntityData>,
     config: GraphVisuals
   ) {
     this.sprite = renderNode(x, y, config.nodeSize)
+    this.data = data
   }
 
   addToContainer(container: PIXI.Container) {
@@ -29,5 +36,6 @@ export default class NodeVisual implements DrawHandle {
 
   remove() {
     this.sprite.removeFromParent()
+    this.data.cancel() // Cancel the data fetch if still pending
   }
 }

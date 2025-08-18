@@ -28,10 +28,6 @@ export interface Tile {
   edges: Edge[]
 }
 
-export interface DrawHandle {
-  remove(): void
-}
-
 export interface EntityData {
   id: number
   name: string
@@ -42,4 +38,12 @@ export interface EntityData {
 export interface GraphVisuals {
   nodeSize: number
   arrowHeadTexture: PIXI.Texture
+}
+
+export interface CancellablePromise<T> extends Promise<T> {
+  cancel: () => void
+}
+
+export interface DrawHandle {
+  remove(): void
 }

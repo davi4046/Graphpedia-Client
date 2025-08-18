@@ -1,4 +1,4 @@
-type CancellablePromise<T> = Promise<T> & { cancel: () => void }
+import { CancellablePromise } from "../types"
 
 export default class BatchProcessor<T, U> {
   private queue: {
