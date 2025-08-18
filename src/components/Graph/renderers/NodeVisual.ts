@@ -17,7 +17,7 @@ function renderNode(x: number, y: number, size: number) {
 }
 
 export default class NodeVisual implements DrawHandle {
-  private sprite: PIXI.Sprite
+  private visual: PIXI.Container
   private data: CancellablePromise<EntityData>
 
   constructor(
@@ -27,13 +27,19 @@ export default class NodeVisual implements DrawHandle {
     container: PIXI.Container,
     style: GraphStyle
   ) {
-    this.sprite = renderNode(x, y, style.nodeSize)
+    const visual = new PIXI.Container()
+
+    const sprite = renderNode(x, y, style.nodeSize)
+
+    visual.addChild(sprite)
+    container.addChild(visual)
+
+    this.visual = visual
     this.data = data
-    container.addChild(this.sprite)
   }
 
   remove() {
-    this.sprite.removeFromParent()
+    this.visual.removeFromParent()
     this.data.cancel() // Cancel the data fetch if still pending
   }
 
