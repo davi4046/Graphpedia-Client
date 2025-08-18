@@ -29,10 +29,23 @@ export default class BatchProcessor<T, U> {
     return promise
   }
 
-  async process(n?: number) {
-    const items = n ? this.queue.splice(0, n) : this.queue.splice(0)
-    this.queue = [] // clear queue before processing
+  private takeFirstItems(n?: number) {
+    const result: typeof this.queue = []
+    let count = 0
 
+    while (this.queue.length > 0 && (n === undefined || count < n)) {
+      const item = this.queue.shift()!
+      if (!item.cancelled) {
+        result.push(item)
+        count++
+      }
+    }
+
+    return result
+  }
+
+  async process(n?: number) {
+    const items = this.takeFirstItems(n)
     if (items.length === 0) return
 
     const dataArray = items.map((item) => item.data)
@@ -40,18 +53,15 @@ export default class BatchProcessor<T, U> {
     try {
       const results = await this.processFn(dataArray)
 
-      results.forEach((result, index) => {
-        const item = items[index]
-        if (!item.cancelled) {
-          item.resolve(result)
+      items.forEach((item, idx) => {
+        if (idx < results.length) {
+          item.resolve(results[idx])
+        } else {
+          item.reject(new Error("Missing result"))
         }
       })
     } catch (err) {
-      items.forEach((item) => {
-        if (!item.cancelled) {
-          item.reject(err)
-        }
-      })
+      items.forEach((item) => item.reject(err))
     }
   }
 }
