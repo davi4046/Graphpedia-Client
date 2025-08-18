@@ -72,8 +72,10 @@ export default function Graph(props: GraphProps) {
       ])
     }
 
-    const arrowHeadGraphics = renderArrowHead()
-    arrowHeadTexture = app.renderer.generateTexture(arrowHeadGraphics)
+    if (!arrowHeadTexture) {
+      const arrowHeadGraphics = renderArrowHead()
+      arrowHeadTexture = app.renderer.generateTexture(arrowHeadGraphics)
+    }
 
     const graphStyle: GraphStyle = {
       nodeSize: NODE_SIZE,
