@@ -80,22 +80,15 @@ export default function Graph(props: GraphProps) {
       arrowHeadTexture: arrowHeadTexture,
     }
 
-    const drawNode = (entityId: number, x: number, y: number) => {
-      const dataPromise = entityFetcher.enqueue(entityId)
-      const nodeVisual = new NodeVisual(x, y, dataPromise, config)
-      nodeVisual.addToContainer(nodeContainer)
-      return nodeVisual
-    }
-
-    const drawEdge = (x1: number, y1: number, x2: number, y2: number) => {
-      const edgeVisual = new EdgeVisual(x1, y1, x2, y2, config)
-      edgeVisual.addToContainer(edgeContainer)
-      return edgeVisual
-    }
+    const drawNode = NodeVisual.createFactory(nodeContainer, config)
+    const drawEdge = EdgeVisual.createFactory(edgeContainer, config)
 
     const graphViewCtrl = new GraphViewController(
       queryTiles,
-      drawNode,
+      (entityId: number, x: number, y: number) => {
+        const dataPromise = entityFetcher.enqueue(entityId)
+        return drawNode(x, y, dataPromise)
+      },
       drawEdge
     )
 

@@ -42,6 +42,7 @@ export default class EdgeVisual implements DrawHandle {
     y1: number,
     x2: number,
     y2: number,
+    container: PIXI.Container,
     config: GraphVisuals
   ) {
     x1 = x1 + config.nodeSize / 2
@@ -49,13 +50,16 @@ export default class EdgeVisual implements DrawHandle {
     x2 = x2 + config.nodeSize / 2
     y2 = y2 + config.nodeSize / 2
     this.graphics = renderEdge(x1, y1, x2, y2, config.arrowHeadTexture)
-  }
-
-  addToContainer(container: PIXI.Container) {
     container.addChild(this.graphics)
   }
 
   remove() {
     this.graphics.removeFromParent()
+  }
+
+  static createFactory(container: PIXI.Container, config: GraphVisuals) {
+    return (x1: number, y1: number, x2: number, y2: number) => {
+      return new EdgeVisual(x1, y1, x2, y2, container, config)
+    }
   }
 }

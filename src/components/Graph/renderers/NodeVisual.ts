@@ -24,18 +24,22 @@ export default class NodeVisual implements DrawHandle {
     x: number,
     y: number,
     data: CancellablePromise<EntityData>,
+    container: PIXI.Container,
     config: GraphVisuals
   ) {
     this.sprite = renderNode(x, y, config.nodeSize)
     this.data = data
-  }
-
-  addToContainer(container: PIXI.Container) {
     container.addChild(this.sprite)
   }
 
   remove() {
     this.sprite.removeFromParent()
     this.data.cancel() // Cancel the data fetch if still pending
+  }
+
+  static createFactory(container: PIXI.Container, config: GraphVisuals) {
+    return (x: number, y: number, data: CancellablePromise<EntityData>) => {
+      return new NodeVisual(x, y, data, container, config)
+    }
   }
 }
