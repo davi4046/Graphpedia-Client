@@ -9,29 +9,19 @@ function renderLine(x1: number, y1: number, x2: number, y2: number) {
   return graphics
 }
 
-function renderEdge(
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
+function renderArrowHead(
+  x: number,
+  y: number,
+  angle: number,
   arrowHeadTexture: PIXI.Texture
 ) {
-  const dx = x2 - x1
-  const dy = y2 - y1
-  const angle = Math.atan2(dy, dx)
-
-  const edgeGraphics = renderLine(x1, y1, x2, y2)
-
   const arrowHeadSprite = new PIXI.Sprite(arrowHeadTexture)
   arrowHeadSprite.scale.set(0.2)
   arrowHeadSprite.anchor.set(1, 0.5)
-  arrowHeadSprite.x = x2
-  arrowHeadSprite.y = y2
+  arrowHeadSprite.x = x
+  arrowHeadSprite.y = y
   arrowHeadSprite.rotation = angle
-
-  edgeGraphics.addChild(arrowHeadSprite)
-
-  return edgeGraphics
+  return arrowHeadSprite
 }
 
 export default class EdgeVisual implements DrawHandle {
@@ -50,9 +40,17 @@ export default class EdgeVisual implements DrawHandle {
     x2 = x2 + style.nodeSize / 2
     y2 = y2 + style.nodeSize / 2
 
+    const dx = x2 - x1
+    const dy = y2 - y1
+    const angle = Math.atan2(dy, dx)
+
     const visual = new PIXI.Container()
-    const graphics = renderEdge(x1, y1, x2, y2, style.arrowHeadTexture)
-    visual.addChild(graphics)
+
+    const lineGraphics = renderLine(x1, y1, x2, y2)
+    const arrowHead = renderArrowHead(x2, y2, angle, style.arrowHeadTexture)
+
+    visual.addChild(lineGraphics)
+    visual.addChild(arrowHead)
     container.addChild(visual)
 
     this.visual = visual
