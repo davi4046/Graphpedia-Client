@@ -35,7 +35,7 @@ function renderEdge(
 }
 
 export default class EdgeVisual implements DrawHandle {
-  private graphics: PIXI.Graphics
+  private visual: PIXI.Container
 
   constructor(
     x1: number,
@@ -49,12 +49,17 @@ export default class EdgeVisual implements DrawHandle {
     y1 = y1 + style.nodeSize / 2
     x2 = x2 + style.nodeSize / 2
     y2 = y2 + style.nodeSize / 2
-    this.graphics = renderEdge(x1, y1, x2, y2, style.arrowHeadTexture)
-    container.addChild(this.graphics)
+
+    const visual = new PIXI.Container()
+    const graphics = renderEdge(x1, y1, x2, y2, style.arrowHeadTexture)
+    visual.addChild(graphics)
+    container.addChild(visual)
+
+    this.visual = visual
   }
 
   remove() {
-    this.graphics.removeFromParent()
+    this.visual.removeFromParent()
   }
 
   static createFactory(container: PIXI.Container, style: GraphStyle) {
