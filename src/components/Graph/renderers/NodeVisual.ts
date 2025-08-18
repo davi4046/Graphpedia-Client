@@ -36,6 +36,22 @@ export default class NodeVisual implements DrawHandle {
 
     this.visual = visual
     this.data = data
+
+    data.then((entityData) => {
+      const text = new PIXI.BitmapText({
+        text: entityData.name,
+        style: {
+          fontFamily: "Arial",
+          fontSize: 32,
+        },
+      })
+
+      text.x = x
+      text.y = y
+      text.scale.set(0.1)
+
+      visual.addChild(text)
+    })
   }
 
   remove() {
