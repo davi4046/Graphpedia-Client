@@ -10,7 +10,7 @@ import NodeVisual from "./renderers/NodeVisual"
 import renderArrowHead from "./renderers/renderArrowHead"
 import BatchProcessor from "./services/BatchProcessor"
 import TileIndexService from "./services/TileIndexService"
-import { GraphVisuals, Tile, TileEntry } from "./types"
+import { GraphStyle, Tile, TileEntry } from "./types"
 
 type GraphProps = {
   graphId: string
@@ -75,13 +75,13 @@ export default function Graph(props: GraphProps) {
     const arrowHeadGraphics = renderArrowHead()
     arrowHeadTexture = app.renderer.generateTexture(arrowHeadGraphics)
 
-    const config: GraphVisuals = {
+    const graphStyle: GraphStyle = {
       nodeSize: NODE_SIZE,
       arrowHeadTexture: arrowHeadTexture,
     }
 
-    const drawNode = NodeVisual.createFactory(nodeContainer, config)
-    const drawEdge = EdgeVisual.createFactory(edgeContainer, config)
+    const drawNode = NodeVisual.createFactory(nodeContainer, graphStyle)
+    const drawEdge = EdgeVisual.createFactory(edgeContainer, graphStyle)
 
     const graphViewCtrl = new GraphViewController(
       queryTiles,

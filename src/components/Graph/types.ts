@@ -35,7 +35,7 @@ export interface EntityData {
   imageUrl?: string
 }
 
-export interface GraphVisuals {
+export interface GraphStyle {
   nodeSize: number
   arrowHeadTexture: PIXI.Texture
 }

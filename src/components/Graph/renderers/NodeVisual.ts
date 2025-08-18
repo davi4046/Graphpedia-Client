@@ -3,7 +3,7 @@ import {
   CancellablePromise,
   DrawHandle,
   EntityData,
-  GraphVisuals,
+  GraphStyle,
 } from "../types"
 
 function renderNode(x: number, y: number, size: number) {
@@ -25,9 +25,9 @@ export default class NodeVisual implements DrawHandle {
     y: number,
     data: CancellablePromise<EntityData>,
     container: PIXI.Container,
-    config: GraphVisuals
+    style: GraphStyle
   ) {
-    this.sprite = renderNode(x, y, config.nodeSize)
+    this.sprite = renderNode(x, y, style.nodeSize)
     this.data = data
     container.addChild(this.sprite)
   }
@@ -37,9 +37,9 @@ export default class NodeVisual implements DrawHandle {
     this.data.cancel() // Cancel the data fetch if still pending
   }
 
-  static createFactory(container: PIXI.Container, config: GraphVisuals) {
+  static createFactory(container: PIXI.Container, style: GraphStyle) {
     return (x: number, y: number, data: CancellablePromise<EntityData>) => {
-      return new NodeVisual(x, y, data, container, config)
+      return new NodeVisual(x, y, data, container, style)
     }
   }
 }

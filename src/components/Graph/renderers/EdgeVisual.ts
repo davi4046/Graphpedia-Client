@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js"
-import { DrawHandle, GraphVisuals } from "../types"
+import { DrawHandle, GraphStyle } from "../types"
 
 function renderLine(x1: number, y1: number, x2: number, y2: number) {
   const graphics = new PIXI.Graphics()
@@ -43,13 +43,13 @@ export default class EdgeVisual implements DrawHandle {
     x2: number,
     y2: number,
     container: PIXI.Container,
-    config: GraphVisuals
+    style: GraphStyle
   ) {
-    x1 = x1 + config.nodeSize / 2
-    y1 = y1 + config.nodeSize / 2
-    x2 = x2 + config.nodeSize / 2
-    y2 = y2 + config.nodeSize / 2
-    this.graphics = renderEdge(x1, y1, x2, y2, config.arrowHeadTexture)
+    x1 = x1 + style.nodeSize / 2
+    y1 = y1 + style.nodeSize / 2
+    x2 = x2 + style.nodeSize / 2
+    y2 = y2 + style.nodeSize / 2
+    this.graphics = renderEdge(x1, y1, x2, y2, style.arrowHeadTexture)
     container.addChild(this.graphics)
   }
 
@@ -57,9 +57,9 @@ export default class EdgeVisual implements DrawHandle {
     this.graphics.removeFromParent()
   }
 
-  static createFactory(container: PIXI.Container, config: GraphVisuals) {
+  static createFactory(container: PIXI.Container, style: GraphStyle) {
     return (x1: number, y1: number, x2: number, y2: number) => {
-      return new EdgeVisual(x1, y1, x2, y2, container, config)
+      return new EdgeVisual(x1, y1, x2, y2, container, style)
     }
   }
 }
