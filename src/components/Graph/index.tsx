@@ -65,6 +65,19 @@ export default function Graph(props: GraphProps) {
     const tileIndex = await fetchTileIndex(DATA_URL, props.graphId)
     const tileIndexSvc = new TileIndexService(tileIndex)
 
+    const queryTiles = (
+      minX: number,
+      minY: number,
+      maxX: number,
+      maxY: number
+    ): [TileEntry, Promise<Tile>][] => {
+      const visibleTiles = tileIndexSvc.query(minX, minY, maxX, maxY)
+      return visibleTiles.map((tileEntry) => [
+        tileEntry,
+        fetchTile(DATA_URL, props.graphId, tileEntry.tileId),
+      ])
+    }
+
     const entitiesCache = new Map<number, FoundEntity>()
 
     const fetchAndCacheEntities = async (ids: number[]) => {
@@ -79,19 +92,6 @@ export default function Graph(props: GraphProps) {
       entitiesCache.has(id)
         ? { promise: Promise.resolve(entitiesCache.get(id)!), cancel: () => {} }
         : entityFetcher.enqueue(id)
-
-    const queryTiles = (
-      minX: number,
-      minY: number,
-      maxX: number,
-      maxY: number
-    ): [TileEntry, Promise<Tile>][] => {
-      const visibleTiles = tileIndexSvc.query(minX, minY, maxX, maxY)
-      return visibleTiles.map((tileEntry) => [
-        tileEntry,
-        fetchTile(DATA_URL, props.graphId, tileEntry.tileId),
-      ])
-    }
 
     if (!arrowHeadTexture) {
       const arrowHeadGraphics = renderArrowHead()
