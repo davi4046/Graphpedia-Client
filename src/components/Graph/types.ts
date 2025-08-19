@@ -48,10 +48,11 @@ export interface GraphStyle {
   arrowHeadTexture: PIXI.Texture
 }
 
-export interface CancellablePromise<T> extends Promise<T> {
-  cancel: () => void
-}
-
 export interface DrawHandle {
   remove(): void
+}
+
+export interface CancellablePromise<T> {
+  promise: Promise<T>
+  cancel: () => void
 }

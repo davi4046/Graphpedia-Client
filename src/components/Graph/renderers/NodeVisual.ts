@@ -55,14 +55,14 @@ export default class NodeVisual implements DrawHandle {
     this.visual = visual
     this.data = data
 
-    data.then((entityData) => {
-      if (entityData._branch === "MissingEntity") {
-        console.warn(`Entity with ID ${entityData.id} not found`)
+    data.promise.then((entity) => {
+      if (entity._branch === "MissingEntity") {
+        console.warn(`Entity with ID ${entity.id} not found`)
         return
       }
 
       const text = new PIXI.Text({
-        text: entityData.name,
+        text: entity.name,
         style: {
           fontSize: 16,
           fill: 0x000000,

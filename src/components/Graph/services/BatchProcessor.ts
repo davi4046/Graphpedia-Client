@@ -15,18 +15,17 @@ export default class BatchProcessor<T, U> {
 
     const promise = new Promise<U>((resolve, reject) => {
       this.queue.push({ data, resolve, reject, cancelled })
-    }) as CancellablePromise<U>
+    })
 
-    promise.cancel = () => {
+    const cancel = () => {
       cancelled = true
-      // mark the queued item as cancelled so process() will skip it
       const item = this.queue.find(
         (q) => q.resolve === (promise as any).resolve
       )
       if (item) item.cancelled = true
     }
 
-    return promise
+    return { promise, cancel }
   }
 
   private takeFirstItems(n?: number) {
