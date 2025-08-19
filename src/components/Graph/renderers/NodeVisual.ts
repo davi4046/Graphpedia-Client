@@ -16,6 +16,29 @@ function renderNode(x: number, y: number, size: number) {
   return sprite
 }
 
+function fitTextToBounds(
+  text: PIXI.Text,
+  x: number,
+  y: number,
+  maxSize: number
+): PIXI.Text {
+  // Center anchor
+  text.anchor.set(0.5)
+  text.x = x + maxSize / 2
+  text.y = y + maxSize / 2
+
+  // Fit within bounds
+  const maxWidth = maxSize * 0.8
+  const maxHeight = maxSize * 0.8
+
+  const scaleX = maxWidth / text.width
+  const scaleY = maxHeight / text.height
+  const scale = Math.min(scaleX, scaleY, 1)
+
+  text.scale.set(scale)
+  return text
+}
+
 export default class NodeVisual implements DrawHandle {
   private visual: PIXI.Container
   private data: CancellablePromise<EntityData>
@@ -38,18 +61,18 @@ export default class NodeVisual implements DrawHandle {
     this.data = data
 
     data.then((entityData) => {
-      const text = new PIXI.BitmapText({
+      const text = new PIXI.Text({
         text: entityData.name,
         style: {
-          fontFamily: "Arial",
-          fontSize: 32,
+          fontSize: 16,
+          fill: 0x000000,
+          align: "center",
+          wordWrap: true,
+          wordWrapWidth: style.nodeSize * 0.8,
         },
       })
 
-      text.x = x
-      text.y = y
-      text.scale.set(0.1)
-
+      fitTextToBounds(text, x, y, style.nodeSize)
       visual.addChild(text)
     })
   }
