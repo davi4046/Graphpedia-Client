@@ -75,6 +75,11 @@ export default function Graph(props: GraphProps) {
 
     const entityFetcher = new BatchProcessor(fetchAndCacheEntities)
 
+    const getEntity = (id: number) =>
+      entitiesCache.has(id)
+        ? { promise: Promise.resolve(entitiesCache.get(id)!), cancel: () => {} }
+        : entityFetcher.enqueue(id)
+
     const queryTiles = (
       minX: number,
       minY: number,
@@ -103,10 +108,7 @@ export default function Graph(props: GraphProps) {
 
     const graphViewCtrl = new GraphViewController(
       queryTiles,
-      (entityId: number, x: number, y: number) => {
-        const entity = entityFetcher.enqueue(entityId)
-        return drawNode(x, y, entity)
-      },
+      (id, x, y) => drawNode(x, y, getEntity(id)),
       drawEdge
     )
 
