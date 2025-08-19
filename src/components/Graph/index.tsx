@@ -1,3 +1,4 @@
+import { throttle } from "@solid-primitives/scheduled"
 import * as PIXIViewport from "pixi-viewport"
 import * as PIXI from "pixi.js"
 import { onCleanup, onMount } from "solid-js"
@@ -94,10 +95,12 @@ export default function Graph(props: GraphProps) {
       drawEdge
     )
 
+    const throttledFetch = throttle(() => entityFetcher.process(), 100)
+
     const update = () => {
       const { x, y, width, height } = viewport.getVisibleBounds()
       graphViewCtrl.update(x - NODE_SIZE, y - NODE_SIZE, x + width, y + height)
-      entityFetcher.process()
+      throttledFetch()
     }
 
     viewport.on("moved", update)
