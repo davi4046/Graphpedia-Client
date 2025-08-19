@@ -11,7 +11,13 @@ import NodeVisual from "./renderers/NodeVisual"
 import renderArrowHead from "./renderers/renderArrowHead"
 import BatchProcessor from "./services/BatchProcessor"
 import TileIndexService from "./services/TileIndexService"
-import { GraphStyle, Tile, TileEntry } from "./types"
+import {
+  FoundEntity,
+  GraphStyle,
+  MissingEntity,
+  Tile,
+  TileEntry,
+} from "./types"
 
 type GraphProps = {
   graphId: string
@@ -58,7 +64,16 @@ export default function Graph(props: GraphProps) {
 
     const tileIndex = await fetchTileIndex(DATA_URL, props.graphId)
     const tileIndexSvc = new TileIndexService(tileIndex)
-    const entityFetcher = new BatchProcessor(fetchEntities)
+
+    const entitiesCache = new Map<number, FoundEntity>()
+
+    const fetchAndCacheEntities = async (ids: number[]) => {
+      const entities = await fetchEntities(ids)
+      entities.forEach((entity) => entitiesCache.set(entity.id, entity))
+      return ids.map((id) => entitiesCache.get(id) || ({ id } as MissingEntity))
+    }
+
+    const entityFetcher = new BatchProcessor(fetchAndCacheEntities)
 
     const queryTiles = (
       minX: number,
@@ -89,8 +104,8 @@ export default function Graph(props: GraphProps) {
     const graphViewCtrl = new GraphViewController(
       queryTiles,
       (entityId: number, x: number, y: number) => {
-        const dataPromise = entityFetcher.enqueue(entityId)
-        return drawNode(x, y, dataPromise)
+        const entity = entityFetcher.enqueue(entityId)
+        return drawNode(x, y, entity)
       },
       drawEdge
     )

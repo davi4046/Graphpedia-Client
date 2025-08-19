@@ -28,12 +28,20 @@ export interface Tile {
   edges: Edge[]
 }
 
-export interface EntityData {
+export interface FoundEntity {
+  readonly _branch: "FoundEntity"
   id: number
   name: string
   description: string
   imageUrl?: string
 }
+
+export interface MissingEntity {
+  readonly _branch: "MissingEntity"
+  id: number
+}
+
+export type Entity = FoundEntity | MissingEntity
 
 export interface GraphStyle {
   nodeSize: number
