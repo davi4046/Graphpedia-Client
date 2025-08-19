@@ -24,7 +24,6 @@ export default function Graph(props: GraphProps) {
   let app: PIXI.Application
   let viewport: PIXIViewport.Viewport
   let arrowHeadTexture: PIXI.Texture
-  let fetchInterval: NodeJS.Timeout | null = null
 
   onMount(async () => {
     app = new PIXI.Application()
@@ -95,39 +94,19 @@ export default function Graph(props: GraphProps) {
       drawEdge
     )
 
-    let lastX = 0
-    let lastY = 0
-    let speed = 0
-
     const update = () => {
       const { x, y, width, height } = viewport.getVisibleBounds()
       graphViewCtrl.update(x - NODE_SIZE, y - NODE_SIZE, x + width, y + height)
-
-      const deltaX = x - lastX
-      const deltaY = y - lastY
-      speed = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-
-      lastX = x
-      lastY = y
+      entityFetcher.process()
     }
 
     viewport.on("moved", update)
-
-    fetchInterval = setInterval(() => {
-      console.log("Speed:", speed)
-      if (speed < 10) {
-        entityFetcher.process()
-        console.log("Fetching entities...")
-      }
-    }, 1000)
+    viewport.on("zoomed", update)
 
     update()
   })
 
   onCleanup(() => {
-    if (fetchInterval) {
-      clearInterval(fetchInterval)
-    }
     app?.destroy(true, { children: true })
   })
 
