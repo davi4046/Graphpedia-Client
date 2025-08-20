@@ -91,13 +91,8 @@ export default class GraphViewController {
     this.minY = minY
     this.maxX = maxX
     this.maxY = maxY
-    this.updateLOD()
     this.loadTiles()
     this.render()
-  }
-
-  private updateLOD() {
-    // TODO: Implement Level of Detail (LOD) logic here
   }
 
   private loadTiles() {

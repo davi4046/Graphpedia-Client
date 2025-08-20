@@ -89,10 +89,6 @@ export default class NodeVisual implements DrawHandle {
     this.data.cancel() // Cancel the data fetch if still pending
   }
 
-  setLOD(level: number) {
-    // TODO: Implement Level of Detail (LOD) logic here
-  }
-
   static createFactory(container: PIXI.Container, style: GraphStyle) {
     return (x: number, y: number, data: CancellablePromise<EntityResult>) => {
       return new NodeVisual(x, y, data, container, style)
