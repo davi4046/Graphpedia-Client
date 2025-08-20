@@ -2,7 +2,8 @@ import { throttle } from "@solid-primitives/scheduled"
 import * as PIXIViewport from "pixi-viewport"
 import * as PIXI from "pixi.js"
 import { onCleanup, onMount } from "solid-js"
-import GraphViewController from "./controllers/GraphViewController"
+import GraphDataManager from "./controllers/GraphDataManager"
+import GraphRenderer from "./controllers/GraphRenderer"
 import fetchEntities from "./fetchers/fetchEntities"
 import fetchTile from "./fetchers/fetchTile"
 import fetchTileIndex from "./fetchers/fetchTileIndex"
@@ -11,7 +12,14 @@ import NodeVisual from "./renderers/NodeVisual"
 import renderArrowHead from "./renderers/renderArrowHead"
 import BatchProcessor from "./services/BatchProcessor"
 import TileIndexService from "./services/TileIndexService"
-import { Entity, GraphStyle, Tile, TileEntry } from "./types"
+import {
+  CancellablePromise,
+  Entity,
+  EntityResult,
+  GraphStyle,
+  Tile,
+  TileEntry,
+} from "./types"
 
 type GraphProps = {
   graphId: string
@@ -19,6 +27,35 @@ type GraphProps = {
 
 const DATA_URL = import.meta.env.PUBLIC_DATA_URL
 const NODE_SIZE = 10
+
+class EntityProvider {
+  private entityCache = new Map<number, Entity>()
+  private batchProcessor: BatchProcessor<number, EntityResult>
+
+  constructor() {
+    this.batchProcessor = new BatchProcessor(async (ids: number[]) => {
+      const entities = await fetchEntities(ids)
+      entities.forEach((entity) => this.entityCache.set(entity.id, entity))
+      return ids.map(
+        (id) => this.entityCache.get(id) || { id, error: "Entity not found" }
+      )
+    })
+  }
+
+  get(id: number): CancellablePromise<EntityResult> {
+    if (this.entityCache.has(id)) {
+      return {
+        promise: Promise.resolve(this.entityCache.get(id)!),
+        cancel: () => {},
+      }
+    }
+    return this.batchProcessor.enqueue(id)
+  }
+
+  process() {
+    this.batchProcessor.process()
+  }
+}
 
 export default function Graph(props: GraphProps) {
   let containerRef: HTMLDivElement | undefined
@@ -72,21 +109,6 @@ export default function Graph(props: GraphProps) {
       ])
     }
 
-    const entityCache = new Map<number, Entity>()
-
-    const entityFetcher = new BatchProcessor(async (ids: number[]) => {
-      const entities = await fetchEntities(ids)
-      entities.forEach((entity) => entityCache.set(entity.id, entity))
-      return ids.map(
-        (id) => entityCache.get(id) || { id, error: "Entity not found" }
-      )
-    })
-
-    const getEntity = (id: number) =>
-      entityCache.has(id)
-        ? { promise: Promise.resolve(entityCache.get(id)!), cancel: () => {} }
-        : entityFetcher.enqueue(id)
-
     if (!arrowHeadTexture) {
       const arrowHeadGraphics = renderArrowHead()
       arrowHeadTexture = app.renderer.generateTexture(arrowHeadGraphics)
@@ -100,18 +122,28 @@ export default function Graph(props: GraphProps) {
     const drawNode = NodeVisual.createFactory(nodeContainer, graphStyle)
     const drawEdge = EdgeVisual.createFactory(edgeContainer, graphStyle)
 
-    const graphViewCtrl = new GraphViewController(
-      queryTiles,
-      (id, x, y) => drawNode(x, y, getEntity(id)),
+    const dataManager = new GraphDataManager(queryTiles)
+    const entityProvider = new EntityProvider()
+    const renderer = new GraphRenderer(
+      dataManager,
+      (id, x, y) => drawNode(x, y, entityProvider.get(id)),
       drawEdge
     )
 
-    const throttledFetch = throttle(() => entityFetcher.process(), 100)
+    const fetchEntititesThrot = throttle(() => entityProvider.process(), 100)
+
+    let minX: number, minY: number, maxX: number, maxY: number
 
     const update = () => {
       const { x, y, width, height } = viewport.getVisibleBounds()
-      graphViewCtrl.update(x - NODE_SIZE, y - NODE_SIZE, x + width, y + height)
-      throttledFetch()
+      minX = x - NODE_SIZE
+      minY = y - NODE_SIZE
+      maxX = x + width
+      maxY = y + height
+
+      dataManager.load(minX, minY, maxX, maxY)
+      renderer.render(minX, minY, maxX, maxY)
+      fetchEntititesThrot()
     }
 
     viewport.on("moved", update)
