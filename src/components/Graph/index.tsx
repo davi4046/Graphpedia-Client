@@ -72,19 +72,19 @@ export default function Graph(props: GraphProps) {
       ])
     }
 
-    const entitiesCache = new Map<number, Entity>()
+    const entityCache = new Map<number, Entity>()
 
     const entityFetcher = new BatchProcessor(async (ids: number[]) => {
       const entities = await fetchEntities(ids)
-      entities.forEach((entity) => entitiesCache.set(entity.id, entity))
+      entities.forEach((entity) => entityCache.set(entity.id, entity))
       return ids.map(
-        (id) => entitiesCache.get(id) || { id, error: "Entity not found" }
+        (id) => entityCache.get(id) || { id, error: "Entity not found" }
       )
     })
 
     const getEntity = (id: number) =>
-      entitiesCache.has(id)
-        ? { promise: Promise.resolve(entitiesCache.get(id)!), cancel: () => {} }
+      entityCache.has(id)
+        ? { promise: Promise.resolve(entityCache.get(id)!), cancel: () => {} }
         : entityFetcher.enqueue(id)
 
     if (!arrowHeadTexture) {
