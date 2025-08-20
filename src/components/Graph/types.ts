@@ -44,6 +44,7 @@ export interface GraphStyle {
 
 export interface DrawHandle {
   remove(): void
+  setLOD(level: number): void
 }
 
 export interface CancellablePromise<T> {
