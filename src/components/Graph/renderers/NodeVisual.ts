@@ -1,5 +1,10 @@
 import * as PIXI from "pixi.js"
-import { CancellablePromise, DrawHandle, Entity, GraphStyle } from "../types"
+import {
+  CancellablePromise,
+  DrawHandle,
+  EntityResult,
+  GraphStyle,
+} from "../types"
 
 function renderNode(x: number, y: number, size: number) {
   const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
@@ -36,12 +41,12 @@ function fitTextToBounds(
 
 export default class NodeVisual implements DrawHandle {
   private visual: PIXI.Container
-  private data: CancellablePromise<Entity>
+  private data: CancellablePromise<EntityResult>
 
   constructor(
     x: number,
     y: number,
-    data: CancellablePromise<Entity>,
+    data: CancellablePromise<EntityResult>,
     container: PIXI.Container,
     style: GraphStyle
   ) {
@@ -56,8 +61,10 @@ export default class NodeVisual implements DrawHandle {
     this.data = data
 
     data.promise.then((entity) => {
-      if (entity._branch === "MissingEntity") {
-        console.warn(`Entity with ID ${entity.id} not found`)
+      if ("error" in entity) {
+        console.warn(
+          `Failed to load entity with ID ${entity.id}: ${entity.error}`
+        )
         return
       }
 
@@ -83,7 +90,7 @@ export default class NodeVisual implements DrawHandle {
   }
 
   static createFactory(container: PIXI.Container, style: GraphStyle) {
-    return (x: number, y: number, data: CancellablePromise<Entity>) => {
+    return (x: number, y: number, data: CancellablePromise<EntityResult>) => {
       return new NodeVisual(x, y, data, container, style)
     }
   }

@@ -11,13 +11,7 @@ import NodeVisual from "./renderers/NodeVisual"
 import renderArrowHead from "./renderers/renderArrowHead"
 import BatchProcessor from "./services/BatchProcessor"
 import TileIndexService from "./services/TileIndexService"
-import {
-  FoundEntity,
-  GraphStyle,
-  MissingEntity,
-  Tile,
-  TileEntry,
-} from "./types"
+import { Entity, GraphStyle, Tile, TileEntry } from "./types"
 
 type GraphProps = {
   graphId: string
@@ -78,15 +72,15 @@ export default function Graph(props: GraphProps) {
       ])
     }
 
-    const entitiesCache = new Map<number, FoundEntity>()
+    const entitiesCache = new Map<number, Entity>()
 
-    const fetchAndCacheEntities = async (ids: number[]) => {
+    const entityFetcher = new BatchProcessor(async (ids: number[]) => {
       const entities = await fetchEntities(ids)
       entities.forEach((entity) => entitiesCache.set(entity.id, entity))
-      return ids.map((id) => entitiesCache.get(id) || ({ id } as MissingEntity))
-    }
-
-    const entityFetcher = new BatchProcessor(fetchAndCacheEntities)
+      return ids.map(
+        (id) => entitiesCache.get(id) || { id, error: "Entity not found" }
+      )
+    })
 
     const getEntity = (id: number) =>
       entitiesCache.has(id)

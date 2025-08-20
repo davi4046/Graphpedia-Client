@@ -1,8 +1,6 @@
-import { FoundEntity } from "../types"
+import { Entity } from "../types"
 
-export default async function fetchEntities(
-  ids: number[]
-): Promise<FoundEntity[]> {
+export default async function fetchEntities(ids: number[]): Promise<Entity[]> {
   const sparqlQuery = `
     SELECT ?item ?itemLabel ?itemDescription ?image WHERE {
       VALUES ?item { ${ids.map((id) => `wd:Q${id}`).join(" ")} }
@@ -22,7 +20,7 @@ export default async function fetchEntities(
 
   const json = await response.json()
 
-  const results: FoundEntity[] = json.results.bindings.map((binding: any) => ({
+  const results: Entity[] = json.results.bindings.map((binding: any) => ({
     id: parseInt(
       binding.item.value.replace("http://www.wikidata.org/entity/Q", ""),
       10
