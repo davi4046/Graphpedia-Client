@@ -15,7 +15,7 @@ const tileIndexParser = new Parser().array("entries", {
   readUntil: "eof",
 })
 
-export default async function fetchTileIndex(
+async function fetchTileIndex(
   dataUrl: string,
   graphId: string
 ): Promise<TileIndex> {
@@ -24,4 +24,12 @@ export default async function fetchTileIndex(
   const compressed = new Uint8Array(await response.arrayBuffer())
   const decompressed = gunzipSync(compressed)
   return tileIndexParser.parse(decompressed)
+}
+
+export default class TileIndexProvider {
+  constructor(private readonly dataUrl: string) {}
+
+  async getTileIndex(graphId: string): Promise<TileIndex> {
+    return fetchTileIndex(this.dataUrl, graphId)
+  }
 }

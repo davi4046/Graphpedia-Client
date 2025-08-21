@@ -26,7 +26,7 @@ const tileParser = new Parser()
     length: "numEdges",
   })
 
-export default async function fetchTile(
+async function fetchTile(
   dataUrl: string,
   graphId: string,
   tileId: number
@@ -36,4 +36,12 @@ export default async function fetchTile(
   const compressed = new Uint8Array(await response.arrayBuffer())
   const decompressed = gunzipSync(compressed)
   return tileParser.parse(decompressed)
+}
+
+export default class TileProvider {
+  constructor(private readonly dataUrl: string) {}
+
+  async getTile(graphId: string, tileId: number): Promise<Tile> {
+    return fetchTile(this.dataUrl, graphId, tileId)
+  }
 }

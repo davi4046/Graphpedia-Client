@@ -1,17 +1,5 @@
 import * as PIXI from "pixi.js"
 
-export interface TileEntry {
-  tileId: number
-  minX: number
-  minY: number
-  maxX: number
-  maxY: number
-}
-
-export interface TileIndex {
-  entries: TileEntry[]
-}
-
 export interface Node {
   entityId: number
   x: number
@@ -28,6 +16,18 @@ export interface Tile {
   edges: Edge[]
 }
 
+export interface TileEntry {
+  tileId: number
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
+}
+
+export interface TileIndex {
+  entries: TileEntry[]
+}
+
 export interface Entity {
   id: number
   name: string
@@ -35,18 +35,16 @@ export interface Entity {
   imageUrl?: string
 }
 
-export type EntityResult = Entity | { id: number; error: string }
-
 export interface GraphStyle {
   nodeSize: number
-  arrowHeadTexture: PIXI.Texture
+  edgeHeadTexture: PIXI.Texture
 }
 
-export interface DrawHandle {
+export interface Visual {
   remove(): void
 }
 
-export interface CancellablePromise<T> {
+export interface PendingRequest<T> {
   promise: Promise<T>
   cancel: () => void
 }
