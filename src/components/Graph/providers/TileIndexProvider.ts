@@ -4,7 +4,6 @@ import { TileIndex } from "../types"
 
 const tileEntryParser = new Parser()
   .endianess("little")
-  .uint32("tileId")
   .uint32("minX")
   .uint32("minY")
   .uint32("maxX")
@@ -13,6 +12,8 @@ const tileEntryParser = new Parser()
 const tileIndexParser = new Parser().array("entries", {
   type: tileEntryParser,
   readUntil: "eof",
+  formatter: (entries: any[]) =>
+    entries.map((entry, index) => ({ ...entry, tileId: index })),
 })
 
 async function fetchTileIndex(
