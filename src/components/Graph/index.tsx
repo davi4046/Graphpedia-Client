@@ -79,15 +79,6 @@ export default function Graph(props: { graphId: string }) {
     viewport.addChild(edgeContainer)
     viewport.addChild(nodeContainer)
 
-    const triangle = new PIXI.Graphics()
-    triangle.moveTo(0, 0)
-    triangle.lineTo(40, 20)
-    triangle.lineTo(0, 40)
-    triangle.closePath()
-    triangle.fill({
-      color: 0xff0000,
-    })
-
     const nodePositionMap = new NodePositionMap()
     const nodeEdgesMap = new NodeEdgesMap()
     const nodeSpatialIndex = new NodeSpatialIndex()
