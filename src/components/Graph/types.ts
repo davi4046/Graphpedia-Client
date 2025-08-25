@@ -16,16 +16,12 @@ export interface Tile {
   edges: Edge[]
 }
 
-export interface TileEntry {
+export interface TileBBox {
   tileId: number
   minX: number
   minY: number
   maxX: number
   maxY: number
-}
-
-export interface TileIndex {
-  entries: TileEntry[]
 }
 
 export interface Entity {

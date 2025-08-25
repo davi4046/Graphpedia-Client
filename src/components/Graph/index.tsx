@@ -96,8 +96,8 @@ export default function Graph(props: { graphId: string }) {
     const tileProvider = new TileProvider(DATA_URL)
     const entityProvider = new EntityProvider()
 
-    const tileIndex = await tileIndexProvider.getTileIndex(props.graphId)
-    const tileSpatialIndex = new TileSpatialIndex(tileIndex)
+    const tileBBoxes = await tileIndexProvider.getTileIndex(props.graphId)
+    const tileSpatialIndex = new TileSpatialIndex(tileBBoxes)
 
     const edgeHeadTexture = createEdgeHeadTexture(app.renderer)
     const graphStyle: GraphStyle = {
