@@ -2,15 +2,15 @@ import { Parser } from "binary-parser/lib/binary_parser.js"
 import { gunzipSync } from "fflate"
 import { TileBBox } from "../types"
 
-const tileEntryParser = new Parser()
+const tileBBoxParser = new Parser()
   .endianess("little")
   .uint32("minX")
   .uint32("minY")
   .uint32("maxX")
   .uint32("maxY")
 
-const tileBBoxesParser = new Parser().array("", {
-  type: tileEntryParser,
+const tileBBoxArrayParser = new Parser().array("", {
+  type: tileBBoxParser,
   readUntil: "eof",
   formatter: (entries: any[]) =>
     entries.map((entry, index) => ({ ...entry, tileId: index })),
@@ -24,7 +24,7 @@ async function fetchTileBBoxes(
   const response = await fetch(url)
   const compressed = new Uint8Array(await response.arrayBuffer())
   const decompressed = gunzipSync(compressed)
-  return tileBBoxesParser.parse(decompressed)
+  return tileBBoxArrayParser.parse(decompressed)
 }
 
 export default class TileBBoxesProvider {
