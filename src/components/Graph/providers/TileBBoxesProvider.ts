@@ -30,7 +30,7 @@ async function fetchTileBBoxes(
 export default class TileBBoxesProvider {
   constructor(private readonly dataUrl: string) {}
 
-  async getTileIndex(graphId: string): Promise<TileBBox[]> {
+  async getTileBBoxes(graphId: string): Promise<TileBBox[]> {
     return fetchTileBBoxes(this.dataUrl, graphId)
   }
 }

@@ -92,11 +92,11 @@ export default function Graph(props: { graphId: string }) {
       }
     }
 
-    const tileIndexProvider = new TileBBoxesProvider(DATA_URL)
+    const tileBBoxesProvider = new TileBBoxesProvider(DATA_URL)
     const tileProvider = new TileProvider(DATA_URL)
     const entityProvider = new EntityProvider()
 
-    const tileBBoxes = await tileIndexProvider.getTileIndex(props.graphId)
+    const tileBBoxes = await tileBBoxesProvider.getTileBBoxes(props.graphId)
     const tileSpatialIndex = new TileSpatialIndex(tileBBoxes)
 
     const edgeHeadTexture = createEdgeHeadTexture(app.renderer)
