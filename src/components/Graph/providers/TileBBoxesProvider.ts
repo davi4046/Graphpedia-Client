@@ -27,7 +27,7 @@ async function fetchTileBBoxes(
   return tileBBoxesParser.parse(decompressed)
 }
 
-export default class TileIndexProvider {
+export default class TileBBoxesProvider {
   constructor(private readonly dataUrl: string) {}
 
   async getTileIndex(graphId: string): Promise<TileBBox[]> {

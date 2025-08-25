@@ -5,7 +5,7 @@ import { onCleanup, onMount } from "solid-js"
 import NodeEdgesMap from "./maps/NodeEdgesMap"
 import NodePositionMap from "./maps/NodePositionMap"
 import EntityProvider from "./providers/EntityProvider"
-import TileIndexProvider from "./providers/TileIndexProvider"
+import TileBBoxesProvider from "./providers/TileBBoxesProvider"
 import TileProvider from "./providers/TileProvider"
 import { EncodedEdge, encodeEdge } from "./shared/edge-codec"
 import NodeSpatialIndex from "./spatial/NodeSpatialIndex"
@@ -92,7 +92,7 @@ export default function Graph(props: { graphId: string }) {
       }
     }
 
-    const tileIndexProvider = new TileIndexProvider(DATA_URL)
+    const tileIndexProvider = new TileBBoxesProvider(DATA_URL)
     const tileProvider = new TileProvider(DATA_URL)
     const entityProvider = new EntityProvider()
 
