@@ -1,3 +1,4 @@
+import wbk from "wikibase-sdk"
 import { Entity, PendingRequest } from "../types"
 
 type RequestHandle = {
@@ -7,34 +8,36 @@ type RequestHandle = {
 }
 
 async function fetchEntities(ids: number[]): Promise<Entity[]> {
-  const sparqlQuery = `
+  const wbkInstance = wbk({
+    instance: "https://www.wikidata.org",
+    sparqlEndpoint: "https://query.wikidata.org/sparql",
+  })
+
+  const sparql = `
     SELECT ?item ?itemLabel ?itemDescription ?image WHERE {
       VALUES ?item { ${ids.map((id) => `wd:Q${id}`).join(" ")} }
       SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-      OPTIONAL { ?item wdt:P18 ?image. } # P18 is the image property
+      OPTIONAL { ?item wdt:P18 ?image. }
     }
   `
+  const url = wbkInstance.sparqlQuery(sparql)
+  const response = await fetch(url)
 
-  const response = await fetch("https://query.wikidata.org/sparql", {
-    method: "POST", // It's better to use POST because the query can be long
-    headers: {
-      Accept: "application/sparql-results+json", // This makes sure you get JSON results
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: `query=${encodeURIComponent(sparqlQuery)}`,
-  })
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "")
+    throw new Error(`SPARQL request failed: ${response.status} ${errorText}`)
+  }
 
   const json = await response.json()
 
-  const results: Entity[] = json.results.bindings.map((binding: any) => ({
-    id: parseInt(
-      binding.item.value.replace("http://www.wikidata.org/entity/Q", ""),
-      10
-    ),
-    name: binding.itemLabel?.value || "",
-    description: binding.itemDescription?.value || "",
-    imageUrl: binding.image?.value,
-  }))
+  const results: Entity[] = json.results.bindings.map(
+    ({ item, itemLabel, itemDescription, image }: any) => ({
+      id: parseInt(item.value.replace("http://www.wikidata.org/entity/Q", "")),
+      name: itemLabel?.value || "",
+      description: itemDescription?.value || "",
+      imageUrl: image?.value || "",
+    })
+  )
 
   return results
 }
