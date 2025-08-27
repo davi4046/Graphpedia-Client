@@ -20,7 +20,7 @@ async function fetchTileBBoxes(
   dataUrl: string,
   graphId: string
 ): Promise<TileBBox[]> {
-  const url = `${dataUrl}/graphs/${graphId}/tile_bboxes.bin.gz`
+  const url = `${dataUrl}/graphs/${graphId}/tiles_bboxes.bin.gz`
   const response = await fetch(url)
   const compressed = new Uint8Array(await response.arrayBuffer())
   const decompressed = gunzipSync(compressed)

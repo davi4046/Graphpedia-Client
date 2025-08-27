@@ -21,7 +21,7 @@ async function fetchTileEntities(
   dataUrl: string,
   graphId: string
 ): Promise<TileEntities[]> {
-  const url = `${dataUrl}/graphs/${graphId}/tile_entities.bin`
+  const url = `${dataUrl}/graphs/${graphId}/tiles_entities.bin`
   const response = await fetch(url)
   const compressed = new Uint8Array(await response.arrayBuffer())
   const decompressed = gunzipSync(compressed)
