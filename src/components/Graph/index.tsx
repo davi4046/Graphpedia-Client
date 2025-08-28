@@ -2,6 +2,7 @@ import { throttle } from "@solid-primitives/scheduled"
 import * as PIXIViewport from "pixi-viewport"
 import * as PIXI from "pixi.js"
 import { onCleanup, onMount } from "solid-js"
+import GraphSearchBar from "../GraphSearchBar"
 import NodeEdgesMap from "./maps/NodeEdgesMap"
 import NodePositionMap from "./maps/NodePositionMap"
 import EntityProvider from "./providers/EntityProvider"
@@ -191,8 +192,9 @@ export default function Graph(props: { graphId: string }) {
   })
 
   return (
-    <div>
+    <div class="relative w-screen h-screen">
       <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      <GraphSearchBar graphId={props.graphId} />
     </div>
   )
 }

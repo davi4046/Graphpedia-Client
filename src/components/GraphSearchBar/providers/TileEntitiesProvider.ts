@@ -10,7 +10,7 @@ const tileEntitiesParser = new Parser()
     length: "count",
   })
 
-const tileEntitiesArrayParser = new Parser().array("tiles", {
+const tileEntitiesArrayParser = new Parser().array("", {
   type: tileEntitiesParser,
   readUntil: "eof",
   formatter: (entries: any[]) =>
@@ -21,7 +21,7 @@ async function fetchTileEntities(
   dataUrl: string,
   graphId: string
 ): Promise<TileEntities[]> {
-  const url = `${dataUrl}/graphs/${graphId}/tiles_entities.bin`
+  const url = `${dataUrl}/graphs/${graphId}/tiles_entities.bin.gz`
   const response = await fetch(url)
   const compressed = new Uint8Array(await response.arrayBuffer())
   const decompressed = gunzipSync(compressed)
