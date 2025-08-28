@@ -1,4 +1,4 @@
-import { createEffect, createResource } from "solid-js"
+import { createEffect, createResource, createSignal } from "solid-js"
 import TileEntitiesProvider from "./providers/TileEntitiesProvider"
 
 const DATA_URL = import.meta.env.PUBLIC_DATA_URL
@@ -27,10 +27,23 @@ export default function GraphSearchBar(props: { graphId: string }) {
     }
   })
 
+  const [searchValue, setSearchValue] = createSignal("")
+
+  const [searchResults] = createResource(searchValue, (query) => {
+    if (!query) return []
+    return ["foo", "bar", "baz"]
+  })
+
+  createEffect(() => {
+    console.log("Search results for", searchValue(), ":", searchResults())
+  })
+
   return (
     <div class="absolute top-4 left-1/2 transform -translate-x-1/2 w-1/3">
       <input
         type="text"
+        value={searchValue()}
+        onInput={(e) => setSearchValue(e.currentTarget.value)}
         placeholder="Search..."
         class="w-full p-2 rounded border border-gray-300 shadow"
       />
