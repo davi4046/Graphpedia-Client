@@ -1,5 +1,6 @@
 import { createEffect, createResource, createSignal } from "solid-js"
 import TileEntitiesProvider from "./providers/TileEntitiesProvider"
+import EntitySearch from "./search/EntitySearch"
 
 const DATA_URL = import.meta.env.PUBLIC_DATA_URL
 
@@ -21,18 +22,27 @@ export default function GraphSearchBar(props: { graphId: string }) {
     return map
   })
 
-  createEffect(() => {
-    if (!entityIdToTileId.loading && entityIdToTileId()) {
-      console.log("EntityID → TileID map loaded:", entityIdToTileId())
-    }
+  const [entityIds] = createResource(entityIdToTileId, (map) => {
+    if (!map) return new Set<string>()
+    return new Set<string>(map.keys().map((id) => `Q${id}`))
   })
+
+  const entitySearch = new EntitySearch()
 
   const [searchValue, setSearchValue] = createSignal("")
 
-  const [searchResults] = createResource(searchValue, (query) => {
-    if (!query) return []
-    return ["foo", "bar", "baz"]
-  })
+  const [searchResults] = createResource(
+    () => {
+      const value = searchValue()
+      const filter = entityIds()
+      return value && filter ? [value, filter] : undefined
+    },
+    async (args) => {
+      if (!args) return []
+      const [value, filter] = args as [string, ReadonlySet<string>]
+      return await entitySearch.search(value, 10, filter)
+    }
+  )
 
   createEffect(() => {
     console.log("Search results for", searchValue(), ":", searchResults())
