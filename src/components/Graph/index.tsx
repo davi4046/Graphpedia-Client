@@ -1,12 +1,13 @@
 import { throttle } from "@solid-primitives/scheduled"
 import * as PIXIViewport from "pixi-viewport"
 import * as PIXI from "pixi.js"
-import { onCleanup, onMount } from "solid-js"
+import { createSignal, onCleanup, onMount } from "solid-js"
 import GraphSearchBar from "../GraphSearchBar"
 import NodeEdgesMap from "./maps/NodeEdgesMap"
 import NodePositionMap from "./maps/NodePositionMap"
 import EntityProvider from "./providers/EntityProvider"
 import TileBBoxesProvider from "./providers/TileBBoxesProvider"
+import TileEntitiesProvider from "./providers/TileEntitiesProvider"
 import TileProvider from "./providers/TileProvider"
 import { EncodedEdge, encodeEdge } from "./shared/edge-codec"
 import NodeSpatialIndex from "./spatial/NodeSpatialIndex"
@@ -58,6 +59,8 @@ function createEdgeHeadTexture(renderer: PIXI.Renderer): PIXI.Texture {
 export default function Graph(props: { graphId: string }) {
   let containerRef: HTMLDivElement | undefined
   let app: PIXI.Application
+
+  const [entityIds, setEntityIds] = createSignal<Set<string>>(new Set())
 
   onMount(async () => {
     app = new PIXI.Application()
@@ -185,6 +188,18 @@ export default function Graph(props: { graphId: string }) {
     viewport.on("moved", update)
     viewport.on("zoomed", update)
     update()
+
+    const tileEntitiesProvider = new TileEntitiesProvider(DATA_URL)
+    const tileEntities = tileEntitiesProvider.getTileEntities(props.graphId)
+    const filter = new Set<string>()
+
+    tileEntities.then((entities) => {
+      entities.forEach(({ entityIds }) => {
+        entityIds.forEach((id) => filter.add(`Q${id}`))
+      })
+
+      setEntityIds(filter)
+    })
   })
 
   onCleanup(() => {
@@ -194,7 +209,7 @@ export default function Graph(props: { graphId: string }) {
   return (
     <div class="relative w-screen h-screen">
       <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
-      <GraphSearchBar graphId={props.graphId} />
+      <GraphSearchBar filter={entityIds()} />
     </div>
   )
 }

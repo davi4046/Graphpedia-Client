@@ -1,32 +1,7 @@
 import { createEffect, createResource, createSignal } from "solid-js"
-import TileEntitiesProvider from "./providers/TileEntitiesProvider"
-import EntitySearch from "./search/EntitySearch"
+import EntitySearch, { Filter } from "./search/EntitySearch"
 
-const DATA_URL = import.meta.env.PUBLIC_DATA_URL
-
-export default function GraphSearchBar(props: { graphId: string }) {
-  const tileEntitiesProvider = new TileEntitiesProvider(DATA_URL)
-
-  const [tileEntities] = createResource(() =>
-    tileEntitiesProvider.getTileEntities(props.graphId)
-  )
-
-  const [entityIdToTileId] = createResource(tileEntities, (tiles) => {
-    if (!tiles) return new Map<number, number>()
-    const map = new Map<number, number>()
-    tiles.forEach((tile) => {
-      tile.entityIds.forEach((entityId) => {
-        map.set(entityId, tile.tileId)
-      })
-    })
-    return map
-  })
-
-  const [entityIds] = createResource(entityIdToTileId, (map) => {
-    if (!map) return new Set<string>()
-    return new Set<string>(map.keys().map((id) => `Q${id}`))
-  })
-
+export default function GraphSearchBar(props: { filter: Filter }) {
   const entitySearch = new EntitySearch()
 
   const [searchValue, setSearchValue] = createSignal("")
@@ -34,12 +9,12 @@ export default function GraphSearchBar(props: { graphId: string }) {
   const [searchResults] = createResource(
     () => {
       const value = searchValue()
-      const filter = entityIds()
+      const filter = props.filter
       return value && filter ? [value, filter] : undefined
     },
     async (args) => {
       if (!args) return []
-      const [value, filter] = args as [string, ReadonlySet<string>]
+      const [value, filter] = args as [string, Filter]
       return await entitySearch.search(value, 10, filter)
     }
   )
@@ -57,11 +32,6 @@ export default function GraphSearchBar(props: { graphId: string }) {
         placeholder="Search..."
         class="w-full p-2 rounded border border-gray-300 shadow"
       />
-
-      {/* Temporary status message */}
-      {entityIdToTileId.loading && (
-        <div class="mt-2 text-gray-500 text-sm text-center">Loading...</div>
-      )}
     </div>
   )
 }

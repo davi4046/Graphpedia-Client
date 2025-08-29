@@ -24,6 +24,11 @@ export interface TileBBox {
   maxY: number
 }
 
+export interface TileEntities {
+  tileId: number
+  entityIds: number[]
+}
+
 export interface Entity {
   id: number
   name: string

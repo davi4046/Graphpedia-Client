@@ -26,7 +26,7 @@ type WbEntityResult = {
   }
 }
 
-type EntityId = string
+export type Filter = ReadonlySet<string>
 
 export default class EntitySearch {
   private wbkInstance = wbk({
@@ -37,7 +37,7 @@ export default class EntitySearch {
   async search(
     value: string,
     limit: number = 10,
-    filter?: ReadonlySet<EntityId>
+    filter?: Filter
   ): Promise<WbEntityResult[]> {
     const results: WbEntityResult[] = []
     let continueOffset: number | undefined
