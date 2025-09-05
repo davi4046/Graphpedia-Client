@@ -25,6 +25,10 @@ export default class GraphView {
 
   static async create(container: HTMLDivElement, options: GraphViewOptions) {
     const app = new PIXI.Application()
+
+    // @ts-ignore
+    globalThis.__PIXI_APP__ = app
+
     await app.init({
       background: "#1099bb",
       resizeTo: window,
