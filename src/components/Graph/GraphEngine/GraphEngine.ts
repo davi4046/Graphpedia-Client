@@ -93,7 +93,7 @@ export default class GraphEngine {
         }
 
         node.getData().then((data) => {
-          nodeView.setLabel(data.label)
+          nodeView.updateLabelText(data.label)
         })
       }
     }

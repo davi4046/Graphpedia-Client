@@ -11,14 +11,27 @@ import { useGraphEngine } from "./useGraphEngine"
 const dataUrl = import.meta.env.PUBLIC_DATA_URL
 
 const graphOptions: GraphViewOptions = {
+  background: "#E9E7C4",
+  edgeStyle: {
+    width: 0.5,
+    color: "#000000",
+  },
   nodeStyle: {
     size: 10,
-    color: "0x00ff00",
+    fill: {
+      color: "#E9E7C4",
+    },
+    stroke: {
+      color: "#000000",
+      width: 0.5,
+    },
+    labelStyle: {
+      fill: "#000000",
+      fontFamily: "Montserrat, sans-serif",
+      fontWeight: "bold",
+    },
   },
-  edgeStyle: {
-    width: 2,
-    color: "0xff0000",
-  },
+  nodeEdgeMargin: 2,
 }
 
 export default function Graph() {

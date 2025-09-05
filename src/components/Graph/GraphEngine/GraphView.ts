@@ -1,17 +1,13 @@
 import * as PIXIViewport from "pixi-viewport"
 import * as PIXI from "pixi.js"
-import EdgeView from "./EdgeView"
-import NodeView from "./NodeView"
+import EdgeView, { EdgeViewOptions } from "./EdgeView"
+import NodeView, { NodeViewOptions } from "./NodeView"
 
 export interface GraphViewOptions {
-  nodeStyle: {
-    size: number
-    color: PIXI.ColorSource
-  }
-  edgeStyle: {
-    width: number
-    color: PIXI.ColorSource
-  }
+  background: PIXI.ColorSource
+  nodeStyle: Omit<NodeViewOptions, "x" | "y">
+  edgeStyle: Omit<EdgeViewOptions, "x1" | "y1" | "x2" | "y2">
+  nodeEdgeMargin: number
 }
 
 export default class GraphView {
@@ -30,7 +26,7 @@ export default class GraphView {
     globalThis.__PIXI_APP__ = app
 
     await app.init({
-      background: "#1099bb",
+      background: options.background,
       resizeTo: window,
       preference: "webgpu",
       antialias: false,
@@ -76,21 +72,45 @@ export default class GraphView {
   }
 
   addNode(position: NodeCoords) {
-    const size = this.options.nodeStyle.size
-    const color = this.options.nodeStyle.color
-    const opts = { ...position, size, color }
-    return new NodeView(this.nodeContainer, opts)
+    return new NodeView(this.nodeContainer, {
+      ...position,
+      ...this.options.nodeStyle,
+    })
   }
 
   addEdge(position1: NodeCoords, position2: NodeCoords) {
-    const width = this.options.edgeStyle.width
-    const color = this.options.edgeStyle.color
-    const x1 = position1.x + this.options.nodeStyle.size / 2
-    const y1 = position1.y + this.options.nodeStyle.size / 2
-    const x2 = position2.x + this.options.nodeStyle.size / 2
-    const y2 = position2.y + this.options.nodeStyle.size / 2
-    const opts = { x1, y1, x2, y2, width, color }
-    return new EdgeView(this.edgeContainer, opts)
+    const size = this.options.nodeStyle.size
+    const margin = this.options.nodeEdgeMargin
+
+    const half = size / 2
+
+    // Centers
+    const c1 = { x: position1.x + half, y: position1.y + half }
+    const c2 = { x: position2.x + half, y: position2.y + half }
+
+    // Vector from c1 to c2
+    const dx = c2.x - c1.x
+    const dy = c2.y - c1.y
+
+    // Scale for each node
+    const scale1 = half / Math.max(Math.abs(dx), Math.abs(dy)) // from c1 to c2
+    const scale2 = half / Math.max(Math.abs(dx), Math.abs(dy)) // from c2 to c1 (same magnitude, opposite direction)
+
+    // Unit vector in direction of line
+    const length = Math.sqrt(dx * dx + dy * dy)
+    const ux = dx / length
+    const uy = dy / length
+
+    const x1 = c1.x + dx * scale1 + ux * margin
+    const y1 = c1.y + dy * scale1 + uy * margin
+
+    const x2 = c2.x - dx * scale2 - ux * margin
+    const y2 = c2.y - dy * scale2 - uy * margin
+
+    return new EdgeView(this.edgeContainer, {
+      ...{ x1, y1, x2, y2 },
+      ...this.options.edgeStyle,
+    })
   }
 
   destroy() {

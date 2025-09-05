@@ -4,12 +4,14 @@ export interface NodeViewOptions {
   x: number
   y: number
   size: number
-  color: PIXI.ColorSource
+  fill: PIXI.FillInput
+  stroke: PIXI.StrokeInput
+  labelStyle: PIXI.TextStyleOptions
 }
 
 export default class NodeView {
   private root: PIXI.Container
-  private label?: PIXI.Text
+  private label: PIXI.Text
 
   constructor(
     private container: PIXI.Container,
@@ -18,65 +20,65 @@ export default class NodeView {
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
 
-    const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
-    sprite.tint = this.options.color
-    sprite.width = this.options.size
-    sprite.height = this.options.size
-    sprite.x = this.options.x
-    sprite.y = this.options.y
+    const graphics = this.createGraphics()
+    this.root.addChild(graphics)
 
-    this.root.addChild(sprite)
+    this.label = this.createLabel()
+    this.root.addChild(this.label)
   }
 
-  setLabel(text: string) {
-    if (this.label) {
-      console.warn("Setting the label twice is not supported.")
-      return
-    }
-    this.label = createFittedText(text, {
-      minX: this.options.x,
-      minY: this.options.y,
-      maxX: this.options.x + this.options.size,
-      maxY: this.options.y + this.options.size,
-    })
-    this.root.addChild(this.label)
+  private createLabel() {
+    const text = new PIXI.Text({ style: this.options.labelStyle })
+
+    text.x = this.options.x + this.options.size / 2
+    text.y = this.options.y + this.options.size / 2
+    text.anchor.set(0.5)
+    text.resolution = 3
+
+    text.style.fontSize = 16
+    text.style.align = "center"
+    text.style.wordWrap = true
+    text.style.wordWrapWidth = this.options.size * 0.8
+
+    return text
+  }
+
+  private createGraphics() {
+    const minX = this.options.x
+    const minY = this.options.y
+    const maxX = this.options.x + this.options.size
+    const maxY = this.options.y + this.options.size
+
+    const graphics = new PIXI.Graphics()
+    graphics.moveTo(minX, minY)
+    graphics.lineTo(maxX, minY)
+    graphics.lineTo(maxX, maxY)
+    graphics.lineTo(minX, maxY)
+    graphics.closePath()
+
+    graphics.fill(this.options.fill)
+    graphics.stroke(this.options.stroke)
+
+    return graphics
+  }
+
+  updateLabelText(newText: string) {
+    this.label.text = newText
+    fitTextToBounds(
+      this.label,
+      this.options.size * 0.8,
+      this.options.size * 0.8
+    )
   }
 
   remove() {
     this.container.removeChild(this.root)
   }
-
-  setLOD(level: number) {
-    // TODO
-  }
 }
 
-function createFittedText(
-  text: string,
-  bounds: { minX: number; minY: number; maxX: number; maxY: number }
-): PIXI.Text {
-  const style: PIXI.TextStyleOptions = {
-    fontSize: 16,
-    fill: 0x000000,
-    align: "center",
-    wordWrap: true,
-    wordWrapWidth: bounds.maxX - bounds.minX,
-  }
-
-  const fittedText = new PIXI.Text({ text, style })
-  fittedText.anchor.set(0.5)
-
-  // Center the text within the bounds
-  fittedText.x = (bounds.minX + bounds.maxX) / 2
-  fittedText.y = (bounds.minY + bounds.maxY) / 2
-
-  // Scale the text to fit within the bounds
-  const maxWidth = bounds.maxX - bounds.minX
-  const maxHeight = bounds.maxY - bounds.minY
-  const scaleX = maxWidth / fittedText.width
-  const scaleY = maxHeight / fittedText.height
+function fitTextToBounds(text: PIXI.Text, maxWidth: number, maxHeight: number) {
+  const scaleX = maxWidth / text.width
+  const scaleY = maxHeight / text.height
   const scale = Math.min(scaleX, scaleY, 1)
-  fittedText.scale.set(scale)
-
-  return fittedText
+  text.scale.set(scale)
 }
