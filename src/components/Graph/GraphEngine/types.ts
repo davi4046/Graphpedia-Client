@@ -16,6 +16,7 @@ export interface GETileData {
 }
 
 export interface GENode {
+  id: NodeId
   x: number
   y: number
   getData(): Promise<GENodeData>
@@ -26,6 +27,10 @@ export interface GENodeData {
 }
 
 export interface GEEdge {
+  id: EdgeId
   source: GENode
   target: GENode
 }
+
+export type NodeId = string
+export type EdgeId = string

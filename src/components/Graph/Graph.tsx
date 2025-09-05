@@ -66,12 +66,18 @@ function createEngineTile(
     const nodeMap = new Map(
       nodes.map((n) => [
         n.entityId,
-        { x: n.x, y: n.y, getData: () => loadNode(n.entityId) },
+        {
+          id: n.entityId.toString(),
+          x: n.x,
+          y: n.y,
+          getData: () => loadNode(n.entityId),
+        },
       ])
     )
     return {
       nodes: [...nodeMap.values()],
       edges: edges.map((e) => ({
+        id: `${e.sourceId}-${e.targetId}`,
         source: nodeMap.get(e.sourceId)!,
         target: nodeMap.get(e.targetId)!,
       })),
