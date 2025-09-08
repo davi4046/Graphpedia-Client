@@ -11,10 +11,10 @@ import { useGraphEngine } from "./useGraphEngine"
 const dataUrl = import.meta.env.PUBLIC_DATA_URL
 
 const graphOptions: GraphViewOptions = {
-  background: "#6FC3FF",
+  background: "white",
   edgeStyle: {
     width: 1,
-    color: "#E50808",
+    color: "lightgray",
   },
   nodeStyle: {
     size: 10,
@@ -22,7 +22,7 @@ const graphOptions: GraphViewOptions = {
       color: "#00C914",
     },
     stroke: {
-      color: "#ffffff",
+      color: "lightgray",
       width: 0.5,
     },
     labelStyle: {

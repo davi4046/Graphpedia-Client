@@ -101,8 +101,8 @@ export default class GraphView {
     const ux = dx / length
     const uy = dy / length
 
-    const x1 = c1.x + dx * scale1 + ux * margin
-    const y1 = c1.y + dy * scale1 + uy * margin
+    const x1 = c1.x
+    const y1 = c1.y
 
     const x2 = c2.x - dx * scale2 - ux * margin
     const y2 = c2.y - dy * scale2 - uy * margin
