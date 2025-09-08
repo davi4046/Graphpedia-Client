@@ -19,29 +19,27 @@ export default class EdgeView {
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
 
-    const startX = this.options.x1 + this.options.width / 2
-    const startY = this.options.y1 + this.options.width / 2
-    const endX = this.options.x2 + this.options.width / 2
-    const endY = this.options.y2 + this.options.width / 2
-
     const line = new PIXI.Graphics()
-    line.moveTo(startX, startY)
-    line.lineTo(endX, endY)
+    line.moveTo(this.options.x1, this.options.y1)
+    line.lineTo(this.options.x2, this.options.y2)
 
-    const angle = Math.atan2(endY - startY, endX - startX)
+    const angle = Math.atan2(
+      this.options.y2 - this.options.y1,
+      this.options.x2 - this.options.x1
+    )
 
     const leftAngle = angle + Math.PI - Math.PI / 7
     const rightAngle = angle + Math.PI + Math.PI / 7
 
     const arrowSize = 1
 
-    const leftX = endX + Math.cos(leftAngle) * arrowSize
-    const leftY = endY + Math.sin(leftAngle) * arrowSize
-    const rightX = endX + Math.cos(rightAngle) * arrowSize
-    const rightY = endY + Math.sin(rightAngle) * arrowSize
+    const leftX = this.options.x2 + Math.cos(leftAngle) * arrowSize
+    const leftY = this.options.y2 + Math.sin(leftAngle) * arrowSize
+    const rightX = this.options.x2 + Math.cos(rightAngle) * arrowSize
+    const rightY = this.options.y2 + Math.sin(rightAngle) * arrowSize
 
     line.moveTo(leftX, leftY)
-    line.lineTo(endX, endY)
+    line.lineTo(this.options.x2, this.options.y2)
     line.lineTo(rightX, rightY)
     line.closePath()
 

@@ -29,7 +29,6 @@ const graphOptions: GraphViewOptions = {
       fill: "#000000",
     },
   },
-  nodeEdgeMargin: 0.5,
 }
 
 export default function Graph() {

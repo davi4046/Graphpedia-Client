@@ -7,7 +7,6 @@ export interface GraphViewOptions {
   background: PIXI.ColorSource
   nodeStyle: Omit<NodeViewOptions, "x" | "y">
   edgeStyle: Omit<EdgeViewOptions, "x1" | "y1" | "x2" | "y2">
-  nodeEdgeMargin: number
 }
 
 export default class GraphView {
@@ -80,32 +79,13 @@ export default class GraphView {
 
   addEdge(position1: NodeCoords, position2: NodeCoords) {
     const size = this.options.nodeStyle.size
-    const margin = this.options.nodeEdgeMargin
-
     const half = size / 2
 
-    // Centers
     const c1 = { x: position1.x + half, y: position1.y + half }
     const c2 = { x: position2.x + half, y: position2.y + half }
 
-    // Vector from c1 to c2
-    const dx = c2.x - c1.x
-    const dy = c2.y - c1.y
-
-    // Scale for each node
-    const scale1 = half / Math.max(Math.abs(dx), Math.abs(dy)) // from c1 to c2
-    const scale2 = half / Math.max(Math.abs(dx), Math.abs(dy)) // from c2 to c1 (same magnitude, opposite direction)
-
-    // Unit vector in direction of line
-    const length = Math.sqrt(dx * dx + dy * dy)
-    const ux = dx / length
-    const uy = dy / length
-
-    const x1 = c1.x
-    const y1 = c1.y
-
-    const x2 = c2.x - dx * scale2 - ux * margin
-    const y2 = c2.y - dy * scale2 - uy * margin
+    const { x: x1, y: y1 } = c1
+    const { x: x2, y: y2 } = intersectLineWithSquareBorder(c2, c1, half)
 
     return new EdgeView(this.edgeContainer, {
       ...{ x1, y1, x2, y2 },
@@ -121,4 +101,23 @@ export default class GraphView {
 interface NodeCoords {
   readonly x: number
   readonly y: number
+}
+
+function intersectLineWithSquareBorder(
+  center: { x: number; y: number },
+  target: { x: number; y: number },
+  half: number
+) {
+  const dx = target.x - center.x
+  const dy = target.y - center.y
+
+  if (dx === 0 && dy === 0) return { x: center.x, y: center.y }
+
+  const absDx = Math.abs(dx)
+  const absDy = Math.abs(dy)
+  const scale = half / Math.max(absDx, absDy)
+  return {
+    x: center.x + dx * scale,
+    y: center.y + dy * scale,
+  }
 }
