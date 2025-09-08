@@ -61,14 +61,7 @@ export default class GraphView {
     this.viewport.on("moved", handler)
   }
 
-  onViewportZoomed(handler: () => void) {
-    // Use "zoomed-end" instead of "zoomed" to ensure the handler is called
-    // only after the zoom animation is fully complete and the viewport bounds
-    // are stable. Using "zoomed" would trigger the handler multiple times
-    // during the zoom animation, potentially with intermediate or inaccurate
-    // bounds, which can cause issues like nodes temporarily disappearing
-    // ("popping") due to transient empty search results. "zoomed-end" avoids
-    // these problems by firing only once, with the final, correct bounds.
+  onViewportZoomedEnd(handler: () => void) {
     this.viewport.on("zoomed-end", handler)
   }
 
