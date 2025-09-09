@@ -3,27 +3,22 @@ import * as PIXI from "pixi.js"
 import EdgeView from "./EdgeView"
 import NodeView from "./NodeView"
 
-export interface GraphViewOptions {
-  background: PIXI.ColorSource
-}
-
 export default class GraphView {
   private constructor(
     private app: PIXI.Application,
     private viewport: PIXIViewport.Viewport,
     private nodeContainer: PIXI.Container,
-    private edgeContainer: PIXI.Container,
-    private options: GraphViewOptions
+    private edgeContainer: PIXI.Container
   ) {}
 
-  static async create(container: HTMLDivElement, options: GraphViewOptions) {
+  static async create(container: HTMLDivElement) {
     const app = new PIXI.Application()
 
     // @ts-ignore
     globalThis.__PIXI_APP__ = app
 
     await app.init({
-      background: options.background,
+      background: "white",
       resizeTo: window,
       preference: "webgpu",
       antialias: false,
@@ -47,7 +42,7 @@ export default class GraphView {
     viewport.addChild(edgeContainer)
     viewport.addChild(nodeContainer)
 
-    return new GraphView(app, viewport, nodeContainer, edgeContainer, options)
+    return new GraphView(app, viewport, nodeContainer, edgeContainer)
   }
 
   onViewportMoved(handler: () => void) {

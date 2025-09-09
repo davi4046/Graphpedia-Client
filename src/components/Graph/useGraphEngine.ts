@@ -1,11 +1,10 @@
 import { createEffect, onCleanup } from "solid-js"
 import GraphEngine from "./GraphEngine"
-import GraphView, { GraphViewOptions } from "./GraphEngine/GraphView"
+import GraphView from "./GraphEngine/GraphView"
 import { GETile } from "./GraphEngine/types"
 
 export function useGraphEngine(
   containerRef: () => HTMLDivElement | undefined,
-  graphOptions: GraphViewOptions,
   tiles: () => GETile[]
 ) {
   let graphView: GraphView | undefined
@@ -16,7 +15,7 @@ export function useGraphEngine(
     const container = containerRef()
     if (!tileArray || !container) return
 
-    graphView = await GraphView.create(container, graphOptions)
+    graphView = await GraphView.create(container)
     graphEngine = new GraphEngine(graphView, tileArray)
   })
 

@@ -4,15 +4,10 @@ import { BatchFetcher } from "./BatchFetcher"
 import { EntityData, fetchEntities } from "./fetchEntities"
 import { fetchTile, TileData } from "./fetchTile"
 import { fetchTilesBBoxes, TileBBoxData } from "./fetchTilesBBoxes"
-import { GraphViewOptions } from "./GraphEngine/GraphView"
 import { GENodeData, GETile, GETileData } from "./GraphEngine/types"
 import { useGraphEngine } from "./useGraphEngine"
 
 const dataUrl = import.meta.env.PUBLIC_DATA_URL
-
-const graphOptions: GraphViewOptions = {
-  background: "white",
-}
 
 export default function Graph() {
   let containerRef: HTMLDivElement | undefined
@@ -35,7 +30,7 @@ export default function Graph() {
       createEngineTile(bbox, getTileData, getEntityData)
     ) ?? []
 
-  useGraphEngine(() => containerRef, graphOptions, engineTiles)
+  useGraphEngine(() => containerRef, engineTiles)
 
   return (
     <div class="relative w-screen h-screen">
