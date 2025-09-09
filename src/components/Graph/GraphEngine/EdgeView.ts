@@ -23,24 +23,34 @@ export default class EdgeView {
     line.moveTo(this.source.positionX, this.source.positionY)
     line.lineTo(this.target.positionX, this.target.positionY)
 
-    const angle = Math.atan2(
-      this.target.positionY - this.source.positionY,
-      this.target.positionX - this.source.positionX
+    const targetPos = target.intersectBorderFromPoint(
+      this.source.positionX,
+      this.source.positionY
     )
 
-    const leftAngle = angle + Math.PI - Math.PI / 7
-    const rightAngle = angle + Math.PI + Math.PI / 7
+    const angle = Math.atan2(
+      targetPos.y - this.source.positionY,
+      targetPos.x - this.source.positionX
+    )
 
-    const arrowSize = 1
+    const leftAngle = angle + Math.PI - Math.PI / 12
+    const rightAngle = angle + Math.PI + Math.PI / 12
 
-    const leftX = this.target.positionX + Math.cos(leftAngle) * arrowSize
-    const leftY = this.target.positionY + Math.sin(leftAngle) * arrowSize
-    const rightX = this.target.positionX + Math.cos(rightAngle) * arrowSize
-    const rightY = this.target.positionY + Math.sin(rightAngle) * arrowSize
+    const arrowSize = 6
+    const notchInset = 5
+
+    const leftX = targetPos.x + Math.cos(leftAngle) * arrowSize
+    const leftY = targetPos.y + Math.sin(leftAngle) * arrowSize
+    const rightX = targetPos.x + Math.cos(rightAngle) * arrowSize
+    const rightY = targetPos.y + Math.sin(rightAngle) * arrowSize
+
+    const notchX = targetPos.x - Math.cos(angle) * notchInset
+    const notchY = targetPos.y - Math.sin(angle) * notchInset
 
     line.moveTo(leftX, leftY)
-    line.lineTo(this.target.positionX, this.target.positionY)
+    line.lineTo(targetPos.x, targetPos.y)
     line.lineTo(rightX, rightY)
+    line.lineTo(notchX, notchY)
     line.closePath()
 
     line.fill({ color: "lightgrey" })

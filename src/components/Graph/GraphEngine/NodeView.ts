@@ -2,6 +2,8 @@ import * as PIXI from "pixi.js"
 
 export default class NodeView {
   private root: PIXI.Container
+  private radiusX: number
+  private radiusY: number
 
   constructor(
     private container: PIXI.Container,
@@ -62,6 +64,25 @@ export default class NodeView {
     this.root.addChild(shadowSprite)
     this.root.addChild(background)
     this.root.addChild(label)
+
+    this.radiusX = radiusX
+    this.radiusY = radiusY
+  }
+
+  intersectBorderFromPoint(fromX: number, fromY: number) {
+    const dx = fromX - this.positionX
+    const dy = fromY - this.positionY
+
+    const denom = Math.sqrt(
+      (dx * dx) / (this.radiusX * this.radiusX) +
+        (dy * dy) / (this.radiusY * this.radiusY)
+    )
+    const t = 1 / denom
+
+    return {
+      x: this.positionX + dx * t,
+      y: this.positionY + dy * t,
+    }
   }
 
   remove() {
