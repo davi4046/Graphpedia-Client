@@ -1,12 +1,10 @@
 import * as PIXIViewport from "pixi-viewport"
 import * as PIXI from "pixi.js"
-import EdgeView, { EdgeViewOptions } from "./EdgeView"
-import NodeView, { NodeViewOptions } from "./NodeView"
+import EdgeView from "./EdgeView"
+import NodeView from "./NodeView"
 
 export interface GraphViewOptions {
   background: PIXI.ColorSource
-  nodeStyle: Omit<NodeViewOptions, "x" | "y">
-  edgeStyle: Omit<EdgeViewOptions, "x1" | "y1" | "x2" | "y2">
 }
 
 export default class GraphView {
@@ -63,34 +61,21 @@ export default class GraphView {
   getVisibleBounds() {
     const { x, y, width, height } = this.viewport.getVisibleBounds()
     return {
-      minX: x - this.options.nodeStyle.size,
-      minY: y - this.options.nodeStyle.size,
+      minX: x,
+      minY: y,
       maxX: x + width,
       maxY: y + height,
     }
   }
 
   addNode(position: NodeCoords) {
-    return new NodeView(this.nodeContainer, {
-      ...position,
-      ...this.options.nodeStyle,
-    })
+    return new NodeView(this.nodeContainer, position)
   }
 
   addEdge(position1: NodeCoords, position2: NodeCoords) {
-    const size = this.options.nodeStyle.size
-    const half = size / 2
-
-    const c1 = { x: position1.x + half, y: position1.y + half }
-    const c2 = { x: position2.x + half, y: position2.y + half }
-
-    const { x: x1, y: y1 } = c1
-    const { x: x2, y: y2 } = intersectLineWithSquareBorder(c2, c1, half)
-
-    return new EdgeView(this.edgeContainer, {
-      ...{ x1, y1, x2, y2 },
-      ...this.options.edgeStyle,
-    })
+    const { x: x1, y: y1 } = position1
+    const { x: x2, y: y2 } = position2
+    return new EdgeView(this.edgeContainer, { x1, y1, x2, y2 })
   }
 
   destroy() {

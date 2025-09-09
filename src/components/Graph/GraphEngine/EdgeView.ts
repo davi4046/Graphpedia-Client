@@ -5,8 +5,6 @@ export interface EdgeViewOptions {
   y1: number
   x2: number
   y2: number
-  width: number
-  color: PIXI.ColorSource
 }
 
 export default class EdgeView {
@@ -43,14 +41,8 @@ export default class EdgeView {
     line.lineTo(rightX, rightY)
     line.closePath()
 
-    line.stroke({
-      color: this.options.color,
-      width: this.options.width,
-    })
-
-    line.fill({
-      color: this.options.color,
-    })
+    line.fill({ color: "lightgrey" })
+    line.stroke({ color: "lightgrey", width: 1 })
 
     this.root.addChild(line)
   }

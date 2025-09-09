@@ -3,10 +3,6 @@ import * as PIXI from "pixi.js"
 export interface NodeViewOptions {
   x: number
   y: number
-  size: number
-  fill: PIXI.FillInput
-  stroke: PIXI.StrokeInput
-  labelStyle: PIXI.TextStyleOptions
 }
 
 export default class NodeView {

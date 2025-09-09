@@ -12,23 +12,6 @@ const dataUrl = import.meta.env.PUBLIC_DATA_URL
 
 const graphOptions: GraphViewOptions = {
   background: "white",
-  edgeStyle: {
-    width: 1,
-    color: "lightgray",
-  },
-  nodeStyle: {
-    size: 10,
-    fill: {
-      color: "#00C914",
-    },
-    stroke: {
-      color: "lightgray",
-      width: 0.5,
-    },
-    labelStyle: {
-      fill: "#000000",
-    },
-  },
 }
 
 export default function Graph() {
