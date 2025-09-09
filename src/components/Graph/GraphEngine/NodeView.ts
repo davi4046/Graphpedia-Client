@@ -8,6 +8,7 @@ export interface NodeViewOptions {
 export default class NodeView {
   private root: PIXI.Container
   private label: PIXI.Text
+  private background: PIXI.Graphics
 
   constructor(
     private container: PIXI.Container,
@@ -16,65 +17,44 @@ export default class NodeView {
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
 
-    const graphics = this.createGraphics()
-    this.root.addChild(graphics)
+    this.background = new PIXI.Graphics()
+    this.root.addChild(this.background)
 
-    this.label = this.createLabel()
+    const style = { fontSize: 6, fill: "black" }
+    this.label = new PIXI.Text({ style })
+    this.label.anchor.set(0.5)
+    this.label.x = this.options.x
+    this.label.y = this.options.y
+    this.label.resolution = 4
     this.root.addChild(this.label)
+
+    this.updateBackground()
   }
 
-  private createLabel() {
-    const text = new PIXI.Text({ style: this.options.labelStyle })
+  private updateBackground() {
+    this.background.clear()
 
-    text.x = this.options.x + this.options.size / 2
-    text.y = this.options.y + this.options.size / 2
-    text.anchor.set(0.5)
-    text.resolution = 3
+    const bounds = this.label.getLocalBounds()
+    const padding = 4
+    const width = bounds.width + padding
+    const height = bounds.height + padding
 
-    text.style.fontSize = 16
-    text.style.align = "center"
-    text.style.wordWrap = true
-    text.style.wordWrapWidth = this.options.size * 0.8
-
-    return text
-  }
-
-  private createGraphics() {
-    const minX = this.options.x
-    const minY = this.options.y
-    const maxX = this.options.x + this.options.size
-    const maxY = this.options.y + this.options.size
-
-    const graphics = new PIXI.Graphics()
-    graphics.moveTo(minX, minY)
-    graphics.lineTo(maxX, minY)
-    graphics.lineTo(maxX, maxY)
-    graphics.lineTo(minX, maxY)
-    graphics.closePath()
-
-    graphics.fill(this.options.fill)
-    graphics.stroke(this.options.stroke)
-
-    return graphics
+    this.background.ellipse(
+      this.options.x,
+      this.options.y,
+      width / 2,
+      height / 2
+    )
+    this.background.fill({ color: "white" })
+    this.background.stroke({ color: "lightgrey", width: 1 })
   }
 
   updateLabelText(newText: string) {
     this.label.text = newText
-    fitTextToBounds(
-      this.label,
-      this.options.size * 0.8,
-      this.options.size * 0.8
-    )
+    this.updateBackground()
   }
 
   remove() {
     this.container.removeChild(this.root)
   }
-}
-
-function fitTextToBounds(text: PIXI.Text, maxWidth: number, maxHeight: number) {
-  const scaleX = maxWidth / text.width
-  const scaleY = maxHeight / text.height
-  const scale = Math.min(scaleX, scaleY, 1)
-  text.scale.set(scale)
 }
