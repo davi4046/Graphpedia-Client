@@ -21,7 +21,7 @@ export default class NodeView {
       x: positionX,
       y: positionY,
       anchor: 0.5,
-      resolution: 4,
+      resolution: 6,
     })
 
     const bounds = label.getLocalBounds()
