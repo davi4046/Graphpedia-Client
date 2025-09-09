@@ -15,7 +15,7 @@ export default class NodeView {
 
     const label = new PIXI.Text({
       text: this.labelText,
-      style: { fontSize: 6, fill: "black" },
+      style: { fontSize: 5, fill: "black" },
       x: positionX,
       y: positionY,
       anchor: 0.5,
