@@ -79,7 +79,7 @@ export default class GraphEngine {
     for (const nodeId of nodesInBounds) {
       if (!this.renderedNodes.has(nodeId)) {
         const node = this.nodes.get(nodeId)!
-        const nodeView = this.graphView.addNode(node.x, node.y)
+        const nodeView = this.graphView.addNode(node.id, node.x, node.y)
         this.renderedNodes.set(nodeId, nodeView)
 
         const edgeIds = this.nodeEdgesMap.get(nodeId) || []
@@ -95,9 +95,9 @@ export default class GraphEngine {
           }
         }
 
-        node.getData().then((data) => {
-          nodeView.updateLabelText(data.label)
-        })
+        // node.getData().then((data) => {
+        //   nodeView.updateLabelText(data.label)
+        // })
       }
     }
 

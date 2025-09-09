@@ -2,59 +2,66 @@ import * as PIXI from "pixi.js"
 
 export default class NodeView {
   private root: PIXI.Container
-  private label: PIXI.Text
-  private background: PIXI.Graphics
-  private dropshadow: PIXI.Graphics
 
   constructor(
     private container: PIXI.Container,
+    private labelText: string,
     readonly positionX: number,
-    readonly positionY: number
+    readonly positionY: number,
+    renderer: PIXI.Renderer
   ) {
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
 
-    this.dropshadow = new PIXI.Graphics()
-    this.dropshadow.filters = [new PIXI.BlurFilter()]
-    this.root.addChild(this.dropshadow)
+    const label = new PIXI.Text({
+      text: this.labelText,
+      style: { fontSize: 6, fill: "black" },
+      x: positionX,
+      y: positionY,
+      anchor: 0.5,
+      resolution: 4,
+    })
 
-    this.background = new PIXI.Graphics()
-    this.root.addChild(this.background)
-
-    const style = { fontSize: 6, fill: "black" }
-    this.label = new PIXI.Text({ style })
-    this.label.anchor.set(0.5)
-    this.label.x = this.positionX
-    this.label.y = this.positionY
-    this.label.resolution = 4
-    this.root.addChild(this.label)
-
-    this.updateBackground()
-  }
-
-  private updateBackground() {
-    const bounds = this.label.getLocalBounds()
+    const bounds = label.getLocalBounds()
     const width = bounds.width + 4
     const height = bounds.height + 4
-
-    const x = this.positionX
-    const y = this.positionY
     const radiusX = width / 2
     const radiusY = height / 2
 
-    this.background.clear()
-    this.background.ellipse(x, y, radiusX, radiusY)
-    this.background.fill({ color: "white" })
-    this.background.stroke({ color: "lightgrey", width: 0.5 })
+    const background = new PIXI.Graphics()
+    background.ellipse(positionX, positionY, radiusX, radiusY)
+    background.fill({ color: "white" })
+    background.stroke({ color: "lightgrey", width: 0.5 })
 
-    this.dropshadow.clear()
-    this.dropshadow.ellipse(x + 3, y + 3, radiusX, radiusY)
-    this.dropshadow.fill({ color: 0x000000, alpha: 0.3 })
-  }
+    const shadowMargin = 12
 
-  updateLabelText(newText: string) {
-    this.label.text = newText
-    this.updateBackground()
+    const shadowGraphics = new PIXI.Graphics()
+    shadowGraphics.ellipse(
+      radiusX + shadowMargin,
+      radiusY + shadowMargin,
+      radiusX,
+      radiusY
+    )
+    shadowGraphics.fill({ color: "black", alpha: 0.5 })
+
+    const shadowBlurFilter = new PIXI.BlurFilter()
+    shadowBlurFilter.strength = 3
+    shadowGraphics.filters = [shadowBlurFilter]
+
+    const shadowTexture = PIXI.RenderTexture.create({
+      width: width + shadowMargin * 2,
+      height: height + shadowMargin * 2,
+    })
+
+    renderer.render({ container: shadowGraphics, target: shadowTexture })
+
+    const shadowSprite = new PIXI.Sprite(shadowTexture)
+    shadowSprite.x = positionX - radiusX - shadowMargin + 1.5
+    shadowSprite.y = positionY - radiusY - shadowMargin + 1.5
+
+    this.root.addChild(shadowSprite)
+    this.root.addChild(background)
+    this.root.addChild(label)
   }
 
   remove() {

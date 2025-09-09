@@ -63,8 +63,14 @@ export default class GraphView {
     }
   }
 
-  addNode(positionX: number, positionY: number) {
-    return new NodeView(this.nodeContainer, positionX, positionY)
+  addNode(labelText: string, positionX: number, positionY: number) {
+    return new NodeView(
+      this.nodeContainer,
+      labelText,
+      positionX,
+      positionY,
+      this.app.renderer
+    )
   }
 
   addEdge(source: NodeView, target: NodeView) {
