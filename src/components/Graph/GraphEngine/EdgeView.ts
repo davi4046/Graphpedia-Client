@@ -19,36 +19,35 @@ export default class EdgeView {
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
 
+    const sourceX = source.positionX
+    const sourceY = source.positionY
+
+    const { x: targetX, y: targetY } = target.intersectBorderFromPoint(
+      sourceX,
+      sourceY
+    )
+
     const line = new PIXI.Graphics()
-    line.moveTo(this.source.positionX, this.source.positionY)
-    line.lineTo(this.target.positionX, this.target.positionY)
-
-    const targetPos = target.intersectBorderFromPoint(
-      this.source.positionX,
-      this.source.positionY
-    )
-
-    const angle = Math.atan2(
-      targetPos.y - this.source.positionY,
-      targetPos.x - this.source.positionX
-    )
-
-    const leftAngle = angle + Math.PI - Math.PI / 12
-    const rightAngle = angle + Math.PI + Math.PI / 12
+    line.moveTo(sourceX, sourceY)
+    line.lineTo(targetX, targetY)
 
     const arrowSize = 7
     const notchInset = 6
 
-    const leftX = targetPos.x + Math.cos(leftAngle) * arrowSize
-    const leftY = targetPos.y + Math.sin(leftAngle) * arrowSize
-    const rightX = targetPos.x + Math.cos(rightAngle) * arrowSize
-    const rightY = targetPos.y + Math.sin(rightAngle) * arrowSize
+    const angle = Math.atan2(targetY - sourceY, targetX - sourceX)
 
-    const notchX = targetPos.x - Math.cos(angle) * notchInset
-    const notchY = targetPos.y - Math.sin(angle) * notchInset
+    const leftAngle = angle + Math.PI - Math.PI / 12
+    const rightAngle = angle + Math.PI + Math.PI / 12
+
+    const leftX = targetX + Math.cos(leftAngle) * arrowSize
+    const leftY = targetY + Math.sin(leftAngle) * arrowSize
+    const rightX = targetX + Math.cos(rightAngle) * arrowSize
+    const rightY = targetY + Math.sin(rightAngle) * arrowSize
+    const notchX = targetX - Math.cos(angle) * notchInset
+    const notchY = targetY - Math.sin(angle) * notchInset
 
     line.moveTo(leftX, leftY)
-    line.lineTo(targetPos.x, targetPos.y)
+    line.lineTo(targetX, targetY)
     line.lineTo(rightX, rightY)
     line.lineTo(notchX, notchY)
     line.closePath()
