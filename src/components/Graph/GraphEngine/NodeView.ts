@@ -49,7 +49,7 @@ export default class NodeView {
     this.background.clear()
     this.background.ellipse(x, y, radiusX, radiusY)
     this.background.fill({ color: "white" })
-    this.background.stroke({ color: "lightgrey", width: 1 })
+    this.background.stroke({ color: "lightgrey", width: 0.5 })
 
     this.dropshadow.clear()
     this.dropshadow.ellipse(x + 3, y + 3, radiusX, radiusY)

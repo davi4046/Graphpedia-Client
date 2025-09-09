@@ -42,7 +42,7 @@ export default class EdgeView {
     line.closePath()
 
     line.fill({ color: "lightgrey" })
-    line.stroke({ color: "lightgrey", width: 1 })
+    line.stroke({ color: "lightgrey", width: 0.5 })
 
     this.root.addChild(line)
   }
