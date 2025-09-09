@@ -38,9 +38,8 @@ export default class NodeView {
 
   private updateBackground() {
     const bounds = this.label.getLocalBounds()
-    const padding = 4
-    const width = bounds.width + padding
-    const height = bounds.height + padding
+    const width = bounds.width + 4
+    const height = bounds.height + 4
 
     const x = this.options.x
     const y = this.options.y
