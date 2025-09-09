@@ -3,7 +3,15 @@ import RBush from "rbush"
 import EdgeView from "./EdgeView"
 import GraphView from "./GraphView"
 import NodeView from "./NodeView"
-import { EdgeId, GEEdge, GENode, GETile, GETileData, NodeId } from "./types"
+import {
+  EdgeId,
+  GEEdge,
+  GENode,
+  GENodeData,
+  GETile,
+  GETileData,
+  NodeId,
+} from "./types"
 
 export default class GraphEngine {
   private tileIndex: SpatialTileIndex
@@ -95,9 +103,7 @@ export default class GraphEngine {
           }
         }
 
-        // node.getData().then((data) => {
-        //   nodeView.updateLabelText(data.label)
-        // })
+        node.getData().then((data) => this.updateNodesAndEdges(node, data))
       }
     }
 
@@ -120,6 +126,28 @@ export default class GraphEngine {
           }
         }
       }
+    }
+  }
+
+  private updateNodesAndEdges(node: GENode, data: GENodeData) {
+    const oldNodeView = this.renderedNodes.get(node.id)
+    if (!oldNodeView) return
+    const newNodeView = this.graphView.addNode(data.label, node.x, node.y)
+    this.renderedNodes.set(node.id, newNodeView)
+    oldNodeView.remove()
+
+    const edgeIds = this.nodeEdgesMap.get(node.id) || []
+
+    for (const edgeId of edgeIds) {
+      const oldEdgeView = this.renderedEdges.get(edgeId)
+      if (!oldEdgeView) continue
+      const edge = this.edges.get(edgeId)!
+      const source = this.renderedNodes.get(edge.source.id)
+      const target = this.renderedNodes.get(edge.target.id)
+      if (!source || !target) continue
+      const newEdgeView = this.graphView.addEdge(source, target)
+      this.renderedEdges.set(edgeId, newEdgeView)
+      oldEdgeView.remove()
     }
   }
 }
