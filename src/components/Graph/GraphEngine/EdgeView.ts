@@ -36,8 +36,8 @@ export default class EdgeView {
     const leftAngle = angle + Math.PI - Math.PI / 12
     const rightAngle = angle + Math.PI + Math.PI / 12
 
-    const arrowSize = 6
-    const notchInset = 5
+    const arrowSize = 7
+    const notchInset = 6
 
     const leftX = targetPos.x + Math.cos(leftAngle) * arrowSize
     const leftY = targetPos.y + Math.sin(leftAngle) * arrowSize
