@@ -63,24 +63,17 @@ export default class GraphView {
     }
   }
 
-  addNode(position: NodeCoords) {
-    return new NodeView(this.nodeContainer, position)
+  addNode(positionX: number, positionY: number) {
+    return new NodeView(this.nodeContainer, positionX, positionY)
   }
 
-  addEdge(position1: NodeCoords, position2: NodeCoords) {
-    const { x: x1, y: y1 } = position1
-    const { x: x2, y: y2 } = position2
-    return new EdgeView(this.edgeContainer, { x1, y1, x2, y2 })
+  addEdge(source: NodeView, target: NodeView) {
+    return new EdgeView(this.edgeContainer, source, target)
   }
 
   destroy() {
     this.app.destroy(true, { children: true, texture: true })
   }
-}
-
-interface NodeCoords {
-  readonly x: number
-  readonly y: number
 }
 
 function intersectLineWithSquareBorder(

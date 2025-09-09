@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js"
+import NodeView from "./NodeView"
 
 export interface EdgeViewOptions {
   x1: number
@@ -12,18 +13,19 @@ export default class EdgeView {
 
   constructor(
     private container: PIXI.Container,
-    private options: EdgeViewOptions
+    private source: NodeView,
+    private target: NodeView
   ) {
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
 
     const line = new PIXI.Graphics()
-    line.moveTo(this.options.x1, this.options.y1)
-    line.lineTo(this.options.x2, this.options.y2)
+    line.moveTo(this.source.positionX, this.source.positionY)
+    line.lineTo(this.target.positionX, this.target.positionY)
 
     const angle = Math.atan2(
-      this.options.y2 - this.options.y1,
-      this.options.x2 - this.options.x1
+      this.target.positionY - this.source.positionY,
+      this.target.positionX - this.source.positionX
     )
 
     const leftAngle = angle + Math.PI - Math.PI / 7
@@ -31,13 +33,13 @@ export default class EdgeView {
 
     const arrowSize = 1
 
-    const leftX = this.options.x2 + Math.cos(leftAngle) * arrowSize
-    const leftY = this.options.y2 + Math.sin(leftAngle) * arrowSize
-    const rightX = this.options.x2 + Math.cos(rightAngle) * arrowSize
-    const rightY = this.options.y2 + Math.sin(rightAngle) * arrowSize
+    const leftX = this.target.positionX + Math.cos(leftAngle) * arrowSize
+    const leftY = this.target.positionY + Math.sin(leftAngle) * arrowSize
+    const rightX = this.target.positionX + Math.cos(rightAngle) * arrowSize
+    const rightY = this.target.positionY + Math.sin(rightAngle) * arrowSize
 
     line.moveTo(leftX, leftY)
-    line.lineTo(this.options.x2, this.options.y2)
+    line.lineTo(this.target.positionX, this.target.positionY)
     line.lineTo(rightX, rightY)
     line.closePath()
 

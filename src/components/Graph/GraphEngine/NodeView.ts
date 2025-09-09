@@ -1,10 +1,5 @@
 import * as PIXI from "pixi.js"
 
-export interface NodeViewOptions {
-  x: number
-  y: number
-}
-
 export default class NodeView {
   private root: PIXI.Container
   private label: PIXI.Text
@@ -13,7 +8,8 @@ export default class NodeView {
 
   constructor(
     private container: PIXI.Container,
-    private options: NodeViewOptions
+    readonly positionX: number,
+    readonly positionY: number
   ) {
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
@@ -28,8 +24,8 @@ export default class NodeView {
     const style = { fontSize: 6, fill: "black" }
     this.label = new PIXI.Text({ style })
     this.label.anchor.set(0.5)
-    this.label.x = this.options.x
-    this.label.y = this.options.y
+    this.label.x = this.positionX
+    this.label.y = this.positionY
     this.label.resolution = 4
     this.root.addChild(this.label)
 
@@ -41,8 +37,8 @@ export default class NodeView {
     const width = bounds.width + 4
     const height = bounds.height + 4
 
-    const x = this.options.x
-    const y = this.options.y
+    const x = this.positionX
+    const y = this.positionY
     const radiusX = width / 2
     const radiusY = height / 2
 

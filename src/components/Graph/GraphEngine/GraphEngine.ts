@@ -79,7 +79,7 @@ export default class GraphEngine {
     for (const nodeId of nodesInBounds) {
       if (!this.renderedNodes.has(nodeId)) {
         const node = this.nodes.get(nodeId)!
-        const nodeView = this.graphView.addNode(node)
+        const nodeView = this.graphView.addNode(node.x, node.y)
         this.renderedNodes.set(nodeId, nodeView)
 
         const edgeIds = this.nodeEdgesMap.get(nodeId) || []
@@ -87,7 +87,10 @@ export default class GraphEngine {
         for (const edgeId of edgeIds) {
           if (!this.renderedEdges.has(edgeId)) {
             const edge = this.edges.get(edgeId)!
-            const edgeView = this.graphView.addEdge(edge.source, edge.target)
+            const source = this.renderedNodes.get(edge.source.id)
+            const target = this.renderedNodes.get(edge.target.id)
+            if (!source || !target) continue
+            const edgeView = this.graphView.addEdge(source, target)
             this.renderedEdges.set(edgeId, edgeView)
           }
         }
