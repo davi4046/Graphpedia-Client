@@ -9,6 +9,7 @@ export default class NodeView {
   private root: PIXI.Container
   private label: PIXI.Text
   private background: PIXI.Graphics
+  private dropshadow: PIXI.Graphics
 
   constructor(
     private container: PIXI.Container,
@@ -16,6 +17,10 @@ export default class NodeView {
   ) {
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
+
+    this.dropshadow = new PIXI.Graphics()
+    this.dropshadow.filters = [new PIXI.BlurFilter()]
+    this.root.addChild(this.dropshadow)
 
     this.background = new PIXI.Graphics()
     this.root.addChild(this.background)
@@ -32,21 +37,24 @@ export default class NodeView {
   }
 
   private updateBackground() {
-    this.background.clear()
-
     const bounds = this.label.getLocalBounds()
     const padding = 4
     const width = bounds.width + padding
     const height = bounds.height + padding
 
-    this.background.ellipse(
-      this.options.x,
-      this.options.y,
-      width / 2,
-      height / 2
-    )
+    const x = this.options.x
+    const y = this.options.y
+    const radiusX = width / 2
+    const radiusY = height / 2
+
+    this.background.clear()
+    this.background.ellipse(x, y, radiusX, radiusY)
     this.background.fill({ color: "white" })
     this.background.stroke({ color: "lightgrey", width: 1 })
+
+    this.dropshadow.clear()
+    this.dropshadow.ellipse(x + 3, y + 3, radiusX, radiusY)
+    this.dropshadow.fill({ color: 0x000000, alpha: 0.3 })
   }
 
   updateLabelText(newText: string) {
