@@ -13,7 +13,7 @@ export function useGraphEngine(
   createEffect(async () => {
     const tileArray = tiles()
     const container = containerRef()
-    if (!tileArray || !container) return
+    if (!tileArray || !container || tileArray.length === 0) return
 
     graphView = await GraphView.create(container)
     graphEngine = new GraphEngine(graphView, tileArray)
