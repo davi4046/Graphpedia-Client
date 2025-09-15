@@ -1,4 +1,3 @@
-import { useParams } from "@solidjs/router"
 import { createResource } from "solid-js"
 import { BatchFetcher } from "./BatchFetcher"
 import { EntityData, fetchEntities } from "./fetchEntities"
@@ -9,11 +8,10 @@ import { useGraphEngine } from "./useGraphEngine"
 
 const dataUrl = import.meta.env.PUBLIC_DATA_URL
 
-export default function Graph() {
+export default function Graph(props: { graphId: string }) {
   let containerRef: HTMLDivElement | undefined
 
-  const params = useParams()
-  const graphId = params.graphId
+  const graphId = props.graphId
 
   const [tileBBoxArray] = createResource(() =>
     fetchTilesBBoxes(dataUrl, graphId)
