@@ -7,7 +7,6 @@ export default function GraphPage() {
   const navigate = useNavigate()
 
   const [graphId, graphName] = parseSlug(params.graph)
-  const [focusId, focusName] = parseSlug(params.focus)
 
   onMount(() => {
     if (!graphId) {
