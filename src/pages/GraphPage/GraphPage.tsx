@@ -1,5 +1,5 @@
 import { useParams } from "@solidjs/router"
-import Graph from "~/components/Graph"
+import Graph from "./Graph"
 
 export default function GraphPage() {
   const params = useParams()
