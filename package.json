@@ -15,7 +15,6 @@
     "flatbush": "^4.4.1",
     "pixi-viewport": "^6.0.3",
     "pixi.js": "^8.12.0",
-    "prettier-plugin-organize-imports": "^4.2.0",
     "rbush": "^4.0.1",
     "solid-js": "^1.9.5",
     "vinxi": "^0.5.7",
@@ -28,6 +27,7 @@
     "@types/pixi.js": "^4.8.9",
     "@types/rbush": "^4.0.0",
     "prettier": "^3.6.2",
+    "prettier-plugin-organize-imports": "^4.2.0",
     "tailwindcss": "^4.0.7"
   },
   "engines": {
