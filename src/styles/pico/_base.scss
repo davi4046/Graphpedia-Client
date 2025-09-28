@@ -1,0 +1,8 @@
+@use "@picocss/pico/scss/pico" with (
+  $theme-color: "orange",
+  $enable-semantic-container: false,
+  $enable-classes: true,
+  $modules: (
+    "themes/default": true,
+  )
+);
