@@ -1,6 +1,7 @@
 @use "@picocss/pico/scss/pico" with (
   $theme-color: "orange",
-  $enable-semantic-container: false,
+  $semantic-root-element: "#app",
+  $enable-semantic-container: true,
   $enable-classes: true,
   $modules: (
     "themes/default": true,

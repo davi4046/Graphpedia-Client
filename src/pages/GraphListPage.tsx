@@ -1,3 +1,19 @@
+import Nav from "~/components/Nav"
+
 export default function GraphListPage() {
-  return <div>GraphListPage</div>
+  return (
+    <>
+      <header>
+        <Nav />
+      </header>
+
+      <main>
+        <div>GraphListPage</div>
+      </main>
+
+      <footer>
+        <div>Footer</div>
+      </footer>
+    </>
+  )
 }
