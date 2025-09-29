@@ -11,6 +11,7 @@
     "@solid-primitives/scheduled": "^1.5.2",
     "@solidjs/router": "^0.15.0",
     "@solidjs/start": "^1.1.0",
+    "@yornaath/batshit": "^0.10.1",
     "binary-parser": "^2.2.1",
     "camelcase-keys": "^10.0.0",
     "fflate": "^0.8.2",

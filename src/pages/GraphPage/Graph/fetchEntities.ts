@@ -1,53 +1,40 @@
-import WBK from "wikibase-sdk"
-
-export interface EntityData {
+export interface WbEntityResponse {
   id: number
   name: string
   description: string
-  imageUrl?: string
 }
 
 export async function fetchEntities(
-  entityIds: number[]
-): Promise<Map<number, EntityData>> {
-  const wbkInstance = WBK({
-    instance: "https://www.wikidata.org",
-    sparqlEndpoint: "https://query.wikidata.org/sparql",
-  })
+  ids: number[]
+): Promise<WbEntityResponse[]> {
+  const url = new URL("https://www.wikidata.org/w/api.php")
 
-  const sparql = `
-        SELECT ?item ?itemLabel ?itemDescription ?image WHERE {
-            VALUES ?item { ${entityIds.map((id) => `wd:Q${id}`).join(" ")} }
-            SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-            OPTIONAL { ?item wdt:P18 ?image. }
-        }
-    `
-  const url = wbkInstance.sparqlQuery(sparql)
-  const response = await fetch(url)
+  url.search = new URLSearchParams({
+    action: "wbgetentities",
+    ids: ids.map((id) => `Q${id}`).join("|"),
+    props: "labels|descriptions",
+    languages: "en",
+    format: "json",
+    origin: "*",
+  }).toString()
 
+  // TODO: better error handling
+  const response = await fetch(url.toString())
   if (!response.ok) {
-    const errorText = await response.text().catch(() => "")
-    throw new Error(`SPARQL request failed: ${response.status} ${errorText}`)
+    throw new Error(`Error fetching Wikidata entities: ${response.status}`)
   }
 
+  // TODO: better error handling
   const json = await response.json()
-
-  const parseId = (item: any) =>
-    parseInt(item.value.replace("http://www.wikidata.org/entity/Q", ""))
-
-  const results: EntityData[] = json.results.bindings.map(
-    ({ item, itemLabel, itemDescription, image }: any) => ({
-      id: parseId(item),
-      name: itemLabel?.value || "",
-      description: itemDescription?.value || "",
-      imageUrl: image?.value || "",
-    })
-  )
-
-  const entityMap = new Map<number, EntityData>()
-  for (const entity of results) {
-    entityMap.set(entity.id, entity)
+  if (json.success !== 1) {
+    throw new Error(`Error fetching Wikidata entities: ${JSON.stringify(json)}`)
   }
 
-  return entityMap
+  const entities = Object.values(json.entities).map((entity: any) => ({
+    id: parseInt(entity.id.slice(1)),
+    name: entity.labels?.en?.value ?? `Q${entity.id.slice(1)}`,
+    description: entity.descriptions?.en?.value ?? "",
+  }))
+
+  return entities
 }

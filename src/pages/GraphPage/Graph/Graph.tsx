@@ -1,6 +1,10 @@
+import {
+  create,
+  keyResolver,
+  windowedFiniteBatchScheduler,
+} from "@yornaath/batshit"
 import { createResource } from "solid-js"
-import { BatchFetcher } from "./BatchFetcher"
-import { EntityData, fetchEntities } from "./fetchEntities"
+import { fetchEntities, WbEntityResponse } from "./fetchEntities"
 import { fetchTile, TileData } from "./fetchTile"
 import { fetchTilesBBoxes, TileBBoxData } from "./fetchTilesBBoxes"
 import { GENodeData, GETile, GETileData } from "./GraphEngine/types"
@@ -11,11 +15,17 @@ export default function Graph(props: { graphId: string }) {
 
   const [tileBBoxArray] = createResource(() => fetchTilesBBoxes(props.graphId))
 
-  const entityFetcher = new BatchFetcher(fetchEntities, 20)
-  setInterval(() => entityFetcher.flush(), 1000)
+  const entities = create({
+    fetcher: fetchEntities,
+    resolver: keyResolver("id"),
+    scheduler: windowedFiniteBatchScheduler({
+      windowMs: 500,
+      maxBatchSize: 50,
+    }),
+  })
 
-  const getTileData = (tileId: number) => fetchTile(props.graphId, tileId)
-  const getEntityData = (entityId: number) => entityFetcher.get(entityId)
+  const getTileData = (id: number) => fetchTile(props.graphId, id)
+  const getEntityData = (id: number) => entities.fetch(id)
 
   const engineTiles = () =>
     tileBBoxArray()?.map((bbox) =>
@@ -34,7 +44,7 @@ export default function Graph(props: { graphId: string }) {
 function createEngineTile(
   bbox: TileBBoxData,
   getTileData: (id: number) => Promise<TileData>,
-  getEntityData: (id: number) => Promise<EntityData>
+  getEntityData: (id: number) => Promise<WbEntityResponse>
 ): GETile {
   const loadNode = async (id: number): Promise<GENodeData> => {
     const { name } = await getEntityData(id)
