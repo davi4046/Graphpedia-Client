@@ -1,8 +1,11 @@
+import { Link } from "@solidjs/meta"
 import Nav from "~/components/Nav"
 
 export default function HomePage() {
   return (
     <>
+      <Link rel="canonical" href="/" />
+
       <header>
         <Nav />
       </header>
