@@ -1,5 +1,6 @@
 import { Parser } from "binary-parser/dist/binary_parser.js"
 import { gunzipSync } from "fflate"
+import { DATA_URL } from "~/config"
 
 export interface NodeData {
   entityId: number
@@ -18,11 +19,10 @@ export interface TileData {
 }
 
 export async function fetchTile(
-  dataUrl: string,
   graphId: string,
   tileId: number
 ): Promise<TileData> {
-  const url = `${dataUrl}/graphs/${graphId}/tiles/${tileId}.bin.gz`
+  const url = `${DATA_URL}/graphs/${graphId}/tiles/${tileId}.bin.gz`
   const response = await fetch(url)
   const compressed = new Uint8Array(await response.arrayBuffer())
   const decompressed = gunzipSync(compressed)

@@ -6,21 +6,15 @@ import { fetchTilesBBoxes, TileBBoxData } from "./fetchTilesBBoxes"
 import { GENodeData, GETile, GETileData } from "./GraphEngine/types"
 import { useGraphEngine } from "./useGraphEngine"
 
-const dataUrl = import.meta.env.PUBLIC_DATA_URL
-
 export default function Graph(props: { graphId: string }) {
   let containerRef: HTMLDivElement | undefined
 
-  const graphId = props.graphId
-
-  const [tileBBoxArray] = createResource(() =>
-    fetchTilesBBoxes(dataUrl, graphId)
-  )
+  const [tileBBoxArray] = createResource(() => fetchTilesBBoxes(props.graphId))
 
   const entityFetcher = new BatchFetcher(fetchEntities, 20)
   setInterval(() => entityFetcher.flush(), 1000)
 
-  const getTileData = (tileId: number) => fetchTile(dataUrl, graphId, tileId)
+  const getTileData = (tileId: number) => fetchTile(props.graphId, tileId)
   const getEntityData = (entityId: number) => entityFetcher.get(entityId)
 
   const engineTiles = () =>
