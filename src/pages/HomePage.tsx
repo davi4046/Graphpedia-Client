@@ -11,7 +11,16 @@ export default function HomePage() {
       </header>
 
       <main>
-        <div>HomePage</div>
+        <div class="flex flex-col items-center">
+          <h1 class="self-center">Welcome to Graphpedia</h1>
+          <p>
+            home to more than 1600 visual knowledge graphs based on{" "}
+            <a href="https://www.wikidata.org/">Wikidata</a> statements.
+          </p>
+          <a href="/graphs" role="button" class="outline">
+            Browse Graphs
+          </a>
+        </div>
       </main>
 
       <footer>
