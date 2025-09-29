@@ -5,11 +5,9 @@ export default function HomePage() {
   return (
     <>
       <Link rel="canonical" href="/" />
-
       <header>
         <Nav />
       </header>
-
       <main>
         <div class="flex flex-col items-center">
           <h1 class="self-center">Welcome to Graphpedia</h1>
@@ -22,7 +20,6 @@ export default function HomePage() {
           </a>
         </div>
       </main>
-
       <footer>
         <div>Footer</div>
       </footer>
