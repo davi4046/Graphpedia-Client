@@ -1,60 +1,13 @@
 import { Link } from "@solidjs/meta"
 import { useSearchParams } from "@solidjs/router"
-import { createEffect, createSignal, For, onMount } from "solid-js"
+import { For } from "solid-js"
 import Nav from "~/components/Nav"
 import { useGraphsIndex } from "~/utils/graphs/useGraphsIndex"
-import MultiSelect from "./MultiSelect"
-import Select from "./Select"
 
 export default function GraphListPage() {
   const graphsIndex = useGraphsIndex()
 
-  const fieldOptions: [string, string][] = [
-    ["Label", "label"],
-    ["Description", "description"],
-    ["Aliases", "aliases"],
-    ["Tags", "tags"],
-  ]
-
-  const orderOptions: [string, string][] = [
-    ["Label (A-z)", "label-asc"],
-    ["Label (Z-a)", "label-desc"],
-    ["Most Nodes", "nodes-desc"],
-    ["Fewest Nodes", "nodes-asc"],
-    ["Most Edges", "edges-desc"],
-    ["Fewest Edges", "edges-asc"],
-    ["Highest Density", "density-desc"],
-    ["Lowest Density", "density-asc"],
-  ]
-
-  const [query, setQuery] = createSignal("")
-  const [selectedFields, setSelectedFields] = createSignal(
-    fieldOptions.map((p) => p[1])
-  )
-  const [selectedOrder, setSelectedOrder] = createSignal(orderOptions[0][1])
-
   const [searchParams, setSearchParams] = useSearchParams()
-
-  onMount(() => {
-    if (typeof searchParams.search === "string") {
-      setQuery(searchParams.search)
-    }
-    if (typeof searchParams.searchBy === "string") {
-      const fields = searchParams.searchBy.split(",")
-      setSelectedFields(fields)
-    }
-    if (typeof searchParams.orderBy === "string") {
-      setSelectedOrder(searchParams.orderBy)
-    }
-  })
-
-  createEffect(() => {
-    setSearchParams({
-      search: query(),
-      searchBy: selectedFields().join(","),
-      orderBy: selectedOrder(),
-    })
-  })
 
   return (
     <>
@@ -63,26 +16,23 @@ export default function GraphListPage() {
         <Nav />
       </header>
       <main>
-        <input
-          type="search"
-          name="search"
-          placeholder="Search"
-          value={query()}
-          onInput={(e) => setQuery(e.currentTarget.value)}
-        />
-        <label>Search by:</label>
-        <MultiSelect
-          name="searchable-fields"
-          options={fieldOptions}
-          selected={[selectedFields, setSelectedFields]}
-        />
-        <label>Order by:</label>
-        <Select
-          name="order"
-          ariaLabel="Order by"
-          options={orderOptions}
-          selected={[selectedOrder, setSelectedOrder]}
-        />
+        <form>
+          <div role="group">
+            <input type="search" name="search" placeholder="Search" />
+            <input type="submit" value="Search" />
+          </div>
+        </form>
+        <label>Sort by:</label>
+        <select name="sort" id="sort">
+          <option value="label-asc">Label (A-z)</option>
+          <option value="label-desc">Label (Z-a)</option>
+          <option value="nodes-desc">Most Nodes</option>
+          <option value="nodes-asc">Fewest Nodes</option>
+          <option value="edges-desc">Most Edges</option>
+          <option value="edges-asc">Fewest Edges</option>
+          <option value="density-desc">Highest Density</option>
+          <option value="density-asc">Lowest Density</option>
+        </select>
         <For each={graphsIndex()} fallback={<div>No graphs found</div>}>
           {(graph) => (
             <div>
