@@ -16,23 +16,30 @@ export default function GraphListPage() {
         <Nav />
       </header>
       <main>
-        <form>
+        <form
+          action="/graphs"
+          method="get"
+          onSubmit={(e) => {
+            e.preventDefault()
+            console.log("submit", e)
+          }}
+        >
           <div role="group">
             <input type="search" name="search" placeholder="Search" />
             <input type="submit" value="Search" />
           </div>
+          <label for="sort">Sort by:</label>
+          <select name="sort" id="sort">
+            <option value="label-asc">Label (A-z)</option>
+            <option value="label-desc">Label (Z-a)</option>
+            <option value="nodes-desc">Most Nodes</option>
+            <option value="nodes-asc">Fewest Nodes</option>
+            <option value="edges-desc">Most Edges</option>
+            <option value="edges-asc">Fewest Edges</option>
+            <option value="density-desc">Highest Density</option>
+            <option value="density-asc">Lowest Density</option>
+          </select>
         </form>
-        <label>Sort by:</label>
-        <select name="sort" id="sort">
-          <option value="label-asc">Label (A-z)</option>
-          <option value="label-desc">Label (Z-a)</option>
-          <option value="nodes-desc">Most Nodes</option>
-          <option value="nodes-asc">Fewest Nodes</option>
-          <option value="edges-desc">Most Edges</option>
-          <option value="edges-asc">Fewest Edges</option>
-          <option value="density-desc">Highest Density</option>
-          <option value="density-asc">Lowest Density</option>
-        </select>
         <For each={graphsIndex()} fallback={<div>No graphs found</div>}>
           {(graph) => (
             <div>
