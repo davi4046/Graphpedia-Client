@@ -27,6 +27,73 @@ export default function HomePage() {
         </section>
         <section id="featured">
           <h2>Featured</h2>
+          <div class="grid grid-cols-3">
+            <article class="clickable outline">
+              <h3 class="mb-3 text-xl">
+                <a href="">field of work</a>
+              </h3>
+              <p>
+                specialization of a person or organization; see P106 for the
+                occupation
+              </p>
+              <footer class="flex justify-between">
+                <small>42 nodes, 131 edges</small>
+                <small>
+                  <a
+                    href="https://www.wikidata.org/wiki/Property:P101"
+                    target="_blank"
+                    rel="noopener"
+                    class="whitespace-nowrap"
+                  >
+                    View on Wikidata
+                  </a>
+                </small>
+              </footer>
+            </article>
+            <article class="outline">
+              <h3 class="mb-3 text-xl">
+                <a href="">member of political party</a>
+              </h3>
+              <p>
+                the political party of which a person is or has been a member or
+                otherwise affiliated
+              </p>
+              <footer class="flex justify-between">
+                <small>42 nodes, 131 edges</small>
+                <small>
+                  <a
+                    href="https://www.wikidata.org/wiki/Property:P101"
+                    target="_blank"
+                    rel="noopener"
+                    class="whitespace-nowrap"
+                  >
+                    View on Wikidata
+                  </a>
+                </small>
+              </footer>
+            </article>
+            <article class="outline">
+              <h3 class="mb-3 text-xl">
+                <a href="">native language</a>
+              </h3>
+              <p>
+                language or languages a person has learned from early childhood
+              </p>
+              <footer class="flex justify-between">
+                <small>42 nodes, 131 edges</small>
+                <small>
+                  <a
+                    href="https://www.wikidata.org/wiki/Property:P101"
+                    target="_blank"
+                    rel="noopener"
+                    class="whitespace-nowrap"
+                  >
+                    View on Wikidata
+                  </a>
+                </small>
+              </footer>
+            </article>
+          </div>
         </section>
         <section id="graphs">
           <details open>
