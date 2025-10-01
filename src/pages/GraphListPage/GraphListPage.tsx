@@ -1,13 +1,10 @@
 import { Link } from "@solidjs/meta"
-import { useSearchParams } from "@solidjs/router"
 import { For } from "solid-js"
 import Nav from "~/components/Nav"
 import { useGraphsIndex } from "~/utils/graphs/useGraphsIndex"
 
 export default function GraphListPage() {
-  const graphsIndex = useGraphsIndex()
-
-  const [searchParams, setSearchParams] = useSearchParams()
+  const graphs = useGraphsIndex()
 
   return (
     <>
@@ -30,17 +27,17 @@ export default function GraphListPage() {
           </div>
           <label for="sort">Sort by:</label>
           <select name="sort" id="sort">
-            <option value="label-asc">Label (A-z)</option>
-            <option value="label-desc">Label (Z-a)</option>
-            <option value="nodes-desc">Most Nodes</option>
-            <option value="nodes-asc">Fewest Nodes</option>
-            <option value="edges-desc">Most Edges</option>
-            <option value="edges-asc">Fewest Edges</option>
-            <option value="density-desc">Highest Density</option>
-            <option value="density-asc">Lowest Density</option>
+            <option value="label_asc">Label (A-z)</option>
+            <option value="label_desc">Label (Z-a)</option>
+            <option value="nodes_desc">Most Nodes</option>
+            <option value="nodes_asc">Fewest Nodes</option>
+            <option value="edges_desc">Most Edges</option>
+            <option value="edges_asc">Fewest Edges</option>
+            <option value="density_desc">Highest Density</option>
+            <option value="density_asc">Lowest Density</option>
           </select>
         </form>
-        <For each={graphsIndex()} fallback={<div>No graphs found</div>}>
+        <For each={graphs()} fallback={<div>No graphs found</div>}>
           {(graph) => (
             <div>
               <h2>{graph.label}</h2>
