@@ -65,6 +65,39 @@ export default function GraphListPage() {
     setSearch(searchValue)
   }
 
+  const sortedGraphs = () => {
+    const arr = [...(graphs() ?? [])]
+    switch (sort()) {
+      case "label-asc":
+        arr.sort((a, b) => a.label.localeCompare(b.label))
+        break
+      case "label-desc":
+        arr.sort((a, b) => b.label.localeCompare(a.label))
+        break
+      case "nodes-asc":
+        arr.sort((a, b) => a.numNodes - b.numEdges)
+        break
+      case "nodes-desc":
+        arr.sort((a, b) => b.numNodes - a.numNodes)
+        break
+      case "edges-asc":
+        arr.sort((a, b) => a.numEdges - b.numEdges)
+        break
+      case "edges-desc":
+        arr.sort((a, b) => b.numEdges - a.numEdges)
+        break
+      case "density-asc":
+        arr.sort((a, b) => a.numNodes / a.numEdges - b.numNodes / b.numEdges)
+        break
+      case "density-desc":
+        arr.sort((a, b) => b.numNodes / b.numEdges - a.numNodes / a.numEdges)
+        break
+      default:
+        break
+    }
+    return arr
+  }
+
   return (
     <>
       <Link rel="canonical" href="/graphs" />
@@ -98,7 +131,7 @@ export default function GraphListPage() {
             </For>
           </select>
         </form>
-        <For each={graphs()} fallback={<div>No graphs found</div>}>
+        <For each={sortedGraphs()} fallback={<div>No graphs found</div>}>
           {(graph) => (
             <div>
               <h2>{graph.label}</h2>
