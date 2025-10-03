@@ -1,63 +1,96 @@
+import { Key } from "@solid-primitives/keyed"
 import { Link } from "@solidjs/meta"
 import { useSearchParams } from "@solidjs/router"
-import { createMemo, For, Show } from "solid-js"
+import { createEffect, createMemo, For } from "solid-js"
+import { createStore } from "solid-js/store"
 import Nav from "~/components/Nav"
 import { useGraphsIndex } from "~/utils/graphs/useGraphsIndex"
 
+type SortOption = {
+  value: string
+  label: string
+  disabled?: boolean
+}
+
 export default function GraphListPage() {
   const graphs = useGraphsIndex()
-
-  const SORT_OPTIONS = [
-    { value: "relevance", label: "Relevance", requiresSearch: true },
-    { value: "label-asc", label: "Label (A-Z)", requiresSearch: false },
-    { value: "label-desc", label: "Label (Z-A)", requiresSearch: false },
-  ]
-
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const getFirstParamValue = (v: string | string[] | undefined) =>
+  const [sortByRelevance, setSortByRelevance] = createStore<SortOption>({
+    value: "relevance",
+    label: "Relevance",
+    disabled: true,
+  })
+  const [sortByLabelAsc] = createStore<SortOption>({
+    value: "label-asc",
+    label: "Label (A-Z)",
+  })
+  const [sortByLabelDesc] = createStore<SortOption>({
+    value: "label-desc",
+    label: "Label (Z-A)",
+  })
+  const [sortByNodesAsc] = createStore<SortOption>({
+    value: "nodes-asc",
+    label: "Fewest Nodes",
+  })
+  const [sortByNodesDesc] = createStore<SortOption>({
+    value: "nodes-desc",
+    label: "Most Nodes",
+  })
+
+  const sortOptions: SortOption[] = [
+    sortByRelevance,
+    sortByLabelAsc,
+    sortByLabelDesc,
+    sortByNodesDesc,
+    sortByNodesAsc,
+  ]
+
+  createEffect(() => {
+    setSortByRelevance("disabled", search().trim() === "")
+  })
+
+  createEffect(() => {
+    if (!sortByRelevance.disabled) {
+      setSort("relevance")
+    }
+  })
+
+  const getFirstValue = (v: string | string[] | undefined) =>
     Array.isArray(v) ? v[0] : v
 
-  const search = createMemo(() => getFirstParamValue(searchParams.search) || "")
-  const sort = createMemo(
-    () =>
-      getFirstParamValue(searchParams.sort) ||
-      (searchParams.search ? "relevance" : "label-asc")
-  )
+  const search = createMemo(() => getFirstValue(searchParams.search) || "")
 
-  const normalizeSortParam = (sortValue: string, hasSearch: boolean) => {
-    if (hasSearch) {
-      return sortValue === "relevance" ? undefined : sortValue
+  const sort = createMemo(() => {
+    const firstParam = getFirstValue(searchParams.sort)
+    const firstEnabled = sortOptions.find((o) => !o.disabled)
+
+    if (firstParam) {
+      const sortOption = sortOptions.find((o) => o.value === firstParam)
+      return sortOption ? sortOption.value : firstEnabled?.value
+    } else {
+      return firstEnabled?.value
     }
-    return sortValue === "label-asc" ? undefined : sortValue
-  }
+  })
 
   const handleSubmit = (e: Event) => {
     e.preventDefault()
     const form = e.currentTarget as HTMLFormElement
     const formData = new FormData(form)
     const searchValue = (formData.get("search") as string) || ""
-
-    let newSort: string
-    if (searchValue) {
-      newSort = "relevance"
-    } else if (sort() === "relevance") {
-      newSort = "label-asc"
-    } else {
-      newSort = sort()
-    }
-
-    setSearchParams({
-      search: searchValue,
-      sort: normalizeSortParam(newSort, !!searchValue),
-    })
+    setSearchParams({ search: searchValue })
   }
 
   const setSort = (value: string) => {
-    setSearchParams({
-      sort: normalizeSortParam(value, !!search()),
-    })
+    setSearchParams({ sort: value })
   }
+
+  createEffect(() => {
+    const firstEnabled = sortOptions.find((o) => !o.disabled)
+    if (searchParams.sort === firstEnabled?.value) {
+      setSearchParams({ sort: undefined }, { replace: true })
+    }
+  })
 
   return (
     <>
@@ -83,18 +116,13 @@ export default function GraphListPage() {
             value={sort()}
             onChange={(e) => setSort(e.target.value)}
           >
-            <For each={SORT_OPTIONS}>
+            <Key each={sortOptions} by={(option) => option.value}>
               {(option) => (
-                <Show when={!option.requiresSearch || search()}>
-                  <option
-                    value={option.value}
-                    selected={sort() === option.value}
-                  >
-                    {option.label}
-                  </option>
-                </Show>
+                <option value={option().value} disabled={option().disabled}>
+                  {option().label}
+                </option>
               )}
-            </For>
+            </Key>
           </select>
         </form>
         <For each={graphs()} fallback={<div>No graphs found</div>}>
