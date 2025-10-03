@@ -60,6 +60,26 @@ export default function GraphListPage() {
     label: "Most Nodes",
     sortFn: (a, b) => b.numNodes - a.numNodes,
   })
+  const [sortByEdgesAsc] = createStore<SortOption>({
+    value: "edges-asc",
+    label: "Fewest Edges",
+    sortFn: (a, b) => a.numEdges - b.numEdges,
+  })
+  const [sortByEdgesDesc] = createStore<SortOption>({
+    value: "edges-desc",
+    label: "Most Edges",
+    sortFn: (a, b) => b.numEdges - a.numEdges,
+  })
+  const [sortByAvgDegreeAsc] = createStore<SortOption>({
+    value: "avg-degree-asc",
+    label: "Lowest Average Degree",
+    sortFn: (a, b) => a.numEdges / a.numNodes - b.numEdges / b.numNodes,
+  })
+  const [sortByAvgDegreeDesc] = createStore<SortOption>({
+    value: "avg-degree-desc",
+    label: "Highest Average Degree",
+    sortFn: (a, b) => b.numEdges / b.numNodes - a.numEdges / a.numNodes,
+  })
 
   const sortOptions: SortOption[] = [
     sortByRelevance,
@@ -67,6 +87,10 @@ export default function GraphListPage() {
     sortByLabelDesc,
     sortByNodesDesc,
     sortByNodesAsc,
+    sortByEdgesDesc,
+    sortByEdgesAsc,
+    sortByAvgDegreeDesc,
+    sortByAvgDegreeAsc,
   ]
 
   const sort = createMemo(() => {
