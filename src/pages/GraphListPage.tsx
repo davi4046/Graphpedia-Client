@@ -205,6 +205,22 @@ export default function GraphListPage() {
             </For>
           </select>
         </form>
+        <hr />
+        <div class="flex items-center justify-between">
+          <span>
+            Page <strong>{page()}</strong> of{" "}
+            <strong>{Math.ceil(sortedResults().length / perPage)}</strong>
+          </span>
+          <span>
+            Results{" "}
+            <strong>
+              {page() * perPage - (perPage - 1)} &ndash;{" "}
+              {Math.min(page() * perPage, sortedResults().length)}
+            </strong>{" "}
+            of <strong>{sortedResults().length}</strong>
+          </span>
+        </div>
+        <hr />
         <For each={paginatedResults()} fallback={<div>No graphs found</div>}>
           {(graph) => (
             <div>
