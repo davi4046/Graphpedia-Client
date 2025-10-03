@@ -1,7 +1,7 @@
 import { Link } from "@solidjs/meta"
 import { useSearchParams } from "@solidjs/router"
 import Fuse from "fuse.js"
-import { createEffect, createMemo, For, Show } from "solid-js"
+import { createEffect, createMemo, For } from "solid-js"
 import { createStore } from "solid-js/store"
 import Nav from "~/components/Nav"
 import { useGraphsIndex } from "~/utils/graphs/useGraphsIndex"
@@ -185,18 +185,16 @@ export default function GraphListPage() {
             </For>
           </select>
         </form>
-        <Show when={sortedResults()} keyed={true}>
-          <For each={sortedResults()} fallback={<div>No graphs found</div>}>
-            {(graph) => (
-              <div>
-                <h2>
-                  {graph.label} <small>({graph.id})</small>
-                </h2>
-                <p>{graph.description}</p>
-              </div>
-            )}
-          </For>
-        </Show>
+        <For each={sortedResults()} fallback={<div>No graphs found</div>}>
+          {(graph) => (
+            <div>
+              <h2>
+                {graph.label} <small>({graph.id})</small>
+              </h2>
+              <p>{graph.description}</p>
+            </div>
+          )}
+        </For>
       </main>
       <footer>
         <div>Footer</div>
