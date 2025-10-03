@@ -9,6 +9,7 @@ import { useGraphsIndex } from "~/utils/graphs/useGraphsIndex"
 type SortOption = {
   value: string
   label: string
+  sortFn: (a: any, b: any) => number
   disabled?: boolean
 }
 
@@ -32,23 +33,28 @@ export default function GraphListPage() {
   const [sortByRelevance, setSortByRelevance] = createStore<SortOption>({
     value: "relevance",
     label: "Relevance",
+    sortFn: () => 0,
     disabled: search().trim() === "",
   })
   const [sortByLabelAsc] = createStore<SortOption>({
     value: "label-asc",
     label: "Label (A-Z)",
+    sortFn: (a, b) => a.label.localeCompare(b.label),
   })
   const [sortByLabelDesc] = createStore<SortOption>({
     value: "label-desc",
     label: "Label (Z-A)",
+    sortFn: (a, b) => b.label.localeCompare(a.label),
   })
   const [sortByNodesAsc] = createStore<SortOption>({
     value: "nodes-asc",
     label: "Fewest Nodes",
+    sortFn: (a, b) => a.numNodes - b.numNodes,
   })
   const [sortByNodesDesc] = createStore<SortOption>({
     value: "nodes-desc",
     label: "Most Nodes",
+    sortFn: (a, b) => b.numNodes - a.numNodes,
   })
 
   const sortOptions: SortOption[] = [
@@ -114,6 +120,13 @@ export default function GraphListPage() {
     return [...layer1, ...layer2, ...layer3]
   })
 
+  const sortedResults = createMemo(() => {
+    const results = searchResults()
+    const sortOption = sort()
+    if (!sortOption) return results
+    return [...results].sort(sortOption.sortFn)
+  })
+
   return (
     <>
       <Link rel="canonical" href="/graphs" />
@@ -151,7 +164,7 @@ export default function GraphListPage() {
             </For>
           </select>
         </form>
-        <For each={searchResults()} fallback={<div>No graphs found</div>}>
+        <For each={sortedResults()} fallback={<div>No graphs found</div>}>
           {(graph) => (
             <div>
               <h2>
