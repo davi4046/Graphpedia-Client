@@ -1,4 +1,3 @@
-import { Key } from "@solid-primitives/keyed"
 import { Link } from "@solidjs/meta"
 import { useSearchParams } from "@solidjs/router"
 import { createEffect, createMemo, For } from "solid-js"
@@ -16,10 +15,23 @@ export default function GraphListPage() {
   const graphs = useGraphsIndex()
   const [searchParams, setSearchParams] = useSearchParams()
 
+  const getFirstValue = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v
+
+  const search = createMemo(() => getFirstValue(searchParams.search) || "")
+
+  const handleSubmit = (e: Event) => {
+    e.preventDefault()
+    const form = e.currentTarget as HTMLFormElement
+    const formData = new FormData(form)
+    const searchValue = (formData.get("search") as string) || ""
+    setSearchParams({ search: searchValue })
+  }
+
   const [sortByRelevance, setSortByRelevance] = createStore<SortOption>({
     value: "relevance",
     label: "Relevance",
-    disabled: true,
+    disabled: search().trim() === "",
   })
   const [sortByLabelAsc] = createStore<SortOption>({
     value: "label-asc",
@@ -46,46 +58,29 @@ export default function GraphListPage() {
     sortByNodesAsc,
   ]
 
+  const sort = createMemo(() => {
+    const firstParam = getFirstValue(searchParams.sort)
+    const enabledOptions = sortOptions.filter((o) => !o.disabled)
+    if (enabledOptions.length === 0) return null
+    if (!firstParam) return enabledOptions[0]
+    const sortOption = enabledOptions.find((o) => o.value === firstParam)
+    return sortOption ? sortOption : enabledOptions[0]
+  })
+
   createEffect(() => {
+    // Disable "Sort by Relevance" if there's no search query
     setSortByRelevance("disabled", search().trim() === "")
   })
 
   createEffect(() => {
+    // Activate "Sort by Relevance" when it becomes enabled
     if (!sortByRelevance.disabled) {
-      setSort("relevance")
+      setSearchParams({ sort: "relevance" })
     }
   })
-
-  const getFirstValue = (v: string | string[] | undefined) =>
-    Array.isArray(v) ? v[0] : v
-
-  const search = createMemo(() => getFirstValue(searchParams.search) || "")
-
-  const sort = createMemo(() => {
-    const firstParam = getFirstValue(searchParams.sort)
-    const firstEnabled = sortOptions.find((o) => !o.disabled)
-
-    if (firstParam) {
-      const sortOption = sortOptions.find((o) => o.value === firstParam)
-      return sortOption ? sortOption.value : firstEnabled?.value
-    } else {
-      return firstEnabled?.value
-    }
-  })
-
-  const handleSubmit = (e: Event) => {
-    e.preventDefault()
-    const form = e.currentTarget as HTMLFormElement
-    const formData = new FormData(form)
-    const searchValue = (formData.get("search") as string) || ""
-    setSearchParams({ search: searchValue })
-  }
-
-  const setSort = (value: string) => {
-    setSearchParams({ sort: value })
-  }
 
   createEffect(() => {
+    // Remove sort param if it's the first enabled option
     const firstEnabled = sortOptions.find((o) => !o.disabled)
     if (searchParams.sort === firstEnabled?.value) {
       setSearchParams({ sort: undefined }, { replace: true })
@@ -113,16 +108,20 @@ export default function GraphListPage() {
           <select
             name="sort"
             id="sort"
-            value={sort()}
-            onChange={(e) => setSort(e.target.value)}
+            value={sort()?.value}
+            onChange={(e) => setSearchParams({ sort: e.target.value })}
           >
-            <Key each={sortOptions} by={(option) => option.value}>
+            <For each={sortOptions}>
               {(option) => (
-                <option value={option().value} disabled={option().disabled}>
-                  {option().label}
+                <option
+                  value={option.value}
+                  disabled={option.disabled}
+                  selected={sort() === option}
+                >
+                  {option.label}
                 </option>
               )}
-            </Key>
+            </For>
           </select>
         </form>
         <For each={graphs()} fallback={<div>No graphs found</div>}>
