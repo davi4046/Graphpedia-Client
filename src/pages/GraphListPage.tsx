@@ -27,7 +27,11 @@ export default function GraphListPage() {
     const form = e.currentTarget as HTMLFormElement
     const formData = new FormData(form)
     const searchValue = (formData.get("search") as string) || ""
-    setSearchParams({ search: searchValue })
+    if (searchValue === "") {
+      setSearchParams({ search: searchValue })
+    } else {
+      setSearchParams({ search: searchValue, sort: "relevance" })
+    }
   }
 
   const [sortByRelevance, setSortByRelevance] = createStore<SortOption>({
@@ -77,13 +81,6 @@ export default function GraphListPage() {
   createEffect(() => {
     // Disable "Sort by Relevance" if there's no search query
     setSortByRelevance("disabled", search().trim() === "")
-  })
-
-  createEffect(() => {
-    // Activate "Sort by Relevance" when it becomes enabled
-    if (!sortByRelevance.disabled) {
-      setSearchParams({ sort: "relevance" })
-    }
   })
 
   createEffect(() => {
