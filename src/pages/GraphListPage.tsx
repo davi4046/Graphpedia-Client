@@ -148,6 +148,26 @@ export default function GraphListPage() {
     return [...results].sort(sortOption.sortFn)
   })
 
+  const page = createMemo(() => {
+    const p = parseInt(getFirstValue(searchParams.page) || "1")
+    return p
+  })
+
+  const perPage = 25
+
+  const paginatedResults = createMemo(() => {
+    const p = page()
+    const results = sortedResults()
+    const start = (p - 1) * perPage
+    return results.slice(start, start + perPage)
+  })
+
+  const scrollToMain = () => {
+    document.getElementsByTagName("main")[0].scrollIntoView({
+      block: "start",
+    })
+  }
+
   return (
     <>
       <Link rel="canonical" href="/graphs" />
@@ -185,7 +205,7 @@ export default function GraphListPage() {
             </For>
           </select>
         </form>
-        <For each={sortedResults()} fallback={<div>No graphs found</div>}>
+        <For each={paginatedResults()} fallback={<div>No graphs found</div>}>
           {(graph) => (
             <div>
               <h2>
@@ -195,6 +215,35 @@ export default function GraphListPage() {
             </div>
           )}
         </For>
+        <hr />
+        <ul class="flex gap-4">
+          <li class="list-none">
+            <a
+              href={`?page=${page() - 1}`}
+              role="button"
+              onClick={(e) => {
+                e.preventDefault()
+                setSearchParams({ page: (page() - 1).toString() })
+                scrollToMain()
+              }}
+            >
+              Back
+            </a>
+          </li>
+          <li class="list-none">
+            <a
+              href={`?page=${page() + 1}`}
+              role="button"
+              onClick={(e) => {
+                e.preventDefault()
+                setSearchParams({ page: (page() + 1).toString() })
+                scrollToMain()
+              }}
+            >
+              Next
+            </a>
+          </li>
+        </ul>
       </main>
       <footer>
         <div>Footer</div>
