@@ -1,5 +1,6 @@
 import { Link } from "@solidjs/meta"
 import { useSearchParams } from "@solidjs/router"
+import Fuse from "fuse.js"
 import { createEffect, createMemo, For } from "solid-js"
 import { createStore } from "solid-js/store"
 import Nav from "~/components/Nav"
@@ -87,6 +88,32 @@ export default function GraphListPage() {
     }
   })
 
+  const searchResults = createMemo(() => {
+    const data = graphs()
+    const q = search()
+    if (!data) return []
+    if (!q) return data
+
+    // Layer 1: id/label
+    const layer1 = new Fuse(data, { keys: ["id", "label"], threshold: 0.3 })
+      .search(q)
+      .map((r) => r.item)
+
+    // Layer 2: aliases
+    const layer2 = new Fuse(data, { keys: ["aliases"], threshold: 0.3 })
+      .search(q)
+      .map((r) => r.item)
+      .filter((item) => !layer1.includes(item)) // remove duplicates
+
+    // Layer 3: description
+    const layer3 = new Fuse(data, { keys: ["description"], threshold: 0.3 })
+      .search(q)
+      .map((r) => r.item)
+      .filter((item) => !layer1.includes(item) && !layer2.includes(item))
+
+    return [...layer1, ...layer2, ...layer3]
+  })
+
   return (
     <>
       <Link rel="canonical" href="/graphs" />
@@ -124,7 +151,7 @@ export default function GraphListPage() {
             </For>
           </select>
         </form>
-        <For each={graphs()} fallback={<div>No graphs found</div>}>
+        <For each={searchResults()} fallback={<div>No graphs found</div>}>
           {(graph) => (
             <div>
               <h2>
