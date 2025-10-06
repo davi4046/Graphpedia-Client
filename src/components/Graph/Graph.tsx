@@ -34,11 +34,7 @@ export default function Graph(props: { graphId: string }) {
 
   useGraphEngine(() => containerRef, engineTiles)
 
-  return (
-    <div class="relative w-screen h-screen">
-      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
-    </div>
-  )
+  return <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
 }
 
 function createEngineTile(
