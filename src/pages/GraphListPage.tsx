@@ -1,5 +1,6 @@
+import { createPagination } from "@solid-primitives/pagination"
 import { Link } from "@solidjs/meta"
-import { useSearchParams } from "@solidjs/router"
+import { useLocation, useSearchParams } from "@solidjs/router"
 import Fuse from "fuse.js"
 import { createEffect, createMemo, For } from "solid-js"
 import { createStore } from "solid-js/store"
@@ -148,24 +149,35 @@ export default function GraphListPage() {
     return [...results].sort(sortOption.sortFn)
   })
 
-  const page = createMemo(() => {
-    const p = parseInt(getFirstValue(searchParams.page) || "1")
-    return p
+  const resultsPerPage = 25
+
+  const pageNum = createMemo(() => {
+    return parseInt(getFirstValue(searchParams.page) || "1")
   })
 
-  const perPage = 25
+  const [paginationProps, page, setPage] = createPagination(() => ({
+    pages: Math.ceil(sortedResults().length / resultsPerPage),
+    initialPage: pageNum(),
+  }))
 
   const paginatedResults = createMemo(() => {
-    const p = page()
     const results = sortedResults()
-    const start = (p - 1) * perPage
-    return results.slice(start, start + perPage)
+    const start = (page() - 1) * resultsPerPage
+    return results.slice(start, start + resultsPerPage)
   })
 
-  const scrollToMain = () => {
-    document.getElementsByTagName("main")[0].scrollIntoView({
-      block: "start",
-    })
+  createEffect(() => {
+    setPage(pageNum())
+  })
+
+  const location = useLocation()
+
+  const pageUrl = (page?: number) => {
+    const params = new URLSearchParams(location.search)
+    if (page !== undefined) params.set("page", String(page))
+    else params.delete("page")
+    const newQuery = params.toString()
+    return newQuery ? `?${newQuery}` : ""
   }
 
   return (
@@ -208,19 +220,30 @@ export default function GraphListPage() {
         </form>
         <section aria-label="Search Results">
           <header class="flex">
+            <nav aria-label="Pagination Navigation (top)">
+              <ul>
+                <For each={paginationProps()}>
+                  {(props) => (
+                    <li>
+                      <a href={pageUrl(props.page)} children={props.children} />
+                    </li>
+                  )}
+                </For>
+              </ul>
+            </nav>
             <strong class="ml-auto">
-              {page() * perPage - (perPage - 1)} &ndash;{" "}
-              {Math.min(page() * perPage, sortedResults().length)} of{" "}
+              {page() * resultsPerPage - (resultsPerPage - 1)} &ndash;{" "}
+              {Math.min(page() * resultsPerPage, sortedResults().length)} of{" "}
               {sortedResults().length}
             </strong>
           </header>
-          <ol>
+          <ul>
             <For
               each={paginatedResults()}
               fallback={<div>No graphs found</div>}
             >
               {(graph) => (
-                <li class="m-0">
+                <li class="m-0 list-none">
                   <a
                     href={`/graph/${graph.id}`}
                     class="group flex w-full flex-col py-2 no-underline hover:bg-gray-200"
@@ -233,36 +256,19 @@ export default function GraphListPage() {
                 </li>
               )}
             </For>
-          </ol>
+          </ul>
         </section>
-        <ul class="flex gap-4">
-          <li class="list-none">
-            <a
-              href={`?page=${page() - 1}`}
-              role="button"
-              onClick={(e) => {
-                e.preventDefault()
-                setSearchParams({ page: (page() - 1).toString() })
-                scrollToMain()
-              }}
-            >
-              Back
-            </a>
-          </li>
-          <li class="list-none">
-            <a
-              href={`?page=${page() + 1}`}
-              role="button"
-              onClick={(e) => {
-                e.preventDefault()
-                setSearchParams({ page: (page() + 1).toString() })
-                scrollToMain()
-              }}
-            >
-              Next
-            </a>
-          </li>
-        </ul>
+        <nav aria-label="Pagination Navigation (bottom)">
+          <ul>
+            <For each={paginationProps()}>
+              {(props) => (
+                <li>
+                  <a href={pageUrl(props.page)} children={props.children} />
+                </li>
+              )}
+            </For>
+          </ul>
+        </nav>
       </main>
       <footer>
         <div>Footer</div>
