@@ -31,7 +31,7 @@ export default function HomePage() {
         </section>
         <section id="graphs">
           <details open>
-            <summary role="button">Complete List of Graphs</summary>
+            <summary role="button">All Graphs</summary>
             <ul class="flex flex-wrap justify-center gap-2">
               <For each={graphs()} fallback={<div>No graphs found</div>}>
                 {(graph) => (
