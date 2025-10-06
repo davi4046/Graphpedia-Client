@@ -185,10 +185,9 @@ export default function GraphListPage() {
             />
             <input type="submit" value="Search" />
           </div>
-          <label for="sort">Sort by:</label>
           <select
             name="sort"
-            id="sort"
+            aria-label="Sort results by"
             value={sort()?.value}
             onChange={(e) => setSearchParams({ sort: e.target.value })}
           >
@@ -199,7 +198,9 @@ export default function GraphListPage() {
                   disabled={option.disabled}
                   selected={sort() === option}
                 >
-                  {option.label}
+                  {sort() === option
+                    ? `Sort by: ${option.label}`
+                    : option.label}
                 </option>
               )}
             </For>
