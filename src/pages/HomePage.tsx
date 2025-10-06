@@ -36,7 +36,12 @@ export default function HomePage() {
               <For each={graphs()} fallback={<div>No graphs found</div>}>
                 {(graph) => (
                   <li class="list-none before:mr-2 before:content-['•']">
-                    <a href={`/graph/${graph.id}`}>{graph.label}</a>
+                    <a
+                      href={`/graph/${graph.id}`}
+                      class="visited:text-visited visited:decoration-visited transition-none"
+                    >
+                      {graph.label}
+                    </a>
                   </li>
                 )}
               </For>
