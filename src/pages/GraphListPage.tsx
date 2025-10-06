@@ -240,11 +240,11 @@ export default function GraphListPage() {
                 </For>
               </ul>
             </nav>
-            <strong class="ml-auto">
+            <p class="ml-auto font-semibold">
               {page() * resultsPerPage - (resultsPerPage - 1)} &ndash;{" "}
               {Math.min(page() * resultsPerPage, sortedResults().length)} of{" "}
               {sortedResults().length}
-            </strong>
+            </p>
           </header>
           <ul>
             <For
