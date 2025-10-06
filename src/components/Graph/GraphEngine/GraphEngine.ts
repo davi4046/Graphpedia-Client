@@ -47,6 +47,9 @@ export default class GraphEngine {
     // ("popping") due to transient empty search results. "zoomed-end" avoids
     // these problems by firing only once, with the final, correct bounds.
     this.graphView.onViewportZoomedEnd(update)
+
+    // Initial load
+    this.loadTilesInViewport()
   }
 
   private loadTilesInViewport() {
@@ -56,7 +59,10 @@ export default class GraphEngine {
     for (const tile of tilesInBounds) {
       if (this.loadedTiles.has(tile)) continue
       this.loadedTiles.add(tile)
-      tile.getData().then((data) => this.loadTileData(data))
+      tile.getData().then((data) => {
+        this.loadTileData(data)
+        this.render()
+      })
     }
   }
 
