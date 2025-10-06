@@ -225,7 +225,16 @@ export default function GraphListPage() {
                 <For each={paginationProps()}>
                   {(props) => (
                     <li>
-                      <a href={pageUrl(props.page)} children={props.children} />
+                      <a
+                        href={pageUrl(props.page)}
+                        class={`${
+                          props["aria-current"]
+                            ? "bg-gray-300"
+                            : "hover:bg-gray-200 active:bg-gray-200"
+                        } flex h-10 w-10 justify-center whitespace-nowrap`}
+                        aria-current={props["aria-current"]}
+                        children={props.children}
+                      />
                     </li>
                   )}
                 </For>
@@ -263,7 +272,16 @@ export default function GraphListPage() {
             <For each={paginationProps()}>
               {(props) => (
                 <li>
-                  <a href={pageUrl(props.page)} children={props.children} />
+                  <a
+                    href={pageUrl(props.page)}
+                    class={`${
+                      props["aria-current"]
+                        ? "bg-gray-300"
+                        : "hover:bg-gray-200 active:bg-gray-200"
+                    } flex h-10 w-10 justify-center whitespace-nowrap`}
+                    aria-current={props["aria-current"]}
+                    children={props.children}
+                  />
                 </li>
               )}
             </For>
