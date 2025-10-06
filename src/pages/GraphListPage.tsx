@@ -219,7 +219,7 @@ export default function GraphListPage() {
           </select>
         </form>
         <section aria-label="Search Results">
-          <header class="flex">
+          <header class="flex justify-between">
             <nav aria-label="Pagination Navigation (top)">
               <ul>
                 <For each={paginationProps()}>
@@ -240,7 +240,7 @@ export default function GraphListPage() {
                 </For>
               </ul>
             </nav>
-            <p class="ml-auto font-semibold">
+            <p class="font-semibold">
               {page() * resultsPerPage - (resultsPerPage - 1)} &ndash;{" "}
               {Math.min(page() * resultsPerPage, sortedResults().length)} of{" "}
               {sortedResults().length}
