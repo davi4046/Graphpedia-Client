@@ -19,7 +19,7 @@ export default class GraphView {
 
     await app.init({
       background: "white",
-      resizeTo: window,
+      resizeTo: container,
       preference: "webgpu",
       antialias: false,
     })
