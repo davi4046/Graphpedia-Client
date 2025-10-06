@@ -1,5 +1,6 @@
 import { Link } from "@solidjs/meta"
 import { For } from "solid-js"
+import Graph from "~/components/Graph"
 import Nav from "~/components/Nav"
 import { useGraphsIndex } from "~/utils/graphs/useGraphsIndex"
 
@@ -27,7 +28,10 @@ export default function HomePage() {
         </section>
         <section id="featured">
           <h2>Featured Graph</h2>
-          <div class="h-64 bg-green-300"></div>
+          <div class="relative h-72 border border-gray-300">
+            <Graph graphId="P35" />
+            <div class="pointer-events-none absolute inset-0 shadow-inner"></div>
+          </div>
         </section>
         <section id="graphs">
           <details open>
