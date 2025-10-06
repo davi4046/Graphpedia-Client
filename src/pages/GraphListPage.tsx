@@ -220,7 +220,7 @@ export default function GraphListPage() {
         </form>
         <section aria-label="Search Results">
           <header class="flex justify-between">
-            <nav aria-label="Pagination Navigation (top)">
+            <nav aria-label="Top pagination for search results">
               <ul>
                 <For each={paginationProps()}>
                   {(props) => (
@@ -257,7 +257,7 @@ export default function GraphListPage() {
                     href={`/graph/${graph.id}`}
                     class="group flex w-full flex-col py-2 no-underline hover:bg-gray-200"
                   >
-                    <strong class="font-semibold group-hover:underline">
+                    <strong class="group-visited:text-visited group-visited:decoration-visited font-semibold group-hover:underline">
                       {graph.label} ({graph.id})
                     </strong>
                     <small class="text-gray-600">{graph.description}</small>
@@ -267,7 +267,7 @@ export default function GraphListPage() {
             </For>
           </ul>
         </section>
-        <nav aria-label="Pagination Navigation (bottom)">
+        <nav aria-label="Bottom pagination for search results">
           <ul>
             <For each={paginationProps()}>
               {(props) => (
