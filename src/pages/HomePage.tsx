@@ -1,8 +1,8 @@
 import { Link } from "@solidjs/meta"
 import { For } from "solid-js"
 import Graph from "~/components/Graph"
+import { useGraphsIndex } from "~/components/Graph/useGraphsIndex"
 import Nav from "~/components/Nav"
-import { useGraphsIndex } from "~/utils/graphs/useGraphsIndex"
 
 export default function HomePage() {
   const graphs = useGraphsIndex()

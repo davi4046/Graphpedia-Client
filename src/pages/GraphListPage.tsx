@@ -4,8 +4,8 @@ import { useLocation, useSearchParams } from "@solidjs/router"
 import Fuse from "fuse.js"
 import { createEffect, createMemo, For } from "solid-js"
 import { createStore } from "solid-js/store"
+import { useGraphsIndex } from "~/components/Graph/useGraphsIndex"
 import Nav from "~/components/Nav"
-import { useGraphsIndex } from "~/utils/graphs/useGraphsIndex"
 
 type SortOption = {
   value: string
