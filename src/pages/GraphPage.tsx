@@ -7,7 +7,9 @@ export default function GraphPage() {
   return (
     <>
       <Link rel="canonical" href={`/graph/${params.graphId}`} />
-      <Graph graphId={params.graphId} />
+      <div style="height: 100vh; width: 100vw;">
+        <Graph graphId={params.graphId} />
+      </div>
     </>
   )
 }
