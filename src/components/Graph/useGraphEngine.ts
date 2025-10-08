@@ -1,11 +1,11 @@
 import { createEffect, onCleanup } from "solid-js"
 import GraphEngine from "./GraphEngine"
 import GraphView from "./GraphEngine/GraphView"
-import { GETile } from "./GraphEngine/types"
+import { GraphTile } from "./GraphEngine/types"
 
 export function useGraphEngine(
   containerRef: () => HTMLDivElement | undefined,
-  tiles: () => GETile[]
+  tiles: () => GraphTile[] | undefined
 ) {
   let graphView: GraphView | undefined
   let graphEngine: GraphEngine | undefined

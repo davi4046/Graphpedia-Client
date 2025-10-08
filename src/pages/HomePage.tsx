@@ -1,11 +1,11 @@
 import { Link } from "@solidjs/meta"
 import { For } from "solid-js"
 import Graph from "~/components/Graph"
-import { useGraphsIndex } from "~/components/Graph/useGraphsIndex"
 import Nav from "~/components/Nav"
+import { useGraphList } from "./useGraphList"
 
 export default function HomePage() {
-  const graphs = useGraphsIndex()
+  const graphList = useGraphList()
 
   return (
     <>
@@ -37,7 +37,7 @@ export default function HomePage() {
           <details open>
             <summary role="button">All Graphs</summary>
             <ul class="flex flex-wrap justify-center gap-2">
-              <For each={graphs()} fallback={<div>No graphs found</div>}>
+              <For each={graphList()} fallback={<div>No graphs found</div>}>
                 {(graph) => (
                   <li class="list-none before:mr-2 before:content-['•']">
                     <a

@@ -4,8 +4,8 @@ import { useLocation, useSearchParams } from "@solidjs/router"
 import Fuse from "fuse.js"
 import { createEffect, createMemo, For } from "solid-js"
 import { createStore } from "solid-js/store"
-import { useGraphsIndex } from "~/components/Graph/useGraphsIndex"
 import Nav from "~/components/Nav"
+import { useGraphList } from "./useGraphList"
 
 type SortOption = {
   value: string
@@ -15,7 +15,7 @@ type SortOption = {
 }
 
 export default function GraphListPage() {
-  const graphs = useGraphsIndex()
+  const graphList = useGraphList()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const getFirstValue = (v: string | string[] | undefined) =>
@@ -29,9 +29,13 @@ export default function GraphListPage() {
     const formData = new FormData(form)
     const searchValue = (formData.get("search") as string) || ""
     if (searchValue === "") {
-      setSearchParams({ search: searchValue })
+      setSearchParams({ search: searchValue, page: undefined })
     } else {
-      setSearchParams({ search: searchValue, sort: "relevance" })
+      setSearchParams({
+        search: searchValue,
+        page: undefined,
+        sort: "relevance",
+      })
     }
   }
 
@@ -117,7 +121,7 @@ export default function GraphListPage() {
   })
 
   const searchResults = createMemo(() => {
-    const data = graphs()
+    const data = graphList()
     const q = search()
     if (!data) return []
     if (!q) return data
@@ -201,7 +205,9 @@ export default function GraphListPage() {
             name="sort"
             aria-label="Sort results by"
             value={sort()?.value}
-            onChange={(e) => setSearchParams({ sort: e.target.value })}
+            onChange={(e) =>
+              setSearchParams({ sort: e.target.value, page: undefined })
+            }
           >
             <For each={sortOptions}>
               {(option) => (

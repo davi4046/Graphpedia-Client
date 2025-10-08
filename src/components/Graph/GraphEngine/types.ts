@@ -1,36 +1,20 @@
-export interface GETile {
-  bbox: GETileBBox
-  getData(): Promise<GETileData>
+import { BBox } from "~/types/geometry"
+
+export interface GraphTile {
+  readonly id: number
+  readonly bbox: BBox
+  nodes(): Promise<readonly GraphNode[]>
+  edges(): Promise<readonly GraphEdge[]>
 }
 
-export interface GETileBBox {
-  minX: number
-  minY: number
-  maxX: number
-  maxY: number
+export interface GraphNode {
+  readonly id: number
+  readonly x: number
+  readonly y: number
+  label(): Promise<string>
 }
 
-export interface GETileData {
-  nodes: GENode[]
-  edges: GEEdge[]
+export interface GraphEdge {
+  readonly sourceId: number
+  readonly targetId: number
 }
-
-export interface GENode {
-  id: NodeId
-  x: number
-  y: number
-  getData(): Promise<GENodeData>
-}
-
-export interface GENodeData {
-  label: string
-}
-
-export interface GEEdge {
-  id: EdgeId
-  source: GENode
-  target: GENode
-}
-
-export type NodeId = string
-export type EdgeId = string
