@@ -4,7 +4,7 @@ import { useLocation, useSearchParams } from "@solidjs/router"
 import Fuse from "fuse.js"
 import { createEffect, createMemo, For } from "solid-js"
 import { createStore } from "solid-js/store"
-import Nav from "~/components/Nav"
+import Header from "~/components/Header"
 import { useGraphList } from "./useGraphList"
 
 type SortOption = {
@@ -187,9 +187,7 @@ export default function GraphListPage() {
   return (
     <>
       <Link rel="canonical" href="/graphs" />
-      <header>
-        <Nav />
-      </header>
+      <Header />
       <main>
         <form action="/graphs" method="get" onSubmit={handleSubmit}>
           <div role="group">

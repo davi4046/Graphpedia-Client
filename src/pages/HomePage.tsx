@@ -1,7 +1,7 @@
 import { Link } from "@solidjs/meta"
 import { For } from "solid-js"
 import Graph from "~/components/Graph"
-import Nav from "~/components/Nav"
+import Header from "~/components/Header"
 import { useGraphList } from "./useGraphList"
 
 export default function HomePage() {
@@ -10,9 +10,7 @@ export default function HomePage() {
   return (
     <>
       <Link rel="canonical" href="/" />
-      <header>
-        <Nav />
-      </header>
+      <Header />
       <main>
         <section id="welcome" class="hero-pattern bg-repeat py-16">
           <div class="flex flex-col items-center">
