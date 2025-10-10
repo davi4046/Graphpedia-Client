@@ -25,8 +25,19 @@ export default function Graph(props: { graphId: string }) {
   return (
     <div class="relative h-full w-full">
       <div ref={containerRef} class="h-full w-full" />
-      <div class="pointer-events-none absolute top-0 left-0 h-full w-full">
-        <h1 class="m-4">{graphInfo()?.label}</h1>
+      <div class="absolute top-0 left-0">
+        <a
+          href="/"
+          class="flex flex-col items-center gap-0.5 bg-white shadow-sm"
+        >
+          <img src="/graphpedia.svg" class="h-14 w-14" />
+          <img src="/graphpedia-wordmark.svg" class="h-auto w-14" />
+        </a>
+      </div>
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 border-x border-b border-gray-300 bg-white px-1 shadow-sm">
+        <h1 class="mb-0 text-lg font-semibold">
+          {graphInfo()?.label} ({graphInfo()?.id})
+        </h1>
       </div>
     </div>
   )
