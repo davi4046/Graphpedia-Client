@@ -42,6 +42,9 @@ export default class GraphView {
     viewport.addChild(edgeContainer)
     viewport.addChild(nodeContainer)
 
+    const wheelHandler = (e: WheelEvent) => e.preventDefault()
+    app.canvas.addEventListener("wheel", wheelHandler, { passive: false })
+
     return new GraphView(app, viewport, nodeContainer, edgeContainer)
   }
 
