@@ -83,4 +83,14 @@ export default class GraphView {
   destroy() {
     this.app.destroy(true, { children: true, texture: true })
   }
+
+  resetView() {
+    this.viewport.moveCorner(0, 0) // Does not trigger "moved" event
+
+    if (this.viewport.scale.x !== 1) {
+      this.viewport.setZoom(1) // Triggers "zoomed-end" event if zoom changed
+    } else {
+      this.viewport.emit("zoomed-end", this.viewport)
+    }
+  }
 }

@@ -26,7 +26,7 @@ export default function Graph(props: { graphId: string }) {
     setTiles(result)
   })
 
-  useGraphEngine(() => containerRef, tiles)
+  const { graphView } = useGraphEngine(() => containerRef, tiles)
 
   return (
     <div class="relative h-full w-full">
@@ -48,7 +48,7 @@ export default function Graph(props: { graphId: string }) {
       <div class="pointer-events-none absolute right-2 bottom-2 flex flex-col gap-4">
         <div class="flex flex-col gap-1">
           <button
-            onClick={() => {}}
+            onClick={() => graphView()?.resetView()}
             class={styles.control}
             data-tooltip="Reset view"
             data-placement="left"
