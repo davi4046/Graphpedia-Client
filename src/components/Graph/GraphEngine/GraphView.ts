@@ -84,22 +84,3 @@ export default class GraphView {
     this.app.destroy(true, { children: true, texture: true })
   }
 }
-
-function intersectLineWithSquareBorder(
-  center: { x: number; y: number },
-  target: { x: number; y: number },
-  half: number
-) {
-  const dx = target.x - center.x
-  const dy = target.y - center.y
-
-  if (dx === 0 && dy === 0) return { x: center.x, y: center.y }
-
-  const absDx = Math.abs(dx)
-  const absDy = Math.abs(dy)
-  const scale = half / Math.max(absDx, absDy)
-  return {
-    x: center.x + dx * scale,
-    y: center.y + dy * scale,
-  }
-}
