@@ -74,7 +74,11 @@ export default function Graph(props: { graphId: string }) {
           <img src="/graphpedia-wordmark.svg" class="h-auto w-14" />
         </a>
       </div>
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 border-x border-b border-gray-300 bg-white px-1 shadow-sm">
+      <div
+        class="absolute top-0 left-1/2 -translate-x-1/2 border-x border-b border-gray-300 bg-white px-1 shadow-sm"
+        data-tooltip={`${graphInfo()?.label} (${graphInfo()?.id}): ${graphInfo()?.description}`}
+        data-placement="bottom"
+      >
         <h1 class="mb-0 text-lg font-semibold">
           {graphInfo()?.label} ({graphInfo()?.id})
         </h1>
