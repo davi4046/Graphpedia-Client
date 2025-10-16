@@ -51,6 +51,17 @@ export default function Graph(props: { graphId: string }) {
     [...zoomLevels].reverse().find((level) => level < currentZoom()) ??
     zoomLevels[0]
 
+  const [showZoomIndicator, setShowZoomIndicator] = createSignal(false)
+  let zoomTimeout: number | undefined
+
+  createEffect(() => {
+    currentZoom()
+    setShowZoomIndicator(true)
+    clearTimeout(zoomTimeout)
+    zoomTimeout = window.setTimeout(() => setShowZoomIndicator(false), 1200)
+    onCleanup(() => clearTimeout(zoomTimeout))
+  })
+
   return (
     <div class="relative h-full w-full">
       <div ref={containerRef} class="h-full w-full" />
@@ -115,6 +126,13 @@ export default function Graph(props: { graphId: string }) {
             <ShareIcon />
           </button>
         </div>
+      </div>
+      <div
+        class={`pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg bg-black/60 px-3 py-1 text-sm text-white transition-opacity duration-400 ${
+          showZoomIndicator() ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        Zoom: {(currentZoom() * 100).toFixed(0)}%
       </div>
     </div>
   )
