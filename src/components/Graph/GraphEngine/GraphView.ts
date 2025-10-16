@@ -52,8 +52,16 @@ export default class GraphView {
     this.viewport.on("moved", handler)
   }
 
+  offViewportMoved(handler: () => void) {
+    this.viewport.off("moved", handler)
+  }
+
   onViewportZoomedEnd(handler: () => void) {
     this.viewport.on("zoomed-end", handler)
+  }
+
+  offViewportZoomedEnd(handler: () => void) {
+    this.viewport.off("zoomed-end", handler)
   }
 
   getVisibleBounds() {
@@ -92,5 +100,13 @@ export default class GraphView {
     } else {
       this.viewport.emit("zoomed-end", this.viewport)
     }
+  }
+
+  getZoom() {
+    return this.viewport.scale.x
+  }
+
+  setZoom(zoom: number) {
+    this.viewport.setZoom(zoom, true)
   }
 }

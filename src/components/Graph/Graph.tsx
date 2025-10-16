@@ -1,4 +1,4 @@
-import { createSignal, onMount } from "solid-js"
+import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
 import { GRAPH_DATA_URL } from "~/config"
 import CrosshairIcon from "~/icons/CrosshairIcon"
 import ShareIcon from "~/icons/ShareIcon"
@@ -28,6 +28,29 @@ export default function Graph(props: { graphId: string }) {
 
   const { graphView } = useGraphEngine(() => containerRef, tiles)
 
+  const zoomLevels = [0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4, 6, 8]
+
+  const [currentZoom, setCurrentZoom] = createSignal(1)
+
+  createEffect(() => {
+    const view = graphView()
+    if (!view) return
+
+    const handler = () => setCurrentZoom(view.getZoom())
+    view.onViewportZoomedEnd(handler)
+
+    onCleanup(() => {
+      view.offViewportZoomedEnd(handler)
+    })
+  })
+
+  const nextZoomIn = () =>
+    zoomLevels.find((level) => level > currentZoom()) ?? zoomLevels.at(-1)!
+
+  const nextZoomOut = () =>
+    [...zoomLevels].reverse().find((level) => level < currentZoom()) ??
+    zoomLevels[0]
+
   return (
     <div class="relative h-full w-full">
       <div ref={containerRef} class="h-full w-full" />
@@ -56,7 +79,7 @@ export default function Graph(props: { graphId: string }) {
             <CrosshairIcon />
           </button>
           <button
-            onClick={() => {}}
+            onClick={() => graphView()?.setZoom(nextZoomIn())}
             class={styles.control}
             data-tooltip="Zoom in"
             data-placement="left"
@@ -64,7 +87,7 @@ export default function Graph(props: { graphId: string }) {
             <ZoomInIcon />
           </button>
           <button
-            onClick={() => {}}
+            onClick={() => graphView()?.setZoom(nextZoomOut())}
             class={styles.control}
             data-tooltip="Zoom out"
             data-placement="left"
