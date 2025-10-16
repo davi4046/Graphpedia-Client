@@ -48,6 +48,10 @@ export default class GraphView {
     return new GraphView(app, viewport, nodeContainer, edgeContainer)
   }
 
+  destroy() {
+    this.app.destroy(true, { children: true, texture: true })
+  }
+
   onViewportMoved(handler: () => void) {
     this.viewport.on("moved", handler)
   }
@@ -86,10 +90,6 @@ export default class GraphView {
 
   addEdge(source: NodeView, target: NodeView) {
     return new EdgeView(this.edgeContainer, source, target)
-  }
-
-  destroy() {
-    this.app.destroy(true, { children: true, texture: true })
   }
 
   resetView() {
