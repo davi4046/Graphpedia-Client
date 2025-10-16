@@ -62,6 +62,8 @@ export default function Graph(props: { graphId: string }) {
     onCleanup(() => clearTimeout(zoomTimeout))
   })
 
+  const [shareModalOpen, setShareModalOpen] = createSignal(false)
+
   return (
     <div class="relative h-full w-full">
       <div ref={containerRef} class="h-full w-full" />
@@ -122,7 +124,7 @@ export default function Graph(props: { graphId: string }) {
             <WikidataMonogram />
           </a>
           <button
-            onClick={() => {}}
+            onClick={() => setShareModalOpen(true)}
             class={styles.control}
             data-tooltip="Share this graph"
             data-placement="left"
@@ -138,6 +140,22 @@ export default function Graph(props: { graphId: string }) {
       >
         Zoom: {(currentZoom() * 100).toFixed(0)}%
       </div>
+      <dialog open={shareModalOpen()} onClick={() => setShareModalOpen(false)}>
+        <article onClick={(e) => e.stopPropagation()}>
+          <header>
+            <button
+              aria-label="Close"
+              // @ts-ignore
+              rel="prev"
+              onClick={() => setShareModalOpen(false)}
+            ></button>
+            <p>
+              <strong>Share graph</strong>
+            </p>
+          </header>
+          <p>Blablablah blah blablah blah</p>
+        </article>
+      </dialog>
     </div>
   )
 }
