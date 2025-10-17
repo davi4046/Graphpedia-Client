@@ -8,7 +8,6 @@ import ZoomOutIcon from "~/icons/ZoomOutIcon"
 import { useGraphList } from "~/pages/useGraphList"
 import { GraphAdapter } from "./dataAdapter"
 import { GraphpediaDataSource } from "./dataSource"
-import styles from "./Graph.module.css"
 import { GraphTile } from "./GraphEngine/types"
 import { useGraphEngine } from "./useGraphEngine"
 
@@ -89,7 +88,7 @@ export default function Graph(props: { graphId: string }) {
         <div class="flex flex-col gap-1">
           <button
             onClick={() => graphView()?.resetView()}
-            class={styles.control}
+            class="pointer-events-auto grid h-7 w-7 place-items-center border-0 bg-black/80 p-0 [&>svg]:h-4.5 [&>svg]:w-4.5"
             data-tooltip="Reset view"
             data-placement="left"
           >
@@ -97,7 +96,7 @@ export default function Graph(props: { graphId: string }) {
           </button>
           <button
             onClick={() => graphView()?.setZoom(nextZoomIn())}
-            class={styles.control}
+            class="pointer-events-auto grid h-7 w-7 place-items-center border-0 bg-black/80 p-0 [&>svg]:h-4.5 [&>svg]:w-4.5"
             data-tooltip="Zoom in"
             data-placement="left"
           >
@@ -105,7 +104,7 @@ export default function Graph(props: { graphId: string }) {
           </button>
           <button
             onClick={() => graphView()?.setZoom(nextZoomOut())}
-            class={styles.control}
+            class="pointer-events-auto grid h-7 w-7 place-items-center border-0 bg-black/80 p-0 [&>svg]:h-4.5 [&>svg]:w-4.5"
             data-tooltip="Zoom out"
             data-placement="left"
           >
@@ -117,7 +116,7 @@ export default function Graph(props: { graphId: string }) {
             href={`https://www.wikidata.org/wiki/Property:${props.graphId}`}
             target="_blank"
             role="button"
-            class={styles.control}
+            class="pointer-events-auto grid h-7 w-7 place-items-center border-0 bg-black/80 p-0 [&>svg]:h-4.5 [&>svg]:w-4.5"
             data-tooltip="View on Wikidata"
             data-placement="left"
           >
@@ -125,7 +124,7 @@ export default function Graph(props: { graphId: string }) {
           </a>
           <button
             onClick={() => setShareModalOpen(true)}
-            class={styles.control}
+            class="pointer-events-auto grid h-7 w-7 place-items-center border-0 bg-black/80 p-0 [&>svg]:h-4.5 [&>svg]:w-4.5"
             data-tooltip="Share this graph"
             data-placement="left"
           >
@@ -134,9 +133,8 @@ export default function Graph(props: { graphId: string }) {
         </div>
       </div>
       <div
-        class={`pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg bg-black/60 px-3 py-1 text-sm text-white transition-opacity duration-400 ${
-          showZoomIndicator() ? "opacity-100" : "opacity-0"
-        }`}
+        class="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg bg-black/60 px-3 py-1 text-sm text-white transition-opacity duration-400"
+        classList={{ "opacity-0": !showZoomIndicator() }}
       >
         Zoom: {(currentZoom() * 100).toFixed(0)}%
       </div>
