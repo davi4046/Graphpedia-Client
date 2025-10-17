@@ -92,14 +92,14 @@ export default class GraphView {
     return new EdgeView(this.edgeContainer, source, target)
   }
 
-  resetView() {
-    this.viewport.moveCorner(0, 0) // Does not trigger "moved" event
+  getPosition() {
+    const { x, y } = this.viewport.corner
+    return { x, y }
+  }
 
-    if (this.viewport.scale.x !== 1) {
-      this.viewport.setZoom(1) // Triggers "zoomed-end" event if zoom changed
-    } else {
-      this.viewport.emit("zoomed-end", this.viewport)
-    }
+  setPosition(x: number, y: number) {
+    this.viewport.moveCorner(x, y)
+    this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
   }
 
   getZoom() {
