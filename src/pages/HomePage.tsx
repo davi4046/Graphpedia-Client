@@ -12,7 +12,8 @@ export default function HomePage() {
       <Link rel="canonical" href="/" />
       <Header />
       <main>
-        <section id="welcome" class="hero-pattern bg-repeat py-16">
+        <section id="welcome" class="relative py-16">
+          <div class="bg-hero pointer-events-none absolute inset-0 bg-repeat opacity-50"></div>
           <div class="flex flex-col items-center">
             <h1>Welcome to Graphpedia</h1>
             <p>
