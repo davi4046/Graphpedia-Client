@@ -1,6 +1,5 @@
 import { Link } from "@solidjs/meta"
 import { For } from "solid-js"
-import Graph from "~/components/Graph"
 import Header from "~/components/Header"
 import { useGraphList } from "./useGraphList"
 
@@ -27,10 +26,10 @@ export default function HomePage() {
         </section>
         <section id="featured">
           <h2>Featured Graph</h2>
-          <div class="relative h-72 border border-gray-300">
-            <Graph graphId="P35" />
-            <div class="pointer-events-none absolute inset-0 shadow-inner"></div>
-          </div>
+          <iframe
+            src="/graph/P35"
+            class="h-72 w-full border border-gray-300"
+          ></iframe>
         </section>
         <section id="graphs">
           <details open>
