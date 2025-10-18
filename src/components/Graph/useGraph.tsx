@@ -15,6 +15,5 @@ export default function useGraph(container: HTMLElement, graphId: string) {
     setTiles(result)
   })
 
-  const { graphView, graphEngine } = useGraphEngine(() => container, tiles)
-  return { graphView, graphEngine }
+  return useGraphEngine(container, tiles)
 }

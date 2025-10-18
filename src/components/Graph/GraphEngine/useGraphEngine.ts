@@ -4,7 +4,7 @@ import GraphView from "./GraphView"
 import { GraphTile } from "./types"
 
 export function useGraphEngine(
-  containerRef: () => HTMLElement | undefined,
+  container: HTMLElement,
   tiles: () => GraphTile[] | undefined
 ) {
   const [graphView, setGraphView] = createSignal<GraphView>()
@@ -12,8 +12,7 @@ export function useGraphEngine(
 
   createEffect(async () => {
     const tileArray = tiles()
-    const container = containerRef()
-    if (!tileArray || !container || tileArray.length === 0) return
+    if (!tileArray || tileArray.length === 0) return
 
     const view = await GraphView.create(container)
     const engine = new GraphEngine(view, tileArray)
