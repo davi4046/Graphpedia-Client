@@ -1,10 +1,10 @@
 import { createEffect, createSignal, onCleanup } from "solid-js"
-import GraphEngine from "./GraphEngine"
-import GraphView from "./GraphEngine/GraphView"
-import { GraphTile } from "./GraphEngine/types"
+import GraphEngine from "."
+import GraphView from "./GraphView"
+import { GraphTile } from "./types"
 
 export function useGraphEngine(
-  containerRef: () => HTMLDivElement | undefined,
+  containerRef: () => HTMLElement | undefined,
   tiles: () => GraphTile[] | undefined
 ) {
   const [graphView, setGraphView] = createSignal<GraphView>()
