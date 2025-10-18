@@ -2,7 +2,7 @@ import { BBox } from "~/types/geometry"
 import { GraphEdge, GraphNode, GraphTile } from "./GraphEngine/types"
 import { GraphDataSource, GraphInfo, NodeInfo, TileInfo } from "./dataSource"
 
-export class GraphAdapter {
+export class GraphDataAdapter {
   constructor(private dataSource: GraphDataSource) {}
 
   private promise?: Promise<GraphInfo>

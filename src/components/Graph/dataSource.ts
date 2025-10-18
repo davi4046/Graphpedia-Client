@@ -30,13 +30,7 @@ export interface NodeInfo {
   label: string
 }
 
-export interface GraphDataSource {
-  fetchGraphInfo(): Promise<GraphInfo>
-  fetchTileInfo(tileId: number): Promise<TileInfo>
-  fetchNodeInfo(nodeId: number): Promise<NodeInfo>
-}
-
-export class GraphpediaDataSource implements GraphDataSource {
+export class GraphDataSource {
   constructor(
     private baseUrl: string,
     private graphId: string
