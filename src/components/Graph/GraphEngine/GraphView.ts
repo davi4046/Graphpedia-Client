@@ -32,6 +32,7 @@ export default class GraphView {
       worldWidth: 50000,
       worldHeight: 50000,
       events: app.renderer.events,
+      passiveWheel: false,
     })
 
     viewport.drag().pinch().wheel().decelerate()
@@ -41,9 +42,6 @@ export default class GraphView {
     const nodeContainer = new PIXI.Container()
     viewport.addChild(edgeContainer)
     viewport.addChild(nodeContainer)
-
-    const wheelHandler = (e: WheelEvent) => e.preventDefault()
-    app.canvas.addEventListener("wheel", wheelHandler, { passive: false })
 
     return new GraphView(app, viewport, nodeContainer, edgeContainer)
   }
