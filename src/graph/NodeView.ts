@@ -15,13 +15,16 @@ export default class NodeView {
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
 
-    const label = new PIXI.Text({
+    const label = new PIXI.BitmapText({
       text: this.labelText,
-      style: { fontSize: 5, fill: "black" },
+      style: {
+        fontFamily: "Arial",
+        fontSize: 5,
+        fill: 0x000000,
+      },
       x: positionX,
       y: positionY,
       anchor: 0.5,
-      resolution: 6,
     })
 
     const bounds = label.getLocalBounds()
