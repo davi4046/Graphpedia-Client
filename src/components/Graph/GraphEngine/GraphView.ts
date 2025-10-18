@@ -11,7 +11,7 @@ export default class GraphView {
     private edgeContainer: PIXI.Container
   ) {}
 
-  static async create(container: HTMLDivElement) {
+  static async create(container: HTMLElement) {
     const app = new PIXI.Application()
 
     // @ts-ignore
@@ -82,21 +82,23 @@ export default class GraphView {
     return new EdgeView(this.edgeContainer, source, target)
   }
 
-  getPosition() {
-    const { x, y } = this.viewport.corner
-    return { x, y }
-  }
-
-  setPosition(x: number, y: number) {
-    this.viewport.moveCorner(x, y)
-    this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
-  }
-
   getZoom() {
     return this.viewport.scale.x
   }
 
   setZoom(zoom: number) {
     this.viewport.setZoom(zoom, true)
+    this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
+  }
+
+  setPosition(x: number, y: number) {
+    this.viewport.position.set(x, y)
+    this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
+  }
+
+  setZoomAndPosition(x: number, y: number, zoom: number) {
+    this.viewport.setZoom(zoom)
+    this.viewport.position.set(x, y)
+    this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
   }
 }
