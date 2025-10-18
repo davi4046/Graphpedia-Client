@@ -80,7 +80,7 @@ export default function GraphPage() {
         />
       </a>
       <div
-        data-tooltip={graphInfo()?.description}
+        data-tooltip={`${graphInfo()?.label} (${graphInfo()?.id}): ${graphInfo()?.description}`}
         data-placement="bottom"
         class="absolute top-0 left-1/2 -translate-x-1/2 border-x border-b border-gray-300 bg-white px-1 shadow-sm"
       >
