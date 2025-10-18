@@ -61,6 +61,7 @@ export default function GraphPage() {
       <Link rel="canonical" href={`/graph/${params.graphId}`} />
       <div
         ref={containerRef}
+        id="graph"
         role="application"
         aria-labelledby="graph-title"
         aria-describedby="graph-desc"
@@ -96,6 +97,7 @@ export default function GraphPage() {
       >
         <button
           onClick={() => graphView()?.setZoomAndPosition(0, 0, 1)}
+          aria-controls="graph"
           aria-label="Reset view"
           data-tooltip="Reset view"
           data-placement="left"
@@ -105,6 +107,7 @@ export default function GraphPage() {
         </button>
         <button
           onClick={() => graphView()?.setZoom(nextZoomIn())}
+          aria-controls="graph"
           aria-label="Zoom in"
           data-tooltip="Zoom in"
           data-placement="left"
@@ -114,6 +117,7 @@ export default function GraphPage() {
         </button>
         <button
           onClick={() => graphView()?.setZoom(nextZoomOut())}
+          aria-controls="graph"
           aria-label="Zoom out"
           data-tooltip="Zoom out"
           data-placement="left"
