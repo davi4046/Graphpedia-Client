@@ -30,7 +30,7 @@ export interface NodeInfo {
   label: string
 }
 
-export class GraphDataSource {
+export default class GraphDataSource {
   constructor(
     private baseUrl: string,
     private graphId: string

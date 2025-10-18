@@ -1,13 +1,18 @@
 import { Link } from "@solidjs/meta"
 import { useParams } from "@solidjs/router"
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
-import GraphView from "~/components/Graph/GraphEngine/GraphView"
+import { GRAPH_DATA_URL } from "~/config"
+import {
+  GraphDataAdapter,
+  GraphDataSource,
+  GraphEngine,
+  GraphView,
+  useGraphList,
+} from "~/graph"
 import CrosshairIcon from "~/icons/CrosshairIcon"
 import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
 import ZoomOutIcon from "~/icons/ZoomOutIcon"
-import useGraph from "../components/Graph"
-import { useGraphList } from "./useGraphList"
 
 export default function GraphPage() {
   const params = useParams()
@@ -17,21 +22,22 @@ export default function GraphPage() {
   let containerRef: HTMLDivElement | undefined
   const [graphView, setGraphView] = createSignal<GraphView>()
 
-  onMount(() => {
+  onMount(async () => {
     if (!containerRef) return
-    const { graphView } = useGraph(containerRef, params.graphId)
+    const graphView = await GraphView.create(containerRef)
+    const dataSource = new GraphDataSource(GRAPH_DATA_URL, params.graphId)
+    const dataAdapter = new GraphDataAdapter(dataSource)
+    const graphTiles = await dataAdapter.tiles()
+    new GraphEngine(graphView, graphTiles)
 
-    createEffect(() => {
-      const view = graphView()
-      if (!view) return
-      setGraphView(view)
+    const updateZoom = () => setZoom(graphView.getZoom())
+    graphView.onViewportMoved(updateZoom)
 
-      const updateZoom = () => setZoom(view.getZoom())
-      view.onViewportMoved(updateZoom)
+    setGraphView(graphView)
 
-      onCleanup(() => {
-        view.offViewportMoved(updateZoom)
-      })
+    onCleanup(() => {
+      graphView.destroy()
+      setGraphView(undefined)
     })
   })
 
@@ -96,7 +102,7 @@ export default function GraphPage() {
         class="pointer-events-none absolute right-2 bottom-2 flex flex-col gap-1"
       >
         <button
-          onClick={() => graphView()?.setZoomAndPosition(0, 0, 1)}
+          onClick={() => graphView()?.resetViewport()}
           aria-controls="graph"
           aria-label="Reset view"
           data-tooltip="Reset view"

@@ -1,8 +1,8 @@
-import { BBox } from "~/types/geometry"
-import { GraphEdge, GraphNode, GraphTile } from "./GraphEngine/types"
-import { GraphDataSource, GraphInfo, NodeInfo, TileInfo } from "./dataSource"
+import { BBox } from "rbush"
+import GraphDataSource, { GraphInfo, NodeInfo, TileInfo } from "./dataSource"
+import { GraphEdge, GraphNode, GraphTile } from "./GraphEngine"
 
-export class GraphDataAdapter {
+export default class GraphDataAdapter {
   constructor(private dataSource: GraphDataSource) {}
 
   private promise?: Promise<GraphInfo>

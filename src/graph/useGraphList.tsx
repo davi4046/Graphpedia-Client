@@ -27,7 +27,7 @@ async function fetchGraphsIndex(): Promise<GraphEntry[]> {
 
 let cachedPromise: Promise<GraphEntry[]> | null = null
 
-export function useGraphList() {
+export default function useGraphList() {
   if (!cachedPromise) {
     cachedPromise = fetchGraphsIndex()
   }

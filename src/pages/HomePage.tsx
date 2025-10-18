@@ -1,7 +1,7 @@
 import { Link } from "@solidjs/meta"
 import { For } from "solid-js"
 import Header from "~/components/Header"
-import { useGraphList } from "./useGraphList"
+import { useGraphList } from "~/graph"
 
 export default function HomePage() {
   const graphList = useGraphList()

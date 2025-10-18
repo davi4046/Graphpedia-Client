@@ -91,14 +91,9 @@ export default class GraphView {
     this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
   }
 
-  setPosition(x: number, y: number) {
-    this.viewport.position.set(x, y)
-    this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
-  }
-
-  setZoomAndPosition(x: number, y: number, zoom: number) {
-    this.viewport.setZoom(zoom)
-    this.viewport.position.set(x, y)
+  resetViewport() {
+    this.viewport.setZoom(1)
+    this.viewport.moveCorner(0, 0)
     this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
   }
 }

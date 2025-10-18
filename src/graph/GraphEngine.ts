@@ -1,9 +1,27 @@
 import Flatbush from "flatbush"
-import RBush from "rbush"
+import RBush, { BBox } from "rbush"
 import EdgeView from "./EdgeView"
 import GraphView from "./GraphView"
 import NodeView from "./NodeView"
-import { GraphEdge, GraphNode, GraphTile } from "./types"
+
+export interface GraphNode {
+  readonly id: number
+  readonly x: number
+  readonly y: number
+  label(): Promise<string>
+}
+
+export interface GraphEdge {
+  readonly sourceId: number
+  readonly targetId: number
+}
+
+export interface GraphTile {
+  readonly id: number
+  readonly bbox: BBox
+  nodes(): Promise<readonly GraphNode[]>
+  edges(): Promise<readonly GraphEdge[]>
+}
 
 export default class GraphEngine {
   private tileIndex: SpatialTileIndex
