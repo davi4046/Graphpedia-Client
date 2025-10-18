@@ -25,24 +25,13 @@ export default class GraphEngine {
   ) {
     this.tileIndex = new SpatialTileIndex(this.tiles)
 
-    const update = async () => {
+    const update = () => {
       this.loadTilesInViewport()
       this.render()
     }
 
     this.graphView.onViewportMoved(update)
-
-    // Use "zoomed-end" instead of "zoomed" to ensure the handler is called
-    // only after the zoom animation is fully complete and the viewport bounds
-    // are stable. Using "zoomed" would trigger the handler multiple times
-    // during the zoom animation, potentially with intermediate or inaccurate
-    // bounds, which can cause issues like nodes temporarily disappearing
-    // ("popping") due to transient empty search results. "zoomed-end" avoids
-    // these problems by firing only once, with the final, correct bounds.
-    this.graphView.onViewportZoomedEnd(update)
-
-    // Initial load
-    this.loadTilesInViewport()
+    this.loadTilesInViewport() // Initial load
   }
 
   private loadTilesInViewport() {
