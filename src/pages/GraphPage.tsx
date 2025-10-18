@@ -37,8 +37,13 @@ export default function GraphPage() {
 
     onCleanup(() => {
       graphView.destroy()
-      setGraphView(undefined)
     })
+
+    if (import.meta.hot) {
+      import.meta.hot.dispose(() => {
+        graphView.destroy()
+      })
+    }
   })
 
   const zoomLevels = [0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4, 6, 8]

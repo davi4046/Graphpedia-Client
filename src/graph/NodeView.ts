@@ -9,9 +9,12 @@ export default class NodeView {
     private container: PIXI.Container,
     private labelText: string,
     readonly positionX: number,
-    readonly positionY: number,
-    renderer: PIXI.Renderer
+    readonly positionY: number
   ) {
+    if (!NodeView.shadowTexture) {
+      throw new Error("NodeView shadow texture is not initialized")
+    }
+
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
 
@@ -35,34 +38,18 @@ export default class NodeView {
 
     const background = new PIXI.Graphics()
     background.ellipse(positionX, positionY, radiusX, radiusY)
-    background.fill({ color: "white" })
-    background.stroke({ color: "lightgrey", width: 0.5 })
+    background.fill({ color: 0xffffff })
+    background.stroke({ color: 0xd3d3d3, width: 0.5 })
 
-    const shadowMargin = 12
-
-    const shadowGraphics = new PIXI.Graphics()
-    shadowGraphics.ellipse(
-      radiusX + shadowMargin,
-      radiusY + shadowMargin,
-      radiusX,
-      radiusY
-    )
-    shadowGraphics.fill({ color: "black", alpha: 0.5 })
-
-    const shadowBlurFilter = new PIXI.BlurFilter()
-    shadowBlurFilter.strength = 3
-    shadowGraphics.filters = [shadowBlurFilter]
-
-    const shadowTexture = PIXI.RenderTexture.create({
-      width: width + shadowMargin * 2,
-      height: height + shadowMargin * 2,
-    })
-
-    renderer.render({ container: shadowGraphics, target: shadowTexture })
-
-    const shadowSprite = new PIXI.Sprite(shadowTexture)
-    shadowSprite.x = positionX - radiusX - shadowMargin + 1.5
-    shadowSprite.y = positionY - radiusY - shadowMargin + 1.5
+    const { BASE_SHADOW_WIDTH, BASE_SHADOW_MARGIN } = NodeView
+    const shadowSprite = new PIXI.Sprite(NodeView.shadowTexture)
+    const shadowScaleX = radiusX / BASE_SHADOW_WIDTH
+    const shadowScaleY = radiusY / BASE_SHADOW_WIDTH
+    shadowSprite.scale.set(shadowScaleX, shadowScaleY)
+    const marginX = shadowScaleX * BASE_SHADOW_MARGIN
+    const marginY = shadowScaleY * BASE_SHADOW_MARGIN
+    shadowSprite.x = positionX - radiusX - marginX + 1.5
+    shadowSprite.y = positionY - radiusY - marginY + 1.5
 
     this.root.addChild(shadowSprite)
     this.root.addChild(background)
@@ -70,6 +57,10 @@ export default class NodeView {
 
     this.radiusX = radiusX
     this.radiusY = radiusY
+  }
+
+  remove() {
+    this.container.removeChild(this.root)
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
@@ -88,7 +79,33 @@ export default class NodeView {
     }
   }
 
-  remove() {
-    this.container.removeChild(this.root)
+  private static readonly BASE_SHADOW_WIDTH = 32
+  private static readonly BASE_SHADOW_MARGIN = 16
+
+  private static shadowTexture: PIXI.RenderTexture | null = null
+
+  static initShadowTexture(renderer: PIXI.Renderer) {
+    if (NodeView.shadowTexture) return
+
+    const { BASE_SHADOW_WIDTH: width, BASE_SHADOW_MARGIN: margin } = NodeView
+
+    const shadowGraphics = new PIXI.Graphics()
+      .ellipse(width + margin, width + margin, width, width)
+      .fill({ color: 0x000000, alpha: 0.1 })
+
+    const blurFilter = new PIXI.BlurFilter({ strength: 5, quality: 4 })
+    shadowGraphics.filters = [blurFilter]
+
+    const shadowTexture = PIXI.RenderTexture.create({
+      width: (width + margin) * 2,
+      height: (width + margin) * 2,
+    })
+
+    renderer.render({
+      container: shadowGraphics,
+      target: shadowTexture,
+    })
+
+    NodeView.shadowTexture = shadowTexture
   }
 }

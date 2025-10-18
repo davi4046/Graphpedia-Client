@@ -43,6 +43,8 @@ export default class GraphView {
     viewport.addChild(edgeContainer)
     viewport.addChild(nodeContainer)
 
+    NodeView.initShadowTexture(app.renderer)
+
     return new GraphView(app, viewport, nodeContainer, edgeContainer)
   }
 
@@ -69,13 +71,7 @@ export default class GraphView {
   }
 
   addNode(labelText: string, positionX: number, positionY: number) {
-    return new NodeView(
-      this.nodeContainer,
-      labelText,
-      positionX,
-      positionY,
-      this.app.renderer
-    )
+    return new NodeView(this.nodeContainer, labelText, positionX, positionY)
   }
 
   addEdge(source: NodeView, target: NodeView) {
