@@ -1,4 +1,4 @@
-import { Link } from "@solidjs/meta"
+import { Link, Title } from "@solidjs/meta"
 import { For } from "solid-js"
 import Header from "~/components/Header"
 import { useGraphList } from "~/graph"
@@ -8,6 +8,7 @@ export default function HomePage() {
 
   return (
     <>
+      <Title>Graphpedia</Title>
       <Link rel="canonical" href="/" />
       <Header />
       <main>

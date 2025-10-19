@@ -1,4 +1,4 @@
-import { Link } from "@solidjs/meta"
+import { Link, Title } from "@solidjs/meta"
 import { useParams } from "@solidjs/router"
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
 import { GRAPH_DATA_URL } from "~/config"
@@ -63,6 +63,7 @@ export default function GraphPage() {
 
   return (
     <>
+      <Title>{`${graphInfo()?.label} - Graphpedia`}</Title>
       <Link rel="canonical" href={`/graph/${params.graphId}`} />
       <div
         ref={containerRef}

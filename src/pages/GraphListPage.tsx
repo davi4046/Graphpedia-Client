@@ -1,5 +1,5 @@
 import { createPagination } from "@solid-primitives/pagination"
-import { Link } from "@solidjs/meta"
+import { Link, Title } from "@solidjs/meta"
 import { useLocation, useSearchParams } from "@solidjs/router"
 import Fuse from "fuse.js"
 import { createEffect, createMemo, For } from "solid-js"
@@ -186,6 +186,11 @@ export default function GraphListPage() {
 
   return (
     <>
+      {search() ? (
+        <Title>Search results for "{search()}" - Graphpedia</Title>
+      ) : (
+        <Title>All Graphs - Graphpedia</Title>
+      )}
       <Link rel="canonical" href="/graphs" />
       <Header />
       <main>
