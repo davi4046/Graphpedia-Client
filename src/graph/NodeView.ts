@@ -89,9 +89,9 @@ export default class NodeView {
 
     const shadowGraphics = new PIXI.Graphics()
       .ellipse(width + margin, height + margin, width, height)
-      .fill({ color: 0x000000, alpha: 0.1 })
+      .fill({ color: 0x000000, alpha: 0.5 })
 
-    const blurFilter = new PIXI.BlurFilter({ strength: 5, quality: 4 })
+    const blurFilter = new PIXI.BlurFilter({ strength: 12, quality: 4 })
     shadowGraphics.filters = [blurFilter]
 
     const shadowTexture = PIXI.RenderTexture.create({
