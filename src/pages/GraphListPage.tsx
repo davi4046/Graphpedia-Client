@@ -5,7 +5,7 @@ import Fuse from "fuse.js"
 import { createEffect, createMemo, For } from "solid-js"
 import { createStore } from "solid-js/store"
 import Header from "~/components/Header"
-import { useGraphList } from "../graph/useGraphList"
+import { useGraphList } from "~/graph"
 
 type SortOption = {
   value: string
