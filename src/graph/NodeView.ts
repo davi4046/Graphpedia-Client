@@ -1,5 +1,16 @@
 import * as PIXI from "pixi.js"
 
+if (typeof window !== "undefined") {
+  PIXI.BitmapFont.install({
+    name: "NodeLabelFont",
+    style: {
+      fontFamily: "Arial",
+      fill: 0x000000,
+    },
+    resolution: 4,
+  })
+}
+
 export default class NodeView {
   private root: PIXI.Container
   private radiusX: number
@@ -18,7 +29,7 @@ export default class NodeView {
     const label = new PIXI.BitmapText({
       text: this.labelText,
       style: {
-        fontFamily: "Arial",
+        fontFamily: "NodeLabelFont",
         fontSize: 5,
         fill: 0x000000,
       },
