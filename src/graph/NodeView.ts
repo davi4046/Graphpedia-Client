@@ -9,7 +9,8 @@ export default class NodeView {
     private container: PIXI.Container,
     private labelText: string,
     readonly positionX: number,
-    readonly positionY: number
+    readonly positionY: number,
+    shadowTexture: PIXI.Texture
   ) {
     this.root = new PIXI.Container()
     this.container.addChild(this.root)
@@ -27,22 +28,20 @@ export default class NodeView {
     })
 
     const bounds = label.getLocalBounds()
-    const width = bounds.width + 4
-    const height = bounds.height + 4
-    const radiusX = width / 2
-    const radiusY = height / 2
+    const radiusX = (bounds.width + 4) / 2
+    const radiusY = (bounds.height + 4) / 2
 
     const background = new PIXI.Graphics()
     background.ellipse(positionX, positionY, radiusX, radiusY)
     background.fill({ color: 0xffffff })
     background.stroke({ color: 0xd3d3d3, width: 0.5 })
 
-    const shadow = NodeView.createShadowSprite(
-      positionX,
-      positionY,
-      radiusX,
-      radiusY
-    )
+    const shadow = new PIXI.Sprite(shadowTexture)
+    const shadowScaleX = (radiusX * 2) / shadowTexture.width
+    const shadowScaleY = (radiusY * 2) / shadowTexture.height
+    shadow.scale.set(shadowScaleX, shadowScaleY)
+    shadow.x = positionX - radiusX + 1
+    shadow.y = positionY - radiusY + 2
 
     this.root.addChild(shadow)
     this.root.addChild(background)
@@ -70,69 +69,5 @@ export default class NodeView {
       x: this.positionX + dx * t,
       y: this.positionY + dy * t,
     }
-  }
-
-  private static readonly BASE_SHADOW_WIDTH = 96
-  private static readonly BASE_SHADOW_HEIGHT = 32
-  private static readonly BASE_SHADOW_MARGIN = 16
-
-  private static shadowTexture: PIXI.RenderTexture | null = null
-
-  static initShadowTexture(renderer: PIXI.Renderer) {
-    if (NodeView.shadowTexture) return
-
-    const {
-      BASE_SHADOW_WIDTH: width,
-      BASE_SHADOW_HEIGHT: height,
-      BASE_SHADOW_MARGIN: margin,
-    } = NodeView
-
-    const shadowGraphics = new PIXI.Graphics()
-      .ellipse(width + margin, height + margin, width, height)
-      .fill({ color: 0x000000, alpha: 0.5 })
-
-    const blurFilter = new PIXI.BlurFilter({ strength: 12, quality: 4 })
-    shadowGraphics.filters = [blurFilter]
-
-    const shadowTexture = PIXI.RenderTexture.create({
-      width: (width + margin) * 2,
-      height: (height + margin) * 2,
-    })
-
-    renderer.render({
-      container: shadowGraphics,
-      target: shadowTexture,
-    })
-
-    NodeView.shadowTexture = shadowTexture
-  }
-
-  private static createShadowSprite(
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  ): PIXI.Sprite {
-    const {
-      BASE_SHADOW_WIDTH,
-      BASE_SHADOW_HEIGHT,
-      BASE_SHADOW_MARGIN,
-      shadowTexture,
-    } = NodeView
-
-    if (!shadowTexture) {
-      throw new Error("NodeView shadow texture is not initialized")
-    }
-
-    const shadowSprite = new PIXI.Sprite(shadowTexture)
-    const shadowScaleX = width / BASE_SHADOW_WIDTH
-    const shadowScaleY = height / BASE_SHADOW_HEIGHT
-    shadowSprite.scale.set(shadowScaleX, shadowScaleY)
-    const marginX = shadowScaleX * BASE_SHADOW_MARGIN
-    const marginY = shadowScaleY * BASE_SHADOW_MARGIN
-    shadowSprite.x = x - width - marginX + 1.5
-    shadowSprite.y = y - height - marginY + 1.5
-
-    return shadowSprite
   }
 }

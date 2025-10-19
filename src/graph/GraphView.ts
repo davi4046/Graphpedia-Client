@@ -1,6 +1,7 @@
 import * as PIXIViewport from "pixi-viewport"
 import * as PIXI from "pixi.js"
 import EdgeView from "./EdgeView"
+import EllipticShadow from "./EllipticShadow"
 import NodeView from "./NodeView"
 
 export default class GraphView {
@@ -8,7 +9,8 @@ export default class GraphView {
     private app: PIXI.Application,
     private viewport: PIXIViewport.Viewport,
     private nodeContainer: PIXI.Container,
-    private edgeContainer: PIXI.Container
+    private edgeContainer: PIXI.Container,
+    private nodeShadowTexture: PIXI.Texture
   ) {}
 
   static async create(container: HTMLElement) {
@@ -43,9 +45,22 @@ export default class GraphView {
     viewport.addChild(edgeContainer)
     viewport.addChild(nodeContainer)
 
-    NodeView.initShadowTexture(app.renderer)
+    const shadowTexture = new EllipticShadow({
+      radiusX: 96,
+      radiusY: 32,
+      color: 0x000000,
+      alpha: 0.5,
+      blurStrength: 12,
+      blurQuality: 5,
+    }).renderTexture(app.renderer)
 
-    return new GraphView(app, viewport, nodeContainer, edgeContainer)
+    return new GraphView(
+      app,
+      viewport,
+      nodeContainer,
+      edgeContainer,
+      shadowTexture
+    )
   }
 
   destroy() {
@@ -71,7 +86,13 @@ export default class GraphView {
   }
 
   addNode(labelText: string, positionX: number, positionY: number) {
-    return new NodeView(this.nodeContainer, labelText, positionX, positionY)
+    return new NodeView(
+      this.nodeContainer,
+      labelText,
+      positionX,
+      positionY,
+      this.nodeShadowTexture
+    )
   }
 
   addEdge(source: NodeView, target: NodeView) {
