@@ -31,8 +31,8 @@ export default class EdgeView {
     line.moveTo(sourceX, sourceY)
     line.lineTo(targetX, targetY)
 
-    const arrowSize = 7
-    const notchInset = 6
+    const arrowSize = 5
+    const notchInset = 4
 
     const angle = Math.atan2(targetY - sourceY, targetX - sourceX)
 
@@ -52,8 +52,8 @@ export default class EdgeView {
     line.lineTo(notchX, notchY)
     line.closePath()
 
-    line.fill({ color: "lightgrey" })
-    line.stroke({ color: "lightgrey", width: 0.5 })
+    line.fill({ color: 0x767676 })
+    line.stroke({ color: 0x767676, width: 0.5 })
 
     this.root.addChild(line)
   }
