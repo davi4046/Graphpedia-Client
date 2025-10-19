@@ -1,7 +1,14 @@
-import * as PIXI from "pixi.js"
+import {
+  BitmapFont,
+  BitmapText,
+  Container,
+  Graphics,
+  Sprite,
+  Texture,
+} from "pixi.js"
 
 if (typeof window !== "undefined") {
-  PIXI.BitmapFont.install({
+  BitmapFont.install({
     name: "NodeLabelFont",
     style: {
       fontFamily: "Arial",
@@ -12,21 +19,21 @@ if (typeof window !== "undefined") {
 }
 
 export default class NodeView {
-  private root: PIXI.Container
+  private root: Container
   private radiusX: number
   private radiusY: number
 
   constructor(
-    private container: PIXI.Container,
+    private container: Container,
     private labelText: string,
     readonly positionX: number,
     readonly positionY: number,
-    shadowTexture: PIXI.Texture
+    shadowTexture: Texture
   ) {
-    this.root = new PIXI.Container()
+    this.root = new Container()
     this.container.addChild(this.root)
 
-    const label = new PIXI.BitmapText({
+    const label = new BitmapText({
       text: this.labelText,
       style: {
         fontFamily: "NodeLabelFont",
@@ -42,12 +49,12 @@ export default class NodeView {
     const radiusX = (bounds.width + 4) / 2
     const radiusY = (bounds.height + 4) / 2
 
-    const background = new PIXI.Graphics()
+    const background = new Graphics()
     background.ellipse(positionX, positionY, radiusX, radiusY)
     background.fill({ color: 0xffffff })
     background.stroke({ color: 0xd3d3d3, width: 0.5 })
 
-    const shadow = new PIXI.Sprite(shadowTexture)
+    const shadow = new Sprite(shadowTexture)
     const shadowScaleX = (radiusX * 2) / shadowTexture.width
     const shadowScaleY = (radiusY * 2) / shadowTexture.height
     shadow.scale.set(shadowScaleX, shadowScaleY)

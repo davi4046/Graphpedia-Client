@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js"
+import { Container, Graphics } from "pixi.js"
 import NodeView from "./NodeView"
 
 export interface EdgeViewOptions {
@@ -9,14 +9,14 @@ export interface EdgeViewOptions {
 }
 
 export default class EdgeView {
-  private root: PIXI.Container
+  private root: Container
 
   constructor(
-    private container: PIXI.Container,
+    private container: Container,
     private source: NodeView,
     private target: NodeView
   ) {
-    this.root = new PIXI.Container()
+    this.root = new Container()
     this.container.addChild(this.root)
 
     const sourceX = source.positionX
@@ -27,7 +27,7 @@ export default class EdgeView {
       sourceY
     )
 
-    const line = new PIXI.Graphics()
+    const line = new Graphics()
     line.moveTo(sourceX, sourceY)
     line.lineTo(targetX, targetY)
 

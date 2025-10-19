@@ -1,4 +1,4 @@
-import * as PIXI from "pixi.js"
+import { BlurFilter, Graphics, Renderer, RenderTexture, Texture } from "pixi.js"
 
 export interface EllipticalShadowOptions {
   radiusX: number
@@ -10,7 +10,7 @@ export interface EllipticalShadowOptions {
 }
 
 export default class EllipticShadow {
-  readonly graphics: PIXI.Graphics
+  readonly graphics: Graphics
 
   private margin: number = 12
 
@@ -18,11 +18,11 @@ export default class EllipticShadow {
     const centerX = options.radiusX + this.margin
     const centerY = options.radiusY + this.margin
 
-    const shadowGraphics = new PIXI.Graphics()
+    const shadowGraphics = new Graphics()
       .ellipse(centerX, centerY, options.radiusX, options.radiusY)
       .fill({ color: options.color, alpha: options.alpha })
 
-    const blurFilter = new PIXI.BlurFilter({
+    const blurFilter = new BlurFilter({
       strength: options.blurStrength,
       quality: options.blurQuality,
     })
@@ -32,8 +32,8 @@ export default class EllipticShadow {
     this.graphics = shadowGraphics
   }
 
-  renderTexture(renderer: PIXI.Renderer): PIXI.Texture {
-    const texture = PIXI.RenderTexture.create({
+  renderTexture(renderer: Renderer): Texture {
+    const texture = RenderTexture.create({
       width: this.graphics.width + this.margin * 2,
       height: this.graphics.height + this.margin * 2,
     })

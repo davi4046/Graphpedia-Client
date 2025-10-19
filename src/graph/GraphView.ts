@@ -1,20 +1,20 @@
 import * as PIXIViewport from "pixi-viewport"
-import * as PIXI from "pixi.js"
+import { Application, Container, Texture } from "pixi.js"
 import EdgeView from "./EdgeView"
 import EllipticShadow from "./EllipticShadow"
 import NodeView from "./NodeView"
 
 export default class GraphView {
   private constructor(
-    private app: PIXI.Application,
+    private app: Application,
     private viewport: PIXIViewport.Viewport,
-    private nodeContainer: PIXI.Container,
-    private edgeContainer: PIXI.Container,
-    private nodeShadowTexture: PIXI.Texture
+    private nodeContainer: Container,
+    private edgeContainer: Container,
+    private nodeShadowTexture: Texture
   ) {}
 
   static async create(container: HTMLElement) {
-    const app = new PIXI.Application()
+    const app = new Application()
 
     // @ts-ignore
     globalThis.__PIXI_APP__ = app
@@ -40,8 +40,8 @@ export default class GraphView {
     viewport.drag().pinch().wheel().decelerate()
     app.stage.addChild(viewport)
 
-    const edgeContainer = new PIXI.Container()
-    const nodeContainer = new PIXI.Container()
+    const edgeContainer = new Container()
+    const nodeContainer = new Container()
     viewport.addChild(edgeContainer)
     viewport.addChild(nodeContainer)
 
