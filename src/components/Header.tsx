@@ -4,9 +4,10 @@ export default function Header() {
       <nav>
         <ul>
           <li>
-            <a href="/" class="flex items-center">
+            <a href="/" aria-label="Graphpedia" class="flex items-center">
               <img
                 src="/graphpedia.svg"
+                alt=""
                 class="mr-[0.9rem] h-[3.0rem] w-[3.0rem]"
               />
               <picture>
@@ -16,7 +17,7 @@ export default function Header() {
                 />
                 <img
                   src="graphpedia-wordmark-light.svg"
-                  alt="Graphpedia wordmark"
+                  alt=""
                   class="h-[1.8rem] w-auto"
                 />
               </picture>
