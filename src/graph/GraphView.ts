@@ -23,7 +23,7 @@ export default class GraphView {
       background: "white",
       resizeTo: container,
       preference: "webgpu",
-      antialias: false,
+      antialias: true,
     })
 
     container.appendChild(app.canvas)
