@@ -18,22 +18,15 @@ if (typeof window !== "undefined") {
   })
 }
 
-export interface NodeViewOptions {
-  x: number
-  y: number
-  label: string
-  shadowTexture: Texture
-}
-
 export default class NodeView extends Container {
   private radiusX: number
   private radiusY: number
 
-  constructor(options: NodeViewOptions) {
-    super({ x: options.x, y: options.y })
+  constructor(x: number, y: number, labelText: string, shadowTexture: Texture) {
+    super({ x, y })
 
     const label = new BitmapText({
-      text: options.label,
+      text: labelText,
       style: {
         fontFamily: "NodeLabelFont",
         fontSize: 5,
@@ -51,7 +44,6 @@ export default class NodeView extends Container {
     background.fill({ color: 0xffffff })
     background.stroke({ color: 0xbfbfbf, width: 0.5 })
 
-    const shadowTexture = options.shadowTexture
     const shadow = new Sprite(shadowTexture)
     const shadowScaleX = (this.radiusX * 2) / shadowTexture.width + 0.025
     const shadowScaleY = (this.radiusY * 2) / shadowTexture.height + 0.05

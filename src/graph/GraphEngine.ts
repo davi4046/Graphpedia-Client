@@ -100,7 +100,7 @@ export default class GraphEngine {
       node.label().then((label) => {
         if (!this.renderedNodes.has(nodeId)) return
 
-        const nodeView = this.graphView.addNode(label, node.x, node.y)
+        const nodeView = this.graphView.addNode(node.x, node.y, label)
         this.renderedNodes.set(nodeId, nodeView)
 
         const nodeTargets = this.nodeTargetsMap.get(nodeId) || new Set()
