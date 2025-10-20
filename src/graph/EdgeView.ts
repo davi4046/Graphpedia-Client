@@ -8,46 +8,36 @@ export interface EdgeViewOptions {
   y2: number
 }
 
-export default class EdgeView {
-  private root: Container
+export default class EdgeView extends Container {
+  constructor(source: NodeView, target: NodeView) {
+    super()
 
-  constructor(
-    private container: Container,
-    private source: NodeView,
-    private target: NodeView
-  ) {
-    this.root = new Container()
-    this.container.addChild(this.root)
+    const startX = source.x
+    const startY = source.y
 
-    const sourceX = source.positionX
-    const sourceY = source.positionY
-
-    const { x: targetX, y: targetY } = target.intersectBorderFromPoint(
-      sourceX,
-      sourceY
-    )
+    const { x: endX, y: endY } = target.intersectBorderFromPoint(startX, startY)
 
     const line = new Graphics()
-    line.moveTo(sourceX, sourceY)
-    line.lineTo(targetX, targetY)
+    line.moveTo(startX, startY)
+    line.lineTo(endX, endY)
 
     const arrowSize = 5
     const notchInset = 4
 
-    const angle = Math.atan2(targetY - sourceY, targetX - sourceX)
+    const angle = Math.atan2(endY - startY, endX - startX)
 
     const leftAngle = angle + Math.PI - Math.PI / 12
     const rightAngle = angle + Math.PI + Math.PI / 12
 
-    const leftX = targetX + Math.cos(leftAngle) * arrowSize
-    const leftY = targetY + Math.sin(leftAngle) * arrowSize
-    const rightX = targetX + Math.cos(rightAngle) * arrowSize
-    const rightY = targetY + Math.sin(rightAngle) * arrowSize
-    const notchX = targetX - Math.cos(angle) * notchInset
-    const notchY = targetY - Math.sin(angle) * notchInset
+    const leftX = endX + Math.cos(leftAngle) * arrowSize
+    const leftY = endY + Math.sin(leftAngle) * arrowSize
+    const rightX = endX + Math.cos(rightAngle) * arrowSize
+    const rightY = endY + Math.sin(rightAngle) * arrowSize
+    const notchX = endX - Math.cos(angle) * notchInset
+    const notchY = endY - Math.sin(angle) * notchInset
 
     line.moveTo(leftX, leftY)
-    line.lineTo(targetX, targetY)
+    line.lineTo(endX, endY)
     line.lineTo(rightX, rightY)
     line.lineTo(notchX, notchY)
     line.closePath()
@@ -55,10 +45,6 @@ export default class EdgeView {
     line.fill({ color: 0xbfbfbf })
     line.stroke({ color: 0xbfbfbf, width: 0.5 })
 
-    this.root.addChild(line)
-  }
-
-  remove() {
-    this.container.removeChild(this.root)
+    this.addChild(line)
   }
 }

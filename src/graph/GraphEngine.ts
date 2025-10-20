@@ -129,7 +129,7 @@ export default class GraphEngine {
     for (const [nodeId, nodeView] of this.renderedNodes) {
       if (nodesInBounds.has(nodeId)) continue
 
-      nodeView?.remove()
+      nodeView?.removeFromParent()
       this.renderedNodes.delete(nodeId)
 
       const nodeTargets = this.nodeTargetsMap.get(nodeId) || new Set()
@@ -138,14 +138,14 @@ export default class GraphEngine {
       for (const targetId of nodeTargets) {
         if (!this.renderedNodes.has(targetId)) continue
         const edgeView = this.renderedEdges.get(nodeId, targetId)
-        edgeView?.remove()
+        edgeView?.removeFromParent()
         this.renderedEdges.delete(nodeId, targetId)
       }
 
       for (const sourceId of nodeSources) {
         if (!this.renderedNodes.has(sourceId)) continue
         const edgeView = this.renderedEdges.get(sourceId, nodeId)
-        edgeView?.remove()
+        edgeView?.removeFromParent()
         this.renderedEdges.delete(sourceId, nodeId)
       }
     }

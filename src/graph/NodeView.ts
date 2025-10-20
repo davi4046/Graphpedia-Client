@@ -18,64 +18,55 @@ if (typeof window !== "undefined") {
   })
 }
 
-export default class NodeView {
-  private root: Container
+export interface NodeViewOptions {
+  x: number
+  y: number
+  label: string
+  shadowTexture: Texture
+}
+
+export default class NodeView extends Container {
   private radiusX: number
   private radiusY: number
 
-  constructor(
-    private container: Container,
-    private labelText: string,
-    readonly positionX: number,
-    readonly positionY: number,
-    shadowTexture: Texture
-  ) {
-    this.root = new Container()
-    this.container.addChild(this.root)
+  constructor(options: NodeViewOptions) {
+    super({ x: options.x, y: options.y })
 
     const label = new BitmapText({
-      text: this.labelText,
+      text: options.label,
       style: {
         fontFamily: "NodeLabelFont",
         fontSize: 5,
         fill: 0x000000,
       },
-      x: positionX,
-      y: positionY,
       anchor: 0.5,
     })
 
     const bounds = label.getLocalBounds()
-    const radiusX = (bounds.width + 4) / 2
-    const radiusY = (bounds.height + 4) / 2
+    this.radiusX = (bounds.width + 4) / 2
+    this.radiusY = (bounds.height + 4) / 2
 
     const background = new Graphics()
-    background.ellipse(positionX, positionY, radiusX, radiusY)
+    background.ellipse(0, 0, this.radiusX, this.radiusY)
     background.fill({ color: 0xffffff })
     background.stroke({ color: 0xbfbfbf, width: 0.5 })
 
+    const shadowTexture = options.shadowTexture
     const shadow = new Sprite(shadowTexture)
-    const shadowScaleX = (radiusX * 2) / shadowTexture.width + 0.025
-    const shadowScaleY = (radiusY * 2) / shadowTexture.height + 0.05
+    const shadowScaleX = (this.radiusX * 2) / shadowTexture.width + 0.025
+    const shadowScaleY = (this.radiusY * 2) / shadowTexture.height + 0.05
     shadow.scale.set(shadowScaleX, shadowScaleY)
-    shadow.x = positionX - shadow.width / 2 + 1
-    shadow.y = positionY - shadow.height / 2 + 1
+    shadow.x = -shadow.width / 2 + 1
+    shadow.y = -shadow.height / 2 + 1
 
-    this.root.addChild(shadow)
-    this.root.addChild(background)
-    this.root.addChild(label)
-
-    this.radiusX = radiusX
-    this.radiusY = radiusY
-  }
-
-  remove() {
-    this.container.removeChild(this.root)
+    this.addChild(shadow)
+    this.addChild(background)
+    this.addChild(label)
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
-    const dx = fromX - this.positionX
-    const dy = fromY - this.positionY
+    const dx = fromX - this.x
+    const dy = fromY - this.y
 
     const denom = Math.sqrt(
       (dx * dx) / (this.radiusX * this.radiusX) +
@@ -84,8 +75,8 @@ export default class NodeView {
     const t = 1 / denom
 
     return {
-      x: this.positionX + dx * t,
-      y: this.positionY + dy * t,
+      x: this.x + dx * t,
+      y: this.y + dy * t,
     }
   }
 }
