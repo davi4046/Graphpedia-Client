@@ -35,6 +35,7 @@ export default class GraphView {
       worldHeight: 50000,
       events: app.renderer.events,
       passiveWheel: false,
+      allowPreserveDragOutside: true,
     })
 
     viewport.drag().pinch().wheel().decelerate()
