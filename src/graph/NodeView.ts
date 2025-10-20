@@ -21,11 +21,14 @@ if (typeof window !== "undefined") {
 export default class NodeView extends Container {
   private radiusX: number
   private radiusY: number
+  private nodeLabel: BitmapText
+  private nodeShape: Graphics
+  private nodeShadow: Sprite
 
   constructor(x: number, y: number, labelText: string, shadowTexture: Texture) {
-    super({ x, y })
+    super({ x, y, interactive: true, cursor: "pointer" })
 
-    const label = new BitmapText({
+    this.nodeLabel = new BitmapText({
       text: labelText,
       style: {
         fontFamily: "NodeLabelFont",
@@ -33,18 +36,17 @@ export default class NodeView extends Container {
         fill: 0x000000,
       },
       anchor: 0.5,
+      eventMode: "none",
     })
 
-    const bounds = label.getLocalBounds()
+    const bounds = this.nodeLabel.getLocalBounds()
     this.radiusX = (bounds.width + 4) / 2
     this.radiusY = (bounds.height + 4) / 2
 
-    const background = new Graphics()
-    background.ellipse(0, 0, this.radiusX, this.radiusY)
-    background.fill({ color: 0xffffff })
-    background.stroke({ color: 0xbfbfbf, width: 0.5 })
+    this.nodeShape = new Graphics()
+    this.setStyle(0xffffff, 0xbfbfbf)
 
-    const shadow = new Sprite({
+    this.nodeShadow = new Sprite({
       texture: shadowTexture,
       scale: {
         x: (this.radiusX * 2) / shadowTexture.width + 0.025,
@@ -56,9 +58,24 @@ export default class NodeView extends Container {
       eventMode: "none",
     })
 
-    this.addChild(shadow)
-    this.addChild(background)
-    this.addChild(label)
+    this.addChild(this.nodeShadow)
+    this.addChild(this.nodeShape)
+    this.addChild(this.nodeLabel)
+
+    this.on("pointerover", () => {
+      this.setStyle(0xf0f0f0, 0x808080)
+    })
+
+    this.on("pointerout", () => {
+      this.setStyle(0xffffff, 0xbfbfbf)
+    })
+  }
+
+  private setStyle(fill: number, stroke: number) {
+    this.nodeShape.clear()
+    this.nodeShape.ellipse(0, 0, this.radiusX, this.radiusY)
+    this.nodeShape.fill({ color: fill })
+    this.nodeShape.stroke({ color: stroke, width: 0.5 })
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
