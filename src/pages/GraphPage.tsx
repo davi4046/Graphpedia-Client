@@ -75,15 +75,11 @@ export default function GraphPage() {
       ></div>
       <a
         href="/"
-        aria-label="Graphpedia home"
-        class="absolute top-0 left-0 flex flex-col items-center gap-0.5 bg-white shadow-sm"
+        aria-label="Graphpedia"
+        class="absolute top-0 left-0 flex flex-col items-center bg-white shadow-sm"
       >
-        <img src="/graphpedia.svg" alt="Graphpedia logo" class="h-14 w-14" />
-        <img
-          src="/graphpedia-wordmark.svg"
-          alt="Graphpedia wordmark"
-          class="h-auto w-14"
-        />
+        <img src="/graphpedia.svg" alt="" class="h-14 w-14" />
+        <img src="/graphpedia-wordmark.svg" alt="" class="mt-0.5 w-14" />
       </a>
       <div
         data-tooltip={`${graphInfo()?.label} (${graphInfo()?.id}): ${graphInfo()?.description}`}
