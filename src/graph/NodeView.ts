@@ -44,12 +44,17 @@ export default class NodeView extends Container {
     background.fill({ color: 0xffffff })
     background.stroke({ color: 0xbfbfbf, width: 0.5 })
 
-    const shadow = new Sprite(shadowTexture)
-    const shadowScaleX = (this.radiusX * 2) / shadowTexture.width + 0.025
-    const shadowScaleY = (this.radiusY * 2) / shadowTexture.height + 0.05
-    shadow.scale.set(shadowScaleX, shadowScaleY)
-    shadow.x = -shadow.width / 2 + 1
-    shadow.y = -shadow.height / 2 + 1
+    const shadow = new Sprite({
+      texture: shadowTexture,
+      scale: {
+        x: (this.radiusX * 2) / shadowTexture.width + 0.025,
+        y: (this.radiusY * 2) / shadowTexture.height + 0.05,
+      },
+      anchor: 0.5,
+      x: 1,
+      y: 1,
+      eventMode: "none",
+    })
 
     this.addChild(shadow)
     this.addChild(background)
