@@ -52,8 +52,8 @@ export default class EdgeView {
     line.lineTo(notchX, notchY)
     line.closePath()
 
-    line.fill({ color: 0x767676 })
-    line.stroke({ color: 0x767676, width: 0.5 })
+    line.fill({ color: 0xbfbfbf })
+    line.stroke({ color: 0xbfbfbf, width: 0.5 })
 
     this.root.addChild(line)
   }
