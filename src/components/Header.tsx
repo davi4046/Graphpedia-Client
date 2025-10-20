@@ -7,7 +7,7 @@ export default function Header() {
             <a href="/" class="flex items-center">
               <img
                 src="/graphpedia.svg"
-                class="mr-[0.9rem] h-[3.0rem] w-auto"
+                class="mr-[0.9rem] h-[3.0rem] w-[3.0rem]"
               />
               <img src="/graphpedia-wordmark.svg" class="h-[1.8rem] w-auto" />
             </a>
