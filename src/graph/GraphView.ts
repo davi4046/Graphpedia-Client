@@ -72,10 +72,6 @@ export default class GraphView {
     this.viewport.on("moved", handler)
   }
 
-  offViewportMoved(handler: () => void) {
-    this.viewport.off("moved", handler)
-  }
-
   getVisibleBounds() {
     const { x, y, width, height } = this.viewport.getVisibleBounds()
     return {
