@@ -9,7 +9,17 @@ export default function Header() {
                 src="/graphpedia.svg"
                 class="mr-[0.9rem] h-[3.0rem] w-[3.0rem]"
               />
-              <img src="/graphpedia-wordmark.svg" class="h-[1.8rem] w-auto" />
+              <picture>
+                <source
+                  srcset="graphpedia-wordmark-dark.svg"
+                  media="(prefers-color-scheme: dark)"
+                />
+                <img
+                  src="graphpedia-wordmark-light.svg"
+                  alt="Graphpedia wordmark"
+                  class="h-[1.8rem] w-auto"
+                />
+              </picture>
             </a>
           </li>
         </ul>
