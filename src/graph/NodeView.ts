@@ -52,14 +52,14 @@ export default class NodeView {
     const background = new Graphics()
     background.ellipse(positionX, positionY, radiusX, radiusY)
     background.fill({ color: 0xffffff })
-    background.stroke({ color: 0x9a9a9a, width: 0.5 })
+    background.stroke({ color: 0xcccccc, width: 0.5 })
 
     const shadow = new Sprite(shadowTexture)
-    const shadowScaleX = (radiusX * 2) / shadowTexture.width
-    const shadowScaleY = (radiusY * 2) / shadowTexture.height
+    const shadowScaleX = (radiusX * 2) / shadowTexture.width + 0.025
+    const shadowScaleY = (radiusY * 2) / shadowTexture.height + 0.025
     shadow.scale.set(shadowScaleX, shadowScaleY)
-    shadow.x = positionX - radiusX + 1
-    shadow.y = positionY - radiusY + 2
+    shadow.x = positionX - shadow.width / 2 + 1
+    shadow.y = positionY - shadow.height / 2 + 2
 
     this.root.addChild(shadow)
     this.root.addChild(background)
