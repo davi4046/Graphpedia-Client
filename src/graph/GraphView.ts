@@ -86,13 +86,15 @@ export default class GraphView {
   }
 
   addNode(x: number, y: number, label: string) {
-    return this.nodeContainer.addChild(
-      new NodeView(x, y, label, this.nodeShadowTexture)
-    )
+    const nodeView = new NodeView(x, y, label, this.nodeShadowTexture)
+    this.nodeContainer.addChild(nodeView)
+    return nodeView
   }
 
   addEdge(source: NodeView, target: NodeView) {
-    return this.edgeContainer.addChild(new EdgeView(source, target))
+    const edgeView = new EdgeView(source, target)
+    this.edgeContainer.addChild(edgeView)
+    return edgeView
   }
 
   getZoom() {
