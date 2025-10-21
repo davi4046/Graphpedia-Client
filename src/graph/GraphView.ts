@@ -85,9 +85,9 @@ export default class GraphView {
     }
   }
 
-  addNode(x: number, y: number, text: string) {
+  addNode(x: number, y: number, label: string) {
     return this.nodeContainer.addChild(
-      new NodeView(x, y, text, this.nodeShadowTexture)
+      new NodeView(x, y, label, this.nodeShadowTexture)
     )
   }
 

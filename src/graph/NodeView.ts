@@ -25,11 +25,11 @@ export default class NodeView extends Container {
   private nodeShape: Graphics
   private nodeShadow: Sprite
 
-  constructor(x: number, y: number, labelText: string, shadowTexture: Texture) {
+  constructor(x: number, y: number, label: string, shadowTexture: Texture) {
     super({ x, y, interactive: true, cursor: "pointer" })
 
     this.nodeLabel = new BitmapText({
-      text: labelText,
+      text: label,
       style: {
         fontFamily: "NodeLabelFont",
         fontSize: 5,
