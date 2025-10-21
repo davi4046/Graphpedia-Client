@@ -1,4 +1,5 @@
 import Flatbush from "flatbush"
+import { EventEmitter } from "pixi.js"
 import RBush, { BBox } from "rbush"
 import EdgeView from "./EdgeView"
 import GraphView, { NodeMeta } from "./GraphView"
@@ -23,7 +24,11 @@ export interface GraphTile {
   edges(): Promise<readonly GraphEdge[]>
 }
 
-export default class GraphEngine {
+type GraphEngineEvents = {
+  nodeClicked: (nodeId: number) => void
+}
+
+export default class GraphEngine extends EventEmitter<GraphEngineEvents> {
   private tileIndex: SpatialTileIndex
   private loadedTiles = new Set<number>()
 
@@ -41,6 +46,7 @@ export default class GraphEngine {
     private view: GraphView,
     private tiles: GraphTile[]
   ) {
+    super()
     this.tileIndex = new SpatialTileIndex(this.tiles)
 
     const update = () => {
@@ -107,6 +113,7 @@ export default class GraphEngine {
           this.renderedEdges
         )
         const nodeView = this.view.addNode(node.x, node.y, label, meta)
+        nodeView.on("pointertap", () => this.emit("nodeClicked", nodeId))
         this.renderedNodes.set(nodeId, nodeView)
 
         const nodeTargets = this.nodeTargetsMap.get(nodeId) || new Set()

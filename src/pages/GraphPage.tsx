@@ -28,10 +28,14 @@ export default function GraphPage() {
     const dataSource = new GraphDataSource(GRAPH_DATA_URL, params.graphId)
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
-    new GraphEngine(graphView, graphTiles)
+    const graphEngine = new GraphEngine(graphView, graphTiles)
 
     const updateZoom = () => setZoom(graphView.getZoom())
     graphView.on("viewportMoved", updateZoom)
+
+    graphEngine.on("nodeClicked", (nodeId) => {
+      console.log(`Node clicked: ${nodeId}`)
+    })
 
     setGraphView(graphView)
   })
