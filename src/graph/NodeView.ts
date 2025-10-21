@@ -44,7 +44,10 @@ export default class NodeView extends Container {
     this.radiusY = (bounds.height + 4) / 2
 
     this.nodeShape = new Graphics()
-    this.setStyle(0xffffff, 0xbfbfbf)
+    this.nodeShape.clear()
+    this.nodeShape.ellipse(0, 0, this.radiusX, this.radiusY)
+    this.nodeShape.fill({ color: 0xffffff })
+    this.nodeShape.stroke({ color: 0xbfbfbf, width: 0.5 })
 
     this.nodeShadow = new Sprite({
       texture: shadowTexture,
@@ -61,21 +64,6 @@ export default class NodeView extends Container {
     this.addChild(this.nodeShadow)
     this.addChild(this.nodeShape)
     this.addChild(this.nodeLabel)
-
-    this.on("pointerover", () => {
-      this.setStyle(0xf0f0f0, 0x808080)
-    })
-
-    this.on("pointerout", () => {
-      this.setStyle(0xffffff, 0xbfbfbf)
-    })
-  }
-
-  private setStyle(fill: number, stroke: number) {
-    this.nodeShape.clear()
-    this.nodeShape.ellipse(0, 0, this.radiusX, this.radiusY)
-    this.nodeShape.fill({ color: fill })
-    this.nodeShape.stroke({ color: stroke, width: 0.5 })
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
