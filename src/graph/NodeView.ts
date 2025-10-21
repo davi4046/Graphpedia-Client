@@ -26,7 +26,7 @@ export default class NodeView extends Container {
   private nodeShadow: Sprite
 
   constructor(x: number, y: number, label: string, shadowTexture: Texture) {
-    super({ x, y, interactive: true, cursor: "pointer" })
+    super({ x, y, interactive: true, cursor: "help" })
 
     this.nodeLabel = new BitmapText({
       text: label,
@@ -79,19 +79,6 @@ export default class NodeView extends Container {
     return {
       x: this.x + dx * t,
       y: this.y + dy * t,
-    }
-  }
-
-  setHighlighted(highlighted: boolean) {
-    this.nodeShape.clear()
-    if (highlighted) {
-      this.nodeShape.ellipse(0, 0, this.radiusX, this.radiusY)
-      this.nodeShape.fill({ color: 0xffffff })
-      this.nodeShape.stroke({ color: 0x404040, width: 0.5 })
-    } else {
-      this.nodeShape.ellipse(0, 0, this.radiusX, this.radiusY)
-      this.nodeShape.fill({ color: 0xffffff })
-      this.nodeShape.stroke({ color: 0xbfbfbf, width: 0.5 })
     }
   }
 }

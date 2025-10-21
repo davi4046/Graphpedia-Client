@@ -14,7 +14,7 @@ type GraphViewEvents = {
 }
 
 export default class GraphView extends EventEmitter<GraphViewEvents> {
-  private highlightedNode: NodeView | null = null
+  private hoveredNode: NodeView | null = null
   private highlightedEdges: Set<EdgeView> = new Set()
 
   private constructor(
@@ -98,9 +98,7 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     this.nodeContainer.addChild(nodeView)
 
     nodeView.on("pointerover", () => {
-      this.highlightedNode?.setHighlighted(false)
-      this.highlightedNode = nodeView
-      this.highlightedNode.setHighlighted(true)
+      this.hoveredNode = nodeView
       this.nodeContainer.addChild(nodeView) // bring to front
       const edges = [...meta.outgoingEdges, ...meta.incomingEdges]
       this.highlightedEdges.forEach((edge) => edge.setHighlighted(false))
@@ -112,9 +110,8 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     })
 
     nodeView.on("pointerout", () => {
-      if (nodeView === this.highlightedNode) {
-        nodeView.setHighlighted(false)
-        this.highlightedNode = null
+      if (nodeView === this.hoveredNode) {
+        this.hoveredNode = null
         this.highlightedEdges.forEach((edge) => edge.setHighlighted(false))
         this.highlightedEdges.clear()
       }
@@ -127,7 +124,7 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     const edgeView = new EdgeView(source, target)
     this.edgeContainer.addChild(edgeView)
 
-    if (source === this.highlightedNode || target === this.highlightedNode) {
+    if (source === this.hoveredNode || target === this.hoveredNode) {
       edgeView.setHighlighted(true)
       this.highlightedEdges.add(edgeView)
     }
