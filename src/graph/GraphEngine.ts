@@ -48,7 +48,7 @@ export default class GraphEngine {
       this.render()
     }
 
-    this.view.onViewportMoved(update)
+    this.view.on("viewportMoved", update)
     this.loadTilesInViewport() // Initial load
   }
 

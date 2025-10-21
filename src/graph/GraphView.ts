@@ -1,5 +1,5 @@
 import * as PIXIViewport from "pixi-viewport"
-import { Application, Container, Texture } from "pixi.js"
+import { Application, Container, EventEmitter, Texture } from "pixi.js"
 import EdgeView from "./EdgeView"
 import EllipticShadow from "./EllipticShadow"
 import NodeView from "./NodeView"
@@ -9,14 +9,21 @@ export interface NodeMeta {
   get incomingEdges(): EdgeView[]
 }
 
-export default class GraphView {
+type GraphViewEvents = {
+  viewportMoved: () => void
+}
+
+export default class GraphView extends EventEmitter<GraphViewEvents> {
   private constructor(
     private app: Application,
     private viewport: PIXIViewport.Viewport,
     private nodeContainer: Container,
     private edgeContainer: Container,
     private nodeShadowTexture: Texture
-  ) {}
+  ) {
+    super()
+    this.viewport.on("moved", () => this.emit("viewportMoved"))
+  }
 
   static async create(container: HTMLElement) {
     const app = new Application()
@@ -71,10 +78,6 @@ export default class GraphView {
 
   destroy() {
     this.app.destroy(true, { children: true, texture: true })
-  }
-
-  onViewportMoved(handler: () => void) {
-    this.viewport.on("moved", handler)
   }
 
   getVisibleBounds() {

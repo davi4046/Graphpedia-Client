@@ -31,7 +31,7 @@ export default function GraphPage() {
     new GraphEngine(graphView, graphTiles)
 
     const updateZoom = () => setZoom(graphView.getZoom())
-    graphView.onViewportMoved(updateZoom)
+    graphView.on("viewportMoved", updateZoom)
 
     setGraphView(graphView)
   })
