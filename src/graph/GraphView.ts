@@ -4,6 +4,11 @@ import EdgeView from "./EdgeView"
 import EllipticShadow from "./EllipticShadow"
 import NodeView from "./NodeView"
 
+export interface NodeMeta {
+  get outgoingEdges(): EdgeView[]
+  get incomingEdges(): EdgeView[]
+}
+
 export default class GraphView {
   private constructor(
     private app: Application,
@@ -82,7 +87,7 @@ export default class GraphView {
     }
   }
 
-  addNode(x: number, y: number, label: string) {
+  addNode(x: number, y: number, label: string, meta: NodeMeta) {
     const nodeView = new NodeView(x, y, label, this.nodeShadowTexture)
     this.nodeContainer.addChild(nodeView)
     return nodeView

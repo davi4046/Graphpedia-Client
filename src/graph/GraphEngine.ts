@@ -1,7 +1,7 @@
 import Flatbush from "flatbush"
 import RBush, { BBox } from "rbush"
 import EdgeView from "./EdgeView"
-import GraphView from "./GraphView"
+import GraphView, { NodeMeta } from "./GraphView"
 import NodeView from "./NodeView"
 
 export interface GraphNode {
@@ -100,7 +100,13 @@ export default class GraphEngine {
       node.label().then((label) => {
         if (!this.renderedNodes.has(nodeId)) return
 
-        const nodeView = this.view.addNode(node.x, node.y, label)
+        const meta = new NodeMetaImpl(
+          nodeId,
+          this.nodeTargetsMap,
+          this.nodeSourcesMap,
+          this.renderedEdges
+        )
+        const nodeView = this.view.addNode(node.x, node.y, label, meta)
         this.renderedNodes.set(nodeId, nodeView)
 
         const nodeTargets = this.nodeTargetsMap.get(nodeId) || new Set()
@@ -219,5 +225,34 @@ class SpatialNodeIndex {
     return this.index
       .search({ minX, minY, maxX, maxY })
       .map((bbox) => bbox.nodeId)
+  }
+}
+
+class NodeMetaImpl implements NodeMeta {
+  constructor(
+    private nodeId: number,
+    private nodeTargetsMap: Map<number, Set<number>>,
+    private nodeSourcesMap: Map<number, Set<number>>,
+    private renderedEdges: EdgeMap<EdgeView>
+  ) {}
+
+  get outgoingEdges(): EdgeView[] {
+    const targets = this.nodeTargetsMap.get(this.nodeId) || new Set()
+    const edges: EdgeView[] = []
+    for (const targetId of targets) {
+      const edgeView = this.renderedEdges.get(this.nodeId, targetId)
+      if (edgeView) edges.push(edgeView)
+    }
+    return edges
+  }
+
+  get incomingEdges(): EdgeView[] {
+    const sources = this.nodeSourcesMap.get(this.nodeId) || new Set()
+    const edges: EdgeView[] = []
+    for (const sourceId of sources) {
+      const edgeView = this.renderedEdges.get(sourceId, this.nodeId)
+      if (edgeView) edges.push(edgeView)
+    }
+    return edges
   }
 }

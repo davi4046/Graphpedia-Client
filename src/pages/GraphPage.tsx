@@ -23,8 +23,6 @@ export default function GraphPage() {
   const [graphView, setGraphView] = createSignal<GraphView>()
 
   onMount(async () => {
-    if (!containerRef) return
-    const graphView = await GraphView.create(containerRef)
     if (!container) return
     const graphView = await GraphView.create(container)
     const dataSource = new GraphDataSource(GRAPH_DATA_URL, params.graphId)
