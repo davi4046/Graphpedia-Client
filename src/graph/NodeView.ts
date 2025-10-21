@@ -81,4 +81,17 @@ export default class NodeView extends Container {
       y: this.y + dy * t,
     }
   }
+
+  setHighlighted(highlighted: boolean) {
+    this.nodeShape.clear()
+    if (highlighted) {
+      this.nodeShape.ellipse(0, 0, this.radiusX, this.radiusY)
+      this.nodeShape.fill({ color: 0xffffff })
+      this.nodeShape.stroke({ color: 0x404040, width: 0.5 })
+    } else {
+      this.nodeShape.ellipse(0, 0, this.radiusX, this.radiusY)
+      this.nodeShape.fill({ color: 0xffffff })
+      this.nodeShape.stroke({ color: 0xbfbfbf, width: 0.5 })
+    }
+  }
 }

@@ -9,6 +9,8 @@ export interface EdgeViewOptions {
 }
 
 export default class EdgeView extends Container {
+  private line: Graphics
+
   constructor(source: NodeView, target: NodeView) {
     super()
 
@@ -17,9 +19,9 @@ export default class EdgeView extends Container {
 
     const { x: endX, y: endY } = target.intersectBorderFromPoint(startX, startY)
 
-    const line = new Graphics()
-    line.moveTo(startX, startY)
-    line.lineTo(endX, endY)
+    this.line = new Graphics()
+    this.line.moveTo(startX, startY)
+    this.line.lineTo(endX, endY)
 
     const arrowSize = 5
     const notchInset = 4
@@ -36,15 +38,20 @@ export default class EdgeView extends Container {
     const notchX = endX - Math.cos(angle) * notchInset
     const notchY = endY - Math.sin(angle) * notchInset
 
-    line.moveTo(leftX, leftY)
-    line.lineTo(endX, endY)
-    line.lineTo(rightX, rightY)
-    line.lineTo(notchX, notchY)
-    line.closePath()
+    this.line.moveTo(leftX, leftY)
+    this.line.lineTo(endX, endY)
+    this.line.lineTo(rightX, rightY)
+    this.line.lineTo(notchX, notchY)
+    this.line.closePath()
 
-    line.fill({ color: 0xbfbfbf })
-    line.stroke({ color: 0xbfbfbf, width: 0.5 })
+    this.line.fill({ color: 0xffffff })
+    this.line.stroke({ color: 0xffffff, width: 0.5 })
+    this.line.tint = 0xbfbfbf
 
-    this.addChild(line)
+    this.addChild(this.line)
+  }
+
+  setHighlighted(highlighted: boolean) {
+    this.line.tint = highlighted ? 0x404040 : 0xbfbfbf
   }
 }

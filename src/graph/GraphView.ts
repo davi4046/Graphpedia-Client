@@ -14,6 +14,9 @@ type GraphViewEvents = {
 }
 
 export default class GraphView extends EventEmitter<GraphViewEvents> {
+  private highlightedNode: NodeView | null = null
+  private highlightedEdges: Set<EdgeView> = new Set()
+
   private constructor(
     private app: Application,
     private viewport: PIXIViewport.Viewport,
@@ -93,12 +96,42 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
   addNode(x: number, y: number, label: string, meta: NodeMeta) {
     const nodeView = new NodeView(x, y, label, this.nodeShadowTexture)
     this.nodeContainer.addChild(nodeView)
+
+    nodeView.on("pointerover", () => {
+      this.highlightedNode?.setHighlighted(false)
+      this.highlightedNode = nodeView
+      this.highlightedNode.setHighlighted(true)
+      this.nodeContainer.addChild(nodeView) // bring to front
+      const edges = [...meta.outgoingEdges, ...meta.incomingEdges]
+      this.highlightedEdges.forEach((edge) => edge.setHighlighted(false))
+      this.highlightedEdges.clear()
+      edges.forEach((edge) => {
+        edge.setHighlighted(true)
+        this.highlightedEdges.add(edge)
+      })
+    })
+
+    nodeView.on("pointerout", () => {
+      if (nodeView === this.highlightedNode) {
+        nodeView.setHighlighted(false)
+        this.highlightedNode = null
+        this.highlightedEdges.forEach((edge) => edge.setHighlighted(false))
+        this.highlightedEdges.clear()
+      }
+    })
+
     return nodeView
   }
 
   addEdge(source: NodeView, target: NodeView) {
     const edgeView = new EdgeView(source, target)
     this.edgeContainer.addChild(edgeView)
+
+    if (source === this.highlightedNode || target === this.highlightedNode) {
+      edgeView.setHighlighted(true)
+      this.highlightedEdges.add(edgeView)
+    }
+
     return edgeView
   }
 
