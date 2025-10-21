@@ -19,12 +19,14 @@ export default function GraphPage() {
   const graphList = useGraphList()
   const graphInfo = () => graphList()?.find((g) => g.id === params.graphId)
 
-  let containerRef: HTMLDivElement | undefined
+  let container: HTMLDivElement | undefined
   const [graphView, setGraphView] = createSignal<GraphView>()
 
   onMount(async () => {
     if (!containerRef) return
     const graphView = await GraphView.create(containerRef)
+    if (!container) return
+    const graphView = await GraphView.create(container)
     const dataSource = new GraphDataSource(GRAPH_DATA_URL, params.graphId)
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
@@ -66,7 +68,7 @@ export default function GraphPage() {
       <Title>{`${graphInfo()?.label} - Graphpedia`}</Title>
       <Link rel="canonical" href={`/graph/${params.graphId}`} />
       <div
-        ref={containerRef}
+        ref={container}
         id="graph"
         role="application"
         aria-labelledby="graph-title"
