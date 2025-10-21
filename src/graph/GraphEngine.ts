@@ -38,7 +38,7 @@ export default class GraphEngine {
   private renderedEdges = new EdgeMap<EdgeView>()
 
   constructor(
-    private graphView: GraphView,
+    private view: GraphView,
     private tiles: GraphTile[]
   ) {
     this.tileIndex = new SpatialTileIndex(this.tiles)
@@ -48,12 +48,12 @@ export default class GraphEngine {
       this.render()
     }
 
-    this.graphView.onViewportMoved(update)
+    this.view.onViewportMoved(update)
     this.loadTilesInViewport() // Initial load
   }
 
   private loadTilesInViewport() {
-    const { minX, minY, maxX, maxY } = this.graphView.getVisibleBounds()
+    const { minX, minY, maxX, maxY } = this.view.getVisibleBounds()
     const tilesInBounds = this.tileIndex.search(minX, minY, maxX, maxY)
 
     for (const tile of tilesInBounds) {
@@ -88,7 +88,7 @@ export default class GraphEngine {
   }
 
   private render() {
-    const { minX, minY, maxX, maxY } = this.graphView.getVisibleBounds()
+    const { minX, minY, maxX, maxY } = this.view.getVisibleBounds()
     const nodesInBounds = new Set(this.nodeIndex.search(minX, minY, maxX, maxY))
 
     for (const nodeId of nodesInBounds) {
@@ -100,7 +100,7 @@ export default class GraphEngine {
       node.label().then((label) => {
         if (!this.renderedNodes.has(nodeId)) return
 
-        const nodeView = this.graphView.addNode(node.x, node.y, label)
+        const nodeView = this.view.addNode(node.x, node.y, label)
         this.renderedNodes.set(nodeId, nodeView)
 
         const nodeTargets = this.nodeTargetsMap.get(nodeId) || new Set()
@@ -111,7 +111,7 @@ export default class GraphEngine {
           if (this.renderedEdges.get(nodeId, targetId)) continue
           const target = this.renderedNodes.get(targetId)
           if (!target) continue
-          const edgeView = this.graphView.addEdge(nodeView, target)
+          const edgeView = this.view.addEdge(nodeView, target)
           this.renderedEdges.set(nodeId, targetId, edgeView)
         }
 
@@ -120,7 +120,7 @@ export default class GraphEngine {
           if (this.renderedEdges.get(sourceId, nodeId)) continue
           const source = this.renderedNodes.get(sourceId)
           if (!source) continue
-          const edgeView = this.graphView.addEdge(source, nodeView)
+          const edgeView = this.view.addEdge(source, nodeView)
           this.renderedEdges.set(sourceId, nodeId, edgeView)
         }
       })
