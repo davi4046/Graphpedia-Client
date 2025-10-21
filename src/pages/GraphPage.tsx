@@ -9,6 +9,8 @@ import {
   GraphView,
   useGraphList,
 } from "~/graph"
+import GraphQuery from "~/graph/GraphQuery"
+import GraphState from "~/graph/GraphState"
 import CrosshairIcon from "~/icons/CrosshairIcon"
 import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
@@ -23,14 +25,14 @@ export default function GraphPage() {
   const [graphView, setGraphView] = createSignal<GraphView>()
 
   onMount(async () => {
-    if (!containerRef) return
-    const graphView = await GraphView.create(containerRef)
     if (!container) return
-    const graphView = await GraphView.create(container)
+    const graphState = new GraphState()
+    const graphQuery = new GraphQuery(graphState)
+    const graphView = await GraphView.create(container, graphQuery)
     const dataSource = new GraphDataSource(GRAPH_DATA_URL, params.graphId)
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
-    new GraphEngine(graphView, graphTiles)
+    new GraphEngine(graphState, graphView, graphTiles)
 
     const updateZoom = () => setZoom(graphView.getZoom())
     graphView.onViewportMoved(updateZoom)

@@ -2,6 +2,7 @@ import * as PIXIViewport from "pixi-viewport"
 import { Application, Container, Texture } from "pixi.js"
 import EdgeView from "./EdgeView"
 import EllipticShadow from "./EllipticShadow"
+import GraphQuery from "./GraphQuery"
 import NodeView from "./NodeView"
 
 export default class GraphView {
@@ -10,10 +11,11 @@ export default class GraphView {
     private viewport: PIXIViewport.Viewport,
     private nodeContainer: Container,
     private edgeContainer: Container,
-    private nodeShadowTexture: Texture
+    private nodeShadowTexture: Texture,
+    private graphQuery: GraphQuery
   ) {}
 
-  static async create(container: HTMLElement) {
+  static async create(container: HTMLElement, graphQuery: GraphQuery) {
     const app = new Application()
 
     // @ts-ignore
@@ -60,7 +62,8 @@ export default class GraphView {
       viewport,
       nodeContainer,
       edgeContainer,
-      shadowTexture
+      shadowTexture,
+      graphQuery
     )
   }
 

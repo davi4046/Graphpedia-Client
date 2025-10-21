@@ -1,6 +1,24 @@
 import { BBox } from "rbush"
 import GraphDataSource, { GraphInfo, NodeInfo, TileInfo } from "./dataSource"
-import { GraphEdge, GraphNode, GraphTile } from "./GraphEngine"
+
+export interface GraphNode {
+  readonly id: number
+  readonly x: number
+  readonly y: number
+  label(): Promise<string>
+}
+
+export interface GraphEdge {
+  readonly sourceId: number
+  readonly targetId: number
+}
+
+export interface GraphTile {
+  readonly id: number
+  readonly bbox: BBox
+  nodes(): Promise<readonly GraphNode[]>
+  edges(): Promise<readonly GraphEdge[]>
+}
 
 export default class GraphDataAdapter {
   constructor(private dataSource: GraphDataSource) {}
