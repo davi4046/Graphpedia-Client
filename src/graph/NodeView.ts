@@ -67,23 +67,24 @@ export default class NodeView extends Container {
     this.addChild(this.nodeShape)
     this.addChild(this.nodeLabel)
 
-    this.on("pointerover", (e) => {
-      const domTarget = e.originalEvent.target
-      console.log(domTarget)
-      this.handlePointerOver()
-    })
+    this.on("pointerover", () => this.handlePointerOver())
   }
 
   private handlePointerOver() {
     const box = document.createElement("div")
-    box.id = `node-details-${this.uid}`
-    box.style.width = `${this.radiusX * 2}px`
-    box.style.height = `${this.radiusY * 2}px`
-    box.classList.add("pointer-events-none") // Important until PIXI supports eventMode on DOMContainer
+    box.id = "node-tooltip-anchor-" + this.uid
+    box.style.width = this.radiusX * 2 + "px"
+    box.style.height = this.radiusY * 2 + "px"
+    box.classList.add("pointer-events-none") // Prevent capturing pointer events
+
+    box.style.background = "lightyellow"
 
     const domContainer = new DOMContainer({
       element: box,
-      anchor: 0.5,
+      x: -this.radiusX,
+      y: -this.radiusY,
+      width: this.radiusX * 2,
+      height: this.radiusY * 2,
       eventMode: "none", // This does nothing right now
     })
 
@@ -95,35 +96,21 @@ export default class NodeView extends Container {
 
     // Wait a frame to ensure the element is in the DOM
     requestAnimationFrame(() => {
-      tippyInstance = tippy(`#${box.id}`, {
+      tippyInstance = tippy("#" + box.id, {
         theme: "light-border",
         content: detailsHtml,
         allowHTML: true,
         sticky: true,
         plugins: [sticky],
-        trigger: "manual",
-        interactive: true,
-        appendTo: () => document.body,
-        onHidden: () => {
-          tippyInstance?.destroy()
-          tippyInstance = null
-          this.removeChild(domContainer)
-        },
       })[0]
 
-      setTimeout(() => {
-        tippyInstance?.show()
-      }, 500)
+      tippyInstance?.show()
     })
 
     const removeDomContainer = () => {
-      setTimeout(() => {
-        if (tippyInstance?.popper.matches(":hover")) {
-          tippyInstance?.setProps({ trigger: "mouseenter" })
-        } else {
-          tippyInstance?.hide()
-        }
-      }, 500)
+      this.removeChild(domContainer)
+      tippyInstance?.destroy()
+      tippyInstance = null
     }
 
     this.once("removed", removeDomContainer)
@@ -153,7 +140,7 @@ export default class NodeView extends Container {
 
 function NodeDetails(label: string) {
   return html`
-    <strong class="text-lg">${label}</strong>
-    <p>Some additional information about the node.</p>
+    <strong>${label}</strong>
+    <p>Blah blah blah blahblah blah</p>
   `
 }

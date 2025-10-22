@@ -71,7 +71,7 @@ export default function GraphPage() {
         role="application"
         aria-labelledby="graph-title"
         aria-describedby="graph-desc"
-        class="absolute inset-0 -z-50"
+        class="absolute inset-0"
       ></div>
       <a
         href="/"
