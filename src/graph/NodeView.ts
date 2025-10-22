@@ -33,7 +33,6 @@ export default class NodeView extends Container {
       style: {
         fontFamily: "NodeLabelFont",
         fontSize: 5,
-        fill: 0x000000,
       },
       anchor: 0.5,
       eventMode: "none",
