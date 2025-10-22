@@ -4,6 +4,7 @@ import {
   BitmapText,
   Container,
   DOMContainer,
+  FederatedPointerEvent,
   Graphics,
   Sprite,
   Texture,
@@ -68,60 +69,32 @@ export default class NodeView extends Container {
     this.addChild(this.nodeShape)
     this.addChild(this.nodeLabel)
 
-    this.on("pointerover", (event) => {
-      if (!isEventFromCanvas(event)) return
-      this.handlePointerOver()
-    })
+    this.on("pointerover", this.handlePointerOver)
   }
 
-  private handlePointerOver() {
-    const box = document.createElement("div")
-    box.id = "node-tooltip-anchor-" + this.uid
-    box.style.width = this.radiusX * 2 + "px"
-    box.style.height = this.radiusY * 2 + "px"
-    box.classList.add("pointer-events-none") // Prevent capturing pointer events
+  private handlePointerOver(event: FederatedPointerEvent) {
+    if (!isEventFromCanvas(event)) return
 
-    box.style.backgroundColor = "rgba(255, 255, 64, 0.25)"
+    const overlay = new NodeOverlay(this.radiusX * 2, this.radiusY * 2)
+    this.addChild(overlay)
 
-    const domContainer = new DOMContainer({
-      element: box,
-      x: -this.radiusX,
-      y: -this.radiusY,
-      width: this.radiusX * 2,
-      height: this.radiusY * 2,
-      eventMode: "none", // This does nothing right now
-    })
-
-    this.addChild(domContainer)
-
-    const detailsHtml = NodeDetails(this.nodeLabel.text)
-
-    let tippyInstance: Instance<Props> | null = null
+    let tooltip: NodeTooltip | undefined
 
     // Wait a frame to ensure the element is in the DOM
     requestAnimationFrame(() => {
-      tippyInstance = tippy("#" + box.id, {
-        theme: "light-border",
-        content: detailsHtml,
-        allowHTML: true,
-        sticky: true,
-        plugins: [sticky],
-      })[0]
-
-      tippyInstance?.show()
+      tooltip = new NodeTooltip(overlay.element)
     })
 
-    const removeDomContainer = () => {
-      this.removeChild(domContainer)
-      tippyInstance?.destroy()
-      tippyInstance = null
+    const cleanupTooltip = () => {
+      tooltip?.destroy()
+      this.removeChild(overlay)
     }
 
-    this.once("removed", removeDomContainer)
+    this.once("removed", cleanupTooltip)
 
     this.once("pointerout", () => {
-      removeDomContainer()
-      this.off("removed", removeDomContainer)
+      cleanupTooltip()
+      this.off("removed", cleanupTooltip)
     })
   }
 
@@ -142,9 +115,48 @@ export default class NodeView extends Container {
   }
 }
 
-function NodeDetails(label: string) {
-  return html`
-    <strong>${label}</strong>
-    <p>Blah blah blah blahblah blah</p>
-  `
+class NodeOverlay extends DOMContainer {
+  constructor(width: number, height: number) {
+    const element = document.createElement("div")
+    element.classList.add("pointer-events-none") // Workaround for PIXI lacking eventMode "none" on DOMContainer
+    element.style.width = `${width}px`
+    element.style.height = `${height}px`
+    element.style.backgroundColor = "rgba(255, 255, 64, 0.25)"
+
+    super({
+      element: element,
+      x: -width / 2,
+      y: -height / 2,
+      width: width,
+      height: height,
+      eventMode: "none", // Placeholder: currently not supported
+    })
+  }
+}
+
+class NodeTooltip {
+  private instance: Instance<Props>
+
+  constructor(target: Element) {
+    const content = html`
+      <strong>Hej</strong>
+      <section>
+        <p class="mb-0">Blah blah blah blahblah blah</p>
+      </section>
+    `
+
+    this.instance = tippy(target, {
+      theme: "light-border",
+      content: content,
+      allowHTML: true,
+      sticky: true,
+      plugins: [sticky],
+    })
+
+    this.instance.show()
+  }
+
+  destroy() {
+    this.instance.destroy()
+  }
 }
