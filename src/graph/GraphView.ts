@@ -41,6 +41,8 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
       antialias: true,
     })
 
+    app.renderer.events.setTargetElement(app.canvas)
+
     container.appendChild(app.canvas)
 
     const viewport = new PIXIViewport.Viewport({
