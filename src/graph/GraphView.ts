@@ -15,7 +15,7 @@ type GraphViewEvents = {
 
 export default class GraphView extends EventEmitter<GraphViewEvents> {
   private hoveredNode: NodeView | null = null
-  private highlightedEdges: Set<EdgeView> = new Set()
+  private emphasizedEdges: Set<EdgeView> = new Set()
 
   private constructor(
     private app: Application,
@@ -83,6 +83,27 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     this.app.destroy(true, { children: true, texture: true })
   }
 
+  private handleNodePointerOver(node: NodeView, meta: NodeMeta) {
+    this.hoveredNode = node
+    this.nodeContainer.addChild(node) // bring to front
+
+    this.emphasizedEdges.forEach((edge) => edge.setEmphasized(false))
+    this.emphasizedEdges.clear()
+
+    const edges = [...meta.outgoingEdges, ...meta.incomingEdges]
+
+    edges.forEach((edge) => {
+      edge.setEmphasized(true)
+      this.emphasizedEdges.add(edge)
+    })
+
+    node.once("pointerout", () => {
+      this.hoveredNode = null
+      this.emphasizedEdges.forEach((edge) => edge.setEmphasized(false))
+      this.emphasizedEdges.clear()
+    })
+  }
+
   getVisibleBounds() {
     const { x, y, width, height } = this.viewport.getVisibleBounds()
     return {
@@ -94,42 +115,22 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
   }
 
   addNode(x: number, y: number, label: string, meta: NodeMeta) {
-    const nodeView = new NodeView(x, y, label, this.nodeShadowTexture)
-    this.nodeContainer.addChild(nodeView)
-
-    nodeView.on("pointerover", () => {
-      this.hoveredNode = nodeView
-      this.nodeContainer.addChild(nodeView) // bring to front
-      const edges = [...meta.outgoingEdges, ...meta.incomingEdges]
-      this.highlightedEdges.forEach((edge) => edge.setHighlighted(false))
-      this.highlightedEdges.clear()
-      edges.forEach((edge) => {
-        edge.setHighlighted(true)
-        this.highlightedEdges.add(edge)
-      })
-    })
-
-    nodeView.on("pointerout", () => {
-      if (nodeView === this.hoveredNode) {
-        this.hoveredNode = null
-        this.highlightedEdges.forEach((edge) => edge.setHighlighted(false))
-        this.highlightedEdges.clear()
-      }
-    })
-
-    return nodeView
+    const node = new NodeView(x, y, label, this.nodeShadowTexture)
+    this.nodeContainer.addChild(node)
+    node.on("pointerover", () => this.handleNodePointerOver(node, meta))
+    return node
   }
 
   addEdge(source: NodeView, target: NodeView) {
-    const edgeView = new EdgeView(source, target)
-    this.edgeContainer.addChild(edgeView)
+    const edge = new EdgeView(source, target)
+    this.edgeContainer.addChild(edge)
 
     if (source === this.hoveredNode || target === this.hoveredNode) {
-      edgeView.setHighlighted(true)
-      this.highlightedEdges.add(edgeView)
+      edge.setEmphasized(true)
+      this.emphasizedEdges.add(edge)
     }
 
-    return edgeView
+    return edge
   }
 
   getZoom() {

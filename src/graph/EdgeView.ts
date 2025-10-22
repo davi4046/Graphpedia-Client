@@ -51,7 +51,7 @@ export default class EdgeView extends Container {
     this.addChild(this.line)
   }
 
-  setHighlighted(highlighted: boolean) {
-    this.line.tint = highlighted ? 0x404040 : 0xbfbfbf
+  setEmphasized(emphasized: boolean) {
+    this.line.tint = emphasized ? 0x404040 : 0xbfbfbf
   }
 }
