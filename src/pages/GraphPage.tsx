@@ -33,10 +33,6 @@ export default function GraphPage() {
     const updateZoom = () => setZoom(graphView.getZoom())
     graphView.on("viewportMoved", updateZoom)
 
-    graphEngine.on("nodeClicked", (nodeId) => {
-      console.log(`Node clicked: ${nodeId}`)
-    })
-
     setGraphView(graphView)
   })
 
