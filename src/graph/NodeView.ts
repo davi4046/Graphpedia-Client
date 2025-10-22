@@ -1,11 +1,14 @@
+import { html } from "common-tags"
 import {
   BitmapFont,
   BitmapText,
   Container,
+  DOMContainer,
   Graphics,
   Sprite,
   Texture,
 } from "pixi.js"
+import tippy, { Instance, Props, sticky } from "tippy.js"
 
 if (typeof window !== "undefined") {
   BitmapFont.install({
@@ -63,6 +66,59 @@ export default class NodeView extends Container {
     this.addChild(this.nodeShadow)
     this.addChild(this.nodeShape)
     this.addChild(this.nodeLabel)
+
+    this.on("pointerover", () => this.handlePointerOver())
+  }
+
+  private handlePointerOver() {
+    const box = document.createElement("div")
+    box.id = "node-tooltip-anchor-" + this.uid
+    box.style.width = this.radiusX * 2 + "px"
+    box.style.height = this.radiusY * 2 + "px"
+    box.classList.add("pointer-events-none") // Prevent capturing pointer events
+
+    box.style.background = "lightyellow"
+
+    const domContainer = new DOMContainer({
+      element: box,
+      x: -this.radiusX,
+      y: -this.radiusY,
+      width: this.radiusX * 2,
+      height: this.radiusY * 2,
+      eventMode: "none", // This does nothing right now
+    })
+
+    this.addChild(domContainer)
+
+    const detailsHtml = NodeDetails(this.nodeLabel.text)
+
+    let tippyInstance: Instance<Props> | null = null
+
+    // Wait a frame to ensure the element is in the DOM
+    requestAnimationFrame(() => {
+      tippyInstance = tippy("#" + box.id, {
+        theme: "light-border",
+        content: detailsHtml,
+        allowHTML: true,
+        sticky: true,
+        plugins: [sticky],
+      })[0]
+
+      tippyInstance?.show()
+    })
+
+    const removeDomContainer = () => {
+      this.removeChild(domContainer)
+      tippyInstance?.destroy()
+      tippyInstance = null
+    }
+
+    this.once("removed", removeDomContainer)
+
+    this.once("pointerout", () => {
+      removeDomContainer()
+      this.off("removed", removeDomContainer)
+    })
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
@@ -80,4 +136,11 @@ export default class NodeView extends Container {
       y: this.y + dy * t,
     }
   }
+}
+
+function NodeDetails(label: string) {
+  return html`
+    <strong>${label}</strong>
+    <p>Blah blah blah blahblah blah</p>
+  `
 }
