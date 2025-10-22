@@ -9,6 +9,7 @@ import {
   Texture,
 } from "pixi.js"
 import tippy, { Instance, Props, sticky } from "tippy.js"
+import { isEventFromCanvas } from "./pixiHelpers"
 
 if (typeof window !== "undefined") {
   BitmapFont.install({
@@ -67,7 +68,10 @@ export default class NodeView extends Container {
     this.addChild(this.nodeShape)
     this.addChild(this.nodeLabel)
 
-    this.on("pointerover", () => this.handlePointerOver())
+    this.on("pointerover", (event) => {
+      if (!isEventFromCanvas(event)) return
+      this.handlePointerOver()
+    })
   }
 
   private handlePointerOver() {
@@ -77,7 +81,7 @@ export default class NodeView extends Container {
     box.style.height = this.radiusY * 2 + "px"
     box.classList.add("pointer-events-none") // Prevent capturing pointer events
 
-    box.style.background = "lightyellow"
+    box.style.backgroundColor = "rgba(255, 255, 64, 0.25)"
 
     const domContainer = new DOMContainer({
       element: box,

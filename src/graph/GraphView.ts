@@ -3,6 +3,7 @@ import { Application, Container, EventEmitter, Texture } from "pixi.js"
 import EdgeView from "./EdgeView"
 import EllipticShadow from "./EllipticShadow"
 import NodeView from "./NodeView"
+import { isEventFromCanvas } from "./pixiHelpers"
 
 export interface NodeMeta {
   get outgoingEdges(): EdgeView[]
@@ -117,7 +118,12 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
   addNode(x: number, y: number, label: string, meta: NodeMeta) {
     const node = new NodeView(x, y, label, this.nodeShadowTexture)
     this.nodeContainer.addChild(node)
-    node.on("pointerover", () => this.handleNodePointerOver(node, meta))
+
+    node.on("pointerover", (event) => {
+      if (!isEventFromCanvas(event)) return
+      this.handleNodePointerOver(node, meta)
+    })
+
     return node
   }
 
