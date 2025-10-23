@@ -28,6 +28,7 @@ export interface NodeViewProps {
   y: number
   label?: string
   description?: string
+  url: string
   wikidataId: string
   wikidataUrl: string
 }
@@ -82,6 +83,7 @@ export default class NodeView extends Container {
     this.addChild(this.nodeLabel)
 
     this.on("pointerover", this.handlePointerOver)
+    this.on("pointertap", this.handlePointerTap)
   }
 
   private handlePointerOver(event: FederatedPointerEvent) {
@@ -113,6 +115,17 @@ export default class NodeView extends Container {
       cleanupTooltip()
       this.off("removed", cleanupTooltip)
     })
+  }
+
+  private handlePointerTap() {
+    console.log("hello")
+    const popup = new NodePopup(
+      this.props.label,
+      this.props.description,
+      this.props.url,
+      this.props.wikidataId,
+      this.props.wikidataUrl
+    )
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
@@ -163,10 +176,10 @@ class NodeTooltip {
     const content = html`
       <header class="text-sm font-semibold">
         ${label
-          ? `${label} <span class="text-xs opacity-70">(${wikidataId})</span>`
-          : `${wikidataId} [No label]`}
+          ? `${label} <span class="text-xs opacity-80">(${wikidataId})</span>`
+          : `${wikidataId}`}
       </header>
-      <p class="mb-0 text-sm">${description}</p>
+      <p class="mb-0 text-xs">${description}</p>
     `
 
     this.instance = tippy(target, {
@@ -185,6 +198,85 @@ class NodeTooltip {
   }
 }
 
+const ExternalLinkIcon = `
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="18"
+    height="18"
+    fill="currentColor"
+    viewBox="0 0 256 256"
+  >
+    <path
+      d="M224,104a8,8,0,0,1-16,0V59.32l-66.33,66.34a8,8,0,0,1-11.32-11.32L196.68,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V80h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,80V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"
+    ></path>
+  </svg>
+`
+
 class NodePopup {
-  constructor() {}
+  constructor(
+    label: string | undefined,
+    description: string | undefined,
+    url: string,
+    wikidataId: string,
+    wikidataUrl: string
+  ) {
+    const content = html`
+      <dialog open>
+        <article>
+          <header>
+            <button aria-label="Close" rel="prev"></button>
+            <p class="font-semibold">
+              ${label
+                ? `${label}`
+                : `<span class="opacity-60">No label defined</span>`}
+              <small class="opacity-80">(${wikidataId})</small>
+            </p>
+          </header>
+          <p>
+            ${description
+              ? description
+              : `<span class="opacity-60">No description defined</span>`}
+          </p>
+          <p>
+            <a
+              href="${wikidataUrl}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1"
+            >
+              View on Wikidata ${ExternalLinkIcon}
+            </a>
+          </p>
+          <footer>
+            <a href="${url}" target="_blank" rel="noopener noreferrer"
+              >${url}</a
+            >
+          </footer>
+        </article>
+      </dialog>
+    `
+    const template = document.createElement("template")
+    template.innerHTML = content.trim()
+    const node = template.content.firstElementChild
+
+    if (node) {
+      document.body.appendChild(node)
+
+      const dialog = node as HTMLDialogElement
+      const article = dialog.querySelector("article")
+      const closeButton = dialog.querySelector("button")
+
+      closeButton?.addEventListener("click", () => {
+        dialog.open = false
+      })
+
+      dialog.addEventListener("click", () => {
+        dialog.open = false
+      })
+
+      article?.addEventListener("click", (event) => {
+        event.stopPropagation()
+      })
+    }
+  }
 }

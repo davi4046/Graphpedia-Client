@@ -94,7 +94,7 @@
 
     // Modal (<dialog>)
     @if map.get($modules, "components/modal") {
-      #{$css-var-prefix}modal-overlay-backdrop-filter: blur(0.375rem);
+      #{$css-var-prefix}modal-overlay-backdrop-filter: blur(0rem);
     }
 
     // Spacings for nav component

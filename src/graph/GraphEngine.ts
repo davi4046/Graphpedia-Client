@@ -8,6 +8,7 @@ export interface GraphNode {
   readonly id: number
   readonly x: number
   readonly y: number
+  readonly url: string
   readonly wikidataId: string
   readonly wikidataUrl: string
   getDetails(): Promise<{
@@ -112,6 +113,7 @@ export default class GraphEngine {
           y: node.y,
           label,
           description,
+          url: node.url,
           wikidataId: node.wikidataId,
           wikidataUrl: node.wikidataUrl,
         }
