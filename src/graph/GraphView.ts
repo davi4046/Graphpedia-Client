@@ -95,6 +95,7 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
 
     edges.forEach((edge) => {
       edge.setEmphasized(true)
+      this.edgeContainer.addChild(edge) // bring to front
       this.emphasizedEdges.add(edge)
     })
 
@@ -133,6 +134,7 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
 
     if (source === this.hoveredNode || target === this.hoveredNode) {
       edge.setEmphasized(true)
+      this.edgeContainer.addChild(edge) // bring to front
       this.emphasizedEdges.add(edge)
     }
 
