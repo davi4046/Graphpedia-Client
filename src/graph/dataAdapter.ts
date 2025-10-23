@@ -35,8 +35,6 @@ class TileImpl implements GraphTile {
   ) {}
 
   private promise?: Promise<TileInfo>
-  private _nodes?: GraphNode[]
-  private _edges?: GraphEdge[]
 
   private async load(): Promise<TileInfo> {
     if (!this.promise) {
@@ -45,31 +43,21 @@ class TileImpl implements GraphTile {
     return this.promise
   }
 
-  async nodes(): Promise<GraphNode[]> {
+  async getDetails(): Promise<{ nodes: GraphNode[]; edges: GraphEdge[] }> {
     const tileInfo = await this.load()
-
-    if (!this._nodes) {
-      this._nodes = tileInfo.nodes.map((nodeData) => {
+    return {
+      nodes: tileInfo.nodes.map((nodeData) => {
         return new NodeImpl(
           nodeData.id,
           nodeData.x,
           nodeData.y,
           this.dataSource
         )
-      })
+      }),
+      edges: tileInfo.edges.map((edgeData) => {
+        return new EdgeImpl(edgeData.sourceId, edgeData.targetId)
+      }),
     }
-    return this._nodes
-  }
-
-  async edges(): Promise<GraphEdge[]> {
-    const tileInfo = await this.load()
-
-    if (!this._edges) {
-      this._edges = tileInfo.edges.map((edgeInfo) => {
-        return new EdgeImpl(edgeInfo.sourceId, edgeInfo.targetId)
-      })
-    }
-    return this._edges
   }
 }
 
@@ -90,9 +78,8 @@ class NodeImpl implements GraphNode {
     return this.promise
   }
 
-  async label(): Promise<string> {
-    const nodeInfo = await this.load()
-    return nodeInfo.label
+  async getDetails(): Promise<NodeInfo> {
+    return this.load()
   }
 }
 

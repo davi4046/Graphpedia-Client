@@ -23,6 +23,13 @@ if (typeof window !== "undefined") {
   })
 }
 
+export interface NodeViewProps {
+  x: number
+  y: number
+  label: string
+  description: string
+}
+
 export default class NodeView extends Container {
   private radiusX: number
   private radiusY: number
@@ -30,11 +37,14 @@ export default class NodeView extends Container {
   private nodeShape: Graphics
   private nodeShadow: Sprite
 
-  constructor(x: number, y: number, label: string, shadowTexture: Texture) {
-    super({ x, y, label, interactive: true, cursor: "help" })
+  constructor(
+    private props: NodeViewProps,
+    shadowTexture: Texture
+  ) {
+    super({ x: props.x, y: props.y, interactive: true, cursor: "help" })
 
     this.nodeLabel = new BitmapText({
-      text: label,
+      text: props.label,
       style: {
         fontFamily: "NodeLabelFont",
         fontSize: 5,
@@ -82,7 +92,11 @@ export default class NodeView extends Container {
 
     // Wait a frame to ensure the element is in the DOM
     requestAnimationFrame(() => {
-      tooltip = new NodeTooltip(overlay.element, this.label)
+      tooltip = new NodeTooltip(
+        overlay.element,
+        this.props.label,
+        this.props.description
+      )
     })
 
     const cleanupTooltip = () => {
@@ -137,11 +151,11 @@ class NodeOverlay extends DOMContainer {
 class NodeTooltip {
   private instance: Instance<Props>
 
-  constructor(target: Element, label: string) {
+  constructor(target: Element, label: string, description: string) {
     const content = html`
       <strong>${label}</strong>
       <section>
-        <p class="mb-0">Blah blah blah blahblah blah</p>
+        <p class="mb-0">${description}</p>
       </section>
     `
 

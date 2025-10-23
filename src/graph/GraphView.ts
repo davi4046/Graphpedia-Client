@@ -2,10 +2,10 @@ import * as PIXIViewport from "pixi-viewport"
 import { Application, Container, EventEmitter, Texture } from "pixi.js"
 import EdgeView from "./EdgeView"
 import EllipticShadow from "./EllipticShadow"
-import NodeView from "./NodeView"
+import NodeView, { NodeViewProps } from "./NodeView"
 import { isEventFromCanvas } from "./pixiHelpers"
 
-export interface NodeMeta {
+export interface NodeViewMeta {
   get outgoingEdges(): EdgeView[]
   get incomingEdges(): EdgeView[]
 }
@@ -84,7 +84,7 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     this.app.destroy(true, { children: true, texture: true })
   }
 
-  private handleNodePointerOver(node: NodeView, meta: NodeMeta) {
+  private handleNodePointerOver(node: NodeView, meta: NodeViewMeta) {
     this.hoveredNode = node
     this.nodeContainer.addChild(node) // bring to front
 
@@ -115,8 +115,8 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     }
   }
 
-  addNode(x: number, y: number, label: string, meta: NodeMeta) {
-    const node = new NodeView(x, y, label, this.nodeShadowTexture)
+  addNode(props: NodeViewProps, meta: NodeViewMeta) {
+    const node = new NodeView(props, this.nodeShadowTexture)
     this.nodeContainer.addChild(node)
 
     node.on("pointerover", (event) => {

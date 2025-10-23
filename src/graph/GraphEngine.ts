@@ -1,14 +1,17 @@
 import Flatbush from "flatbush"
 import RBush, { BBox } from "rbush"
 import EdgeView from "./EdgeView"
-import GraphView, { NodeMeta } from "./GraphView"
+import GraphView, { NodeViewMeta } from "./GraphView"
 import NodeView from "./NodeView"
 
 export interface GraphNode {
   readonly id: number
   readonly x: number
   readonly y: number
-  label(): Promise<string>
+  getDetails(): Promise<{
+    label: string
+    description: string
+  }>
 }
 
 export interface GraphEdge {
@@ -19,8 +22,10 @@ export interface GraphEdge {
 export interface GraphTile {
   readonly id: number
   readonly bbox: BBox
-  nodes(): Promise<readonly GraphNode[]>
-  edges(): Promise<readonly GraphEdge[]>
+  getDetails(): Promise<{
+    nodes: GraphNode[]
+    edges: GraphEdge[]
+  }>
 }
 
 export default class GraphEngine {
@@ -60,7 +65,7 @@ export default class GraphEngine {
       if (this.loadedTiles.has(tile.id)) continue
       this.loadedTiles.add(tile.id)
 
-      Promise.all([tile.nodes(), tile.edges()]).then(([nodes, edges]) => {
+      tile.getDetails().then(({ nodes, edges }) => {
         for (const node of nodes) {
           if (this.nodes.has(node.id)) continue
           this.nodes.set(node.id, node)
@@ -97,16 +102,24 @@ export default class GraphEngine {
 
       const node = this.nodes.get(nodeId)!
 
-      node.label().then((label) => {
+      node.getDetails().then(({ label, description }) => {
         if (!this.renderedNodes.has(nodeId)) return
 
-        const meta = new NodeMetaImpl(
+        const props = {
+          x: node.x,
+          y: node.y,
+          label,
+          description,
+        }
+
+        const meta = new NodeViewMetaImpl(
           nodeId,
           this.nodeTargetsMap,
           this.nodeSourcesMap,
           this.renderedEdges
         )
-        const nodeView = this.view.addNode(node.x, node.y, label, meta)
+
+        const nodeView = this.view.addNode(props, meta)
         this.renderedNodes.set(nodeId, nodeView)
 
         const nodeTargets = this.nodeTargetsMap.get(nodeId) || new Set()
@@ -228,7 +241,7 @@ class SpatialNodeIndex {
   }
 }
 
-class NodeMetaImpl implements NodeMeta {
+class NodeViewMetaImpl implements NodeViewMeta {
   constructor(
     private nodeId: number,
     private nodeTargetsMap: Map<number, Set<number>>,

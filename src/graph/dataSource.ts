@@ -28,6 +28,7 @@ export interface TileInfo {
 
 export interface NodeInfo {
   label: string
+  description: string
 }
 
 export default class GraphDataSource {
@@ -63,7 +64,10 @@ export default class GraphDataSource {
 
   async fetchNodeInfo(nodeId: number): Promise<NodeInfo> {
     const item = await this.entities.fetch(`Q${nodeId}`)
-    return { label: item.labels?.en?.value ?? `Q${nodeId}` }
+    return {
+      label: item.labels?.en?.value ?? `Q${nodeId}`,
+      description: item.descriptions?.en?.value ?? "",
+    }
   }
 }
 
@@ -71,7 +75,7 @@ export async function fetchEntities(ids: string[]): Promise<Item[]> {
   const wbk = WBK({ instance: "https://www.wikidata.org" })
   const url = wbk.getEntities({
     ids: ids as EntityId[],
-    props: ["labels"],
+    props: ["labels", "descriptions"],
     languages: ["en"],
     format: "json",
   })
