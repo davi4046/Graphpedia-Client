@@ -26,8 +26,10 @@ if (typeof window !== "undefined") {
 export interface NodeViewProps {
   x: number
   y: number
-  label: string
-  description: string
+  label?: string
+  description?: string
+  wikidataId: string
+  wikidataUrl: string
 }
 
 export default class NodeView extends Container {
@@ -44,7 +46,7 @@ export default class NodeView extends Container {
     super({ x: props.x, y: props.y, interactive: true, cursor: "pointer" })
 
     this.nodeLabel = new BitmapText({
-      text: props.label,
+      text: props.label ?? props.wikidataId,
       style: {
         fontFamily: "NodeLabelFont",
         fontSize: 5,
@@ -95,7 +97,8 @@ export default class NodeView extends Container {
       tooltip = new NodeTooltip(
         overlay.element,
         this.props.label,
-        this.props.description
+        this.props.description,
+        this.props.wikidataId
       )
     })
 
@@ -151,12 +154,19 @@ class NodeOverlay extends DOMContainer {
 class NodeTooltip {
   private instance: Instance<Props>
 
-  constructor(target: Element, label: string, description: string) {
+  constructor(
+    target: Element,
+    label: string | undefined,
+    description: string | undefined,
+    wikidataId: string
+  ) {
     const content = html`
-      <strong>${label}</strong>
-      <section>
-        <p class="mb-0">${description}</p>
-      </section>
+      <header class="text-sm font-semibold">
+        ${label
+          ? `${label} <span class="text-xs opacity-70">(${wikidataId})</span>`
+          : `${wikidataId} [No label]`}
+      </header>
+      <p class="mb-0 text-sm">${description}</p>
     `
 
     this.instance = tippy(target, {
@@ -173,4 +183,8 @@ class NodeTooltip {
   destroy() {
     this.instance.destroy()
   }
+}
+
+class NodePopup {
+  constructor() {}
 }

@@ -8,9 +8,11 @@ export interface GraphNode {
   readonly id: number
   readonly x: number
   readonly y: number
+  readonly wikidataId: string
+  readonly wikidataUrl: string
   getDetails(): Promise<{
-    label: string
-    description: string
+    label?: string
+    description?: string
   }>
 }
 
@@ -110,6 +112,8 @@ export default class GraphEngine {
           y: node.y,
           label,
           description,
+          wikidataId: node.wikidataId,
+          wikidataUrl: node.wikidataUrl,
         }
 
         const meta = new NodeViewMetaImpl(

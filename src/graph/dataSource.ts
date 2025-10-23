@@ -27,8 +27,8 @@ export interface TileInfo {
 }
 
 export interface NodeInfo {
-  label: string
-  description: string
+  label?: string
+  description?: string
 }
 
 export default class GraphDataSource {
@@ -65,8 +65,8 @@ export default class GraphDataSource {
   async fetchNodeInfo(nodeId: number): Promise<NodeInfo> {
     const item = await this.entities.fetch(`Q${nodeId}`)
     return {
-      label: item.labels?.en?.value ?? `Q${nodeId}`,
-      description: item.descriptions?.en?.value ?? "",
+      label: item.labels?.en?.value,
+      description: item.descriptions?.en?.value,
     }
   }
 }
