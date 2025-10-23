@@ -31,7 +31,7 @@ export default class NodeView extends Container {
   private nodeShadow: Sprite
 
   constructor(x: number, y: number, label: string, shadowTexture: Texture) {
-    super({ x, y, interactive: true, cursor: "help" })
+    super({ x, y, label, interactive: true, cursor: "help" })
 
     this.nodeLabel = new BitmapText({
       text: label,
@@ -82,7 +82,7 @@ export default class NodeView extends Container {
 
     // Wait a frame to ensure the element is in the DOM
     requestAnimationFrame(() => {
-      tooltip = new NodeTooltip(overlay.element)
+      tooltip = new NodeTooltip(overlay.element, this.label)
     })
 
     const cleanupTooltip = () => {
@@ -137,9 +137,9 @@ class NodeOverlay extends DOMContainer {
 class NodeTooltip {
   private instance: Instance<Props>
 
-  constructor(target: Element) {
+  constructor(target: Element, label: string) {
     const content = html`
-      <strong>Hej</strong>
+      <strong>${label}</strong>
       <section>
         <p class="mb-0">Blah blah blah blahblah blah</p>
       </section>
