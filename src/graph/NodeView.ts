@@ -9,7 +9,7 @@ import {
   Sprite,
   Texture,
 } from "pixi.js"
-import tippy, { Instance, Props, sticky } from "tippy.js"
+import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
 import { isEventFromCanvas } from "./pixiHelpers"
 
 if (typeof window !== "undefined") {
@@ -152,7 +152,7 @@ class NodeOverlay extends DOMContainer {
 }
 
 class NodeTooltip {
-  private instance: Instance<Props>
+  private tippyInstance: TippyInstance
 
   constructor(
     target: Element,
@@ -169,7 +169,7 @@ class NodeTooltip {
       <p class="mb-0 text-sm">${description}</p>
     `
 
-    this.instance = tippy(target, {
+    this.tippyInstance = tippy(target, {
       theme: "light-border",
       content: content,
       allowHTML: true,
@@ -177,10 +177,10 @@ class NodeTooltip {
       plugins: [sticky],
     })
 
-    this.instance.show()
+    this.tippyInstance.show()
   }
 
   destroy() {
-    this.instance.destroy()
+    this.tippyInstance.destroy()
   }
 }
