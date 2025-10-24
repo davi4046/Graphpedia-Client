@@ -51,7 +51,6 @@ class TileImpl implements GraphTile {
           nodeData.id,
           nodeData.x,
           nodeData.y,
-          `https://www.graphpedia.org/graph/${this.dataSource.graphId}?item=Q${nodeData.id}`,
           `Q${nodeData.id}`,
           `https://www.wikidata.org/wiki/Q${nodeData.id}`,
           this.dataSource
@@ -69,7 +68,6 @@ class NodeImpl implements GraphNode {
     public id: number,
     public x: number,
     public y: number,
-    public url: string,
     public wikidataId: string,
     public wikidataUrl: string,
     private dataSource: GraphDataSource

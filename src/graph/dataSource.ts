@@ -34,7 +34,7 @@ export interface NodeInfo {
 export default class GraphDataSource {
   constructor(
     private baseUrl: string,
-    readonly graphId: string
+    private graphId: string
   ) {}
 
   private entities = createBatcher({
