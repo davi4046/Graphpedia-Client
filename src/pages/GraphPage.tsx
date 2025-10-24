@@ -1,6 +1,8 @@
 import { Link, Title } from "@solidjs/meta"
 import { useParams } from "@solidjs/router"
+import { html } from "common-tags"
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
+import tippy from "tippy.js"
 import { GRAPH_DATA_URL } from "~/config"
 import {
   GraphDataAdapter,
@@ -34,6 +36,21 @@ export default function GraphPage() {
     graphView.on("viewportMoved", updateZoom)
 
     setGraphView(graphView)
+
+    const tooltipContent = html`
+      <header class="text-sm font-semibold">
+        ${graphInfo()?.label}${" "}
+        <span class="text-xs opacity-60">(${graphInfo()?.id})</span>
+      </header>
+      <p class="mb-0 text-sm">${graphInfo()?.description}</p>
+    `
+
+    tippy("h1", {
+      theme: "light-border",
+      placement: "bottom",
+      content: tooltipContent,
+      allowHTML: true,
+    })
   })
 
   onCleanup(() => {
@@ -81,14 +98,14 @@ export default function GraphPage() {
         <img src="/graphpedia.svg" alt="" class="h-14 w-14" />
         <img src="/graphpedia-wordmark-light.svg" alt="" class="mt-0.5 w-14" />
       </a>
-      <div
-        data-tooltip={`${graphInfo()?.label} (${graphInfo()?.id}): ${graphInfo()?.description}`}
-        data-placement="bottom"
-        class="absolute top-0 left-1/2 -translate-x-1/2 border-x border-b border-gray-300 bg-white px-1 shadow-sm"
-      >
-        <h1 id="graph-title" class="mb-0 text-lg font-semibold">
-          {graphInfo()?.label} ({graphInfo()?.id})
-        </h1>{" "}
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 border-x border-b border-gray-300 bg-white shadow-sm">
+        <h1
+          id="graph-title"
+          data-template="title-tooltip"
+          class="mb-0 px-1 text-lg font-semibold"
+        >
+          {graphInfo()?.label}
+        </h1>
         <div id="graph-desc" class="sr-only">
           {graphInfo()?.description}
         </div>
