@@ -138,7 +138,7 @@ class NodeOverlay extends DOMContainer {
     element.classList.add("pointer-events-none") // Workaround for PIXI lacking eventMode "none" on DOMContainer
     element.style.width = `${width}px`
     element.style.height = `${height}px`
-    element.style.backgroundColor = "rgba(255, 255, 64, 0.25)"
+    element.style.backgroundColor = "rgba(255, 255, 64, 0.2)"
 
     super({
       element: element,
@@ -163,8 +163,8 @@ class NodeTooltip {
     const content = html`
       <header class="text-sm font-semibold">
         ${label
-          ? `${label} <span class="text-xs opacity-70">(${wikidataId})</span>`
-          : `${wikidataId} [No label]`}
+          ? `${label} <span class="text-xs opacity-60">(${wikidataId})</span>`
+          : `${wikidataId}`}
       </header>
       <p class="mb-0 text-sm">${description}</p>
     `
@@ -183,8 +183,4 @@ class NodeTooltip {
   destroy() {
     this.instance.destroy()
   }
-}
-
-class NodePopup {
-  constructor() {}
 }
