@@ -28,6 +28,7 @@ export interface NodeViewProps {
   y: number
   label?: string
   description?: string
+  url: string
   wikidataId: string
   wikidataUrl: string
 }

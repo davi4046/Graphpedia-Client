@@ -45,12 +45,14 @@ class TileImpl implements GraphTile {
 
   async getDetails(): Promise<{ nodes: GraphNode[]; edges: GraphEdge[] }> {
     const tileInfo = await this.load()
+
     return {
       nodes: tileInfo.nodes.map((nodeData) => {
         return new NodeImpl(
           nodeData.id,
           nodeData.x,
           nodeData.y,
+          `https://www.graphpedia.org/graph/${this.dataSource.graphId}?item=Q${nodeData.id}`,
           `Q${nodeData.id}`,
           `https://www.wikidata.org/wiki/Q${nodeData.id}`,
           this.dataSource
@@ -68,6 +70,7 @@ class NodeImpl implements GraphNode {
     public id: number,
     public x: number,
     public y: number,
+    public url: string,
     public wikidataId: string,
     public wikidataUrl: string,
     private dataSource: GraphDataSource
