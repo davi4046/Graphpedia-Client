@@ -3,21 +3,12 @@ import { Application, Container, EventEmitter, Texture } from "pixi.js"
 import EdgeView from "./EdgeView"
 import EllipticShadow from "./EllipticShadow"
 import NodeView, { NodeViewProps } from "./NodeView"
-import { isEventFromCanvas } from "./pixiHelpers"
-
-export interface NodeViewMeta {
-  get outgoingEdges(): EdgeView[]
-  get incomingEdges(): EdgeView[]
-}
 
 type GraphViewEvents = {
   viewportMoved: () => void
 }
 
 export default class GraphView extends EventEmitter<GraphViewEvents> {
-  private hoveredNode: NodeView | null = null
-  private emphasizedEdges: Set<EdgeView> = new Set()
-
   private constructor(
     private app: Application,
     private viewport: PIXIViewport.Viewport,
@@ -84,28 +75,6 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     this.app.destroy(true, { children: true, texture: true })
   }
 
-  private handleNodePointerOver(node: NodeView, meta: NodeViewMeta) {
-    this.hoveredNode = node
-    this.nodeContainer.addChild(node) // bring to front
-
-    this.emphasizedEdges.forEach((edge) => edge.setEmphasized(false))
-    this.emphasizedEdges.clear()
-
-    const edges = [...meta.outgoingEdges, ...meta.incomingEdges]
-
-    edges.forEach((edge) => {
-      edge.setEmphasized(true)
-      this.edgeContainer.addChild(edge) // bring to front
-      this.emphasizedEdges.add(edge)
-    })
-
-    node.once("pointerout", () => {
-      this.hoveredNode = null
-      this.emphasizedEdges.forEach((edge) => edge.setEmphasized(false))
-      this.emphasizedEdges.clear()
-    })
-  }
-
   getVisibleBounds() {
     const { x, y, width, height } = this.viewport.getVisibleBounds()
     return {
@@ -116,28 +85,15 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     }
   }
 
-  addNode(props: NodeViewProps, meta: NodeViewMeta) {
+  addNode(props: NodeViewProps) {
     const node = new NodeView(props, this.nodeShadowTexture)
     this.nodeContainer.addChild(node)
-
-    node.on("pointerover", (event) => {
-      if (!isEventFromCanvas(event)) return
-      this.handleNodePointerOver(node, meta)
-    })
-
     return node
   }
 
   addEdge(source: NodeView, target: NodeView) {
     const edge = new EdgeView(source, target)
     this.edgeContainer.addChild(edge)
-
-    if (source === this.hoveredNode || target === this.hoveredNode) {
-      edge.setEmphasized(true)
-      this.edgeContainer.addChild(edge) // bring to front
-      this.emphasizedEdges.add(edge)
-    }
-
     return edge
   }
 

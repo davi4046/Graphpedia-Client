@@ -1,7 +1,7 @@
 import Flatbush from "flatbush"
 import RBush, { BBox } from "rbush"
 import EdgeView from "./EdgeView"
-import GraphView, { NodeViewMeta } from "./GraphView"
+import GraphView from "./GraphView"
 import NodeView from "./NodeView"
 
 export interface GraphNode {
@@ -108,7 +108,7 @@ export default class GraphEngine {
       node.getDetails().then(({ label, description }) => {
         if (!this.renderedNodes.has(nodeId)) return
 
-        const props = {
+        const nodeView = this.view.addNode({
           x: node.x,
           y: node.y,
           label,
@@ -116,16 +116,8 @@ export default class GraphEngine {
           url: node.url,
           wikidataId: node.wikidataId,
           wikidataUrl: node.wikidataUrl,
-        }
+        })
 
-        const meta = new NodeViewMetaImpl(
-          nodeId,
-          this.nodeTargetsMap,
-          this.nodeSourcesMap,
-          this.renderedEdges
-        )
-
-        const nodeView = this.view.addNode(props, meta)
         this.renderedNodes.set(nodeId, nodeView)
 
         const nodeTargets = this.nodeTargetsMap.get(nodeId) || new Set()
@@ -244,34 +236,5 @@ class SpatialNodeIndex {
     return this.index
       .search({ minX, minY, maxX, maxY })
       .map((bbox) => bbox.nodeId)
-  }
-}
-
-class NodeViewMetaImpl implements NodeViewMeta {
-  constructor(
-    private nodeId: number,
-    private nodeTargetsMap: Map<number, Set<number>>,
-    private nodeSourcesMap: Map<number, Set<number>>,
-    private renderedEdges: EdgeMap<EdgeView>
-  ) {}
-
-  get outgoingEdges(): EdgeView[] {
-    const targets = this.nodeTargetsMap.get(this.nodeId) || new Set()
-    const edges: EdgeView[] = []
-    for (const targetId of targets) {
-      const edgeView = this.renderedEdges.get(this.nodeId, targetId)
-      if (edgeView) edges.push(edgeView)
-    }
-    return edges
-  }
-
-  get incomingEdges(): EdgeView[] {
-    const sources = this.nodeSourcesMap.get(this.nodeId) || new Set()
-    const edges: EdgeView[] = []
-    for (const sourceId of sources) {
-      const edgeView = this.renderedEdges.get(sourceId, this.nodeId)
-      if (edgeView) edges.push(edgeView)
-    }
-    return edges
   }
 }
