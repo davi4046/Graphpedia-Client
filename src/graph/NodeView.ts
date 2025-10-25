@@ -76,6 +76,12 @@ export default class NodeView extends Container {
     this.addChild(this.nodeShadow)
     this.addChild(this.nodeShape)
     this.addChild(this.nodeLabel)
+
+    this.on("pointertap", (event) => {
+      if (event.button === 0) {
+        window.open(this.props.wikidataUrl, "_blank")
+      }
+    })
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
