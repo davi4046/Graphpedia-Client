@@ -39,6 +39,7 @@ export default class NodeView extends Container {
   private nodeLabel: BitmapText
   private nodeShape: Graphics
   private nodeShadow: Sprite
+  private tooltip?: NodeTooltip
 
   constructor(
     private props: NodeViewProps,
@@ -88,28 +89,26 @@ export default class NodeView extends Container {
   private handlePointerTap(event: FederatedPointerEvent) {
     if (!isEventFromCanvas(event)) return
 
+    if (this.tooltip) {
+      this.tooltip.hide()
+      return
+    }
+
     const overlay = new NodeOverlay(this.radiusX * 2, this.radiusY * 2)
     this.addChild(overlay)
 
-    let tooltip: NodeTooltip | undefined
-
     // Wait a frame to ensure the element is in the DOM
     requestAnimationFrame(() => {
-      tooltip = new NodeTooltip(overlay.element, this.props.description)
-    })
-
-    const cleanupTooltip = () => {
-      tooltip?.hide(() => {
-        tooltip?.destroy()
-        this.removeChild(overlay)
-      })
-    }
-
-    this.once("removed", cleanupTooltip)
-
-    this.once("pointerout", () => {
-      cleanupTooltip()
-      this.off("removed", cleanupTooltip)
+      this.tooltip = new NodeTooltip(
+        overlay.element,
+        this.props.description,
+        () => {
+          this.tooltip?.destroy()
+          this.tooltip = undefined
+          overlay.destroy()
+        }
+      )
+      this.tooltip.show()
     })
   }
 
@@ -151,10 +150,16 @@ class NodeOverlay extends DOMContainer {
 class NodeTooltip {
   private tippyInstance: TippyInstance
 
-  constructor(target: Element, description: string | undefined) {
+  constructor(
+    target: Element,
+    description: string | undefined,
+    onHidden: () => void
+  ) {
     const content = html`
       <p class="mb-0">${description}</p>
-      <i class="opacity-70">Click → open on Wikipedia • Right-click → share</i>
+      <i class="opacity-70">
+        Shift-click → Wikipedia • Right-click → more options
+      </i>
     `
 
     this.tippyInstance = tippy(target, {
@@ -163,18 +168,20 @@ class NodeTooltip {
       allowHTML: true,
       sticky: true,
       plugins: [sticky],
+      placement: "bottom",
+      trigger: "manual",
+      onHidden: onHidden,
     })
 
     this.tippyInstance.show()
   }
 
-  hide(callback?: () => void) {
+  show() {
+    this.tippyInstance.show()
+  }
+
+  hide() {
     this.tippyInstance.hide()
-    if (callback) {
-      setTimeout(() => {
-        callback()
-      }, 200)
-    }
   }
 
   destroy() {
