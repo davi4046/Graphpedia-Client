@@ -1,16 +1,11 @@
-import { html } from "common-tags"
 import {
   BitmapFont,
   BitmapText,
   Container,
-  DOMContainer,
-  FederatedPointerEvent,
   Graphics,
   Sprite,
   Texture,
 } from "pixi.js"
-import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
-import { isEventFromCanvas } from "./pixiHelpers"
 
 if (typeof window !== "undefined") {
   BitmapFont.install({
@@ -81,39 +76,6 @@ export default class NodeView extends Container {
     this.addChild(this.nodeShadow)
     this.addChild(this.nodeShape)
     this.addChild(this.nodeLabel)
-
-    this.on("pointerover", this.handlePointerOver)
-  }
-
-  private handlePointerOver(event: FederatedPointerEvent) {
-    if (!isEventFromCanvas(event)) return
-
-    const overlay = new NodeOverlay(this.radiusX * 2, this.radiusY * 2)
-    this.addChild(overlay)
-
-    let tooltip: NodeTooltip | undefined
-
-    // Wait a frame to ensure the element is in the DOM
-    requestAnimationFrame(() => {
-      tooltip = new NodeTooltip(
-        overlay.element,
-        this.props.label,
-        this.props.description,
-        this.props.wikidataId
-      )
-    })
-
-    const cleanupTooltip = () => {
-      tooltip?.destroy()
-      this.removeChild(overlay)
-    }
-
-    this.once("removed", cleanupTooltip)
-
-    this.once("pointerout", () => {
-      cleanupTooltip()
-      this.off("removed", cleanupTooltip)
-    })
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
@@ -130,58 +92,5 @@ export default class NodeView extends Container {
       x: this.x + dx * t,
       y: this.y + dy * t,
     }
-  }
-}
-
-class NodeOverlay extends DOMContainer {
-  constructor(width: number, height: number) {
-    const element = document.createElement("div")
-    element.classList.add("pointer-events-none") // Workaround for PIXI lacking eventMode "none" on DOMContainer
-    element.style.width = `${width}px`
-    element.style.height = `${height}px`
-    element.style.backgroundColor = "rgba(255, 255, 64, 0.2)"
-
-    super({
-      element: element,
-      x: -width / 2,
-      y: -height / 2,
-      width: width,
-      height: height,
-      eventMode: "none", // Placeholder: currently not supported
-    })
-  }
-}
-
-class NodeTooltip {
-  private tippyInstance: TippyInstance
-
-  constructor(
-    target: Element,
-    label: string | undefined,
-    description: string | undefined,
-    wikidataId: string
-  ) {
-    const content = html`
-      <header class="text-sm font-semibold">
-        ${label
-          ? `${label} <span class="text-xs opacity-60">(${wikidataId})</span>`
-          : `${wikidataId}`}
-      </header>
-      <p class="mb-0 text-sm">${description}</p>
-    `
-
-    this.tippyInstance = tippy(target, {
-      theme: "light-border",
-      content: content,
-      allowHTML: true,
-      sticky: true,
-      plugins: [sticky],
-    })
-
-    this.tippyInstance.show()
-  }
-
-  destroy() {
-    this.tippyInstance.destroy()
   }
 }
