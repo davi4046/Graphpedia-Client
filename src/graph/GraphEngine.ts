@@ -98,8 +98,17 @@ export default class GraphEngine {
   private render() {
     const { minX, minY, maxX, maxY } = this.view.getVisibleBounds()
     const nodesInBounds = new Set(this.nodeIndex.search(minX, minY, maxX, maxY))
+    const nodesToRender = new Set<number>()
 
     for (const nodeId of nodesInBounds) {
+      nodesToRender.add(nodeId)
+      const targets = this.nodeTargetsMap.get(nodeId) || new Set()
+      const sources = this.nodeSourcesMap.get(nodeId) || new Set()
+      targets.forEach((targetId) => nodesToRender.add(targetId))
+      sources.forEach((sourceId) => nodesToRender.add(sourceId))
+    }
+
+    for (const nodeId of nodesToRender) {
       if (this.renderedNodes.has(nodeId)) continue
       this.renderedNodes.set(nodeId, undefined)
 
