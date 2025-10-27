@@ -45,7 +45,7 @@ export default class NodeView extends Container {
     private props: NodeViewProps,
     shadowTexture: Texture
   ) {
-    super({ x: props.x, y: props.y, interactive: true, cursor: "pointer" })
+    super({ x: props.x, y: props.y, interactive: true })
 
     this.nodeLabel = new BitmapText({
       text: props.label ?? props.wikidataId,
@@ -156,10 +156,9 @@ class NodeTooltip {
     onHidden: () => void
   ) {
     const content = html`
-      <p class="mb-0">${description}</p>
-      <i class="opacity-70">
-        Shift-click → Wikipedia • Right-click → more options
-      </i>
+      <p class="mb-0">
+        ${description ? description : `<i>No description available</i>`}
+      </p>
     `
 
     this.tippyInstance = tippy(target, {
@@ -168,7 +167,6 @@ class NodeTooltip {
       allowHTML: true,
       sticky: true,
       plugins: [sticky],
-      placement: "bottom",
       trigger: "manual",
       onHidden: onHidden,
     })
