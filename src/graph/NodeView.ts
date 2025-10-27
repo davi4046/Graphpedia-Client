@@ -12,6 +12,14 @@ import {
 import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
 import { isEventFromCanvas } from "./pixiHelpers"
 
+declare global {
+  interface Window {
+    _handleContextMenu?: (event: MouseEvent) => void
+  }
+}
+
+let preventContextMenu = false
+
 if (typeof window !== "undefined") {
   BitmapFont.install({
     name: "NodeLabelFont",
@@ -20,6 +28,15 @@ if (typeof window !== "undefined") {
       fill: 0x000000,
     },
     resolution: 4,
+  })
+  window._handleContextMenu = (event) => {
+    if (preventContextMenu) event.preventDefault()
+  }
+  document.removeEventListener("contextmenu", window._handleContextMenu, {
+    capture: true,
+  })
+  document.addEventListener("contextmenu", window._handleContextMenu, {
+    capture: true,
   })
 }
 
@@ -89,10 +106,20 @@ export default class NodeView extends Container {
   private handlePointerTap(event: FederatedPointerEvent) {
     if (!isEventFromCanvas(event)) return
 
-    if (this.tooltip) {
-      this.tooltip.hide()
+    if (event.button === 2) {
+      preventContextMenu = true
+      setTimeout(() => {
+        preventContextMenu = false
+      }, 1)
+      new NodeContextMenu(
+        { x: event.global.x, y: event.global.y },
+        this.props.url,
+        this.props.wikidataUrl
+      )
       return
     }
+
+    if (this.tooltip) return
 
     const overlay = new NodeOverlay(this.radiusX * 2, this.radiusY * 2)
     this.addChild(overlay)
@@ -184,5 +211,54 @@ class NodeTooltip {
 
   destroy() {
     this.tippyInstance.destroy()
+  }
+}
+
+class NodeContextMenu {
+  private tippyInstance: TippyInstance
+
+  constructor(
+    position: { x: number; y: number },
+    url: string,
+    wikidataUrl: string
+  ) {
+    const content = html`
+      <ul class="list-none m-0 p-0">
+        <li class="list-none">
+          <a
+            href="${url}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block px-4 py-2 hover:bg-gray-100"
+            >View Node</a
+        </li>
+        <li class="list-none">
+          <a
+            href="${wikidataUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block px-4 py-2 hover:bg-gray-100"
+            >View on Wikidata</a
+        </li>
+      </ul>
+    `
+
+    const element = document.createElement("div")
+    element.style.position = "absolute"
+    element.style.left = `${position.x}px`
+    element.style.top = `${position.y}px`
+    document.body.appendChild(element)
+
+    this.tippyInstance = tippy(element, {
+      theme: "light-border",
+      content: content,
+      allowHTML: true,
+      showOnCreate: true,
+      interactive: true,
+      onHidden: () => {
+        this.tippyInstance.destroy()
+        document.body.removeChild(element)
+      },
+    })
   }
 }
