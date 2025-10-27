@@ -5,6 +5,7 @@ import {
 } from "@yornaath/batshit"
 import WBK, { EntityId, Item } from "wikibase-sdk"
 import { BBox } from "~/types/geometry"
+import GraphDataCache from "./dataCache"
 import { tileBBoxArrayParser, tileParser } from "./dataParsers"
 
 export interface GraphInfo {
@@ -34,7 +35,8 @@ export interface NodeInfo {
 export default class GraphDataSource {
   constructor(
     private baseUrl: string,
-    readonly graphId: string
+    readonly graphId: string,
+    private dataCache: GraphDataCache
   ) {}
 
   private entities = createBatcher({
@@ -47,27 +49,37 @@ export default class GraphDataSource {
   })
 
   async fetchGraphInfo(): Promise<GraphInfo> {
+    const cached = await this.dataCache.getGraphInfo()
+    if (cached) return cached
     const url = `${this.baseUrl}/graphs/${this.graphId}/tiles_bboxes.bin.gz`
     const response = await fetch(url)
     const data = await response.arrayBuffer()
     const tiles = tileBBoxArrayParser.parse(new Uint8Array(data))
+    await this.dataCache.setGraphInfo({ tiles })
     return { tiles }
   }
 
   async fetchTileInfo(tileId: number): Promise<TileInfo> {
+    const cached = await this.dataCache.getTileInfo(tileId)
+    if (cached) return cached
     const url = `${this.baseUrl}/graphs/${this.graphId}/tiles/${tileId}.bin.gz`
     const response = await fetch(url)
     const data = await response.arrayBuffer()
     const tileData = tileParser.parse(new Uint8Array(data))
+    await this.dataCache.setTileInfo(tileId, tileData)
     return tileData
   }
 
   async fetchNodeInfo(nodeId: number): Promise<NodeInfo> {
+    const cached = await this.dataCache.getNodeInfo(nodeId)
+    if (cached) return cached
     const item = await this.entities.fetch(`Q${nodeId}`)
-    return {
+    const result = {
       label: item.labels?.en?.value,
       description: item.descriptions?.en?.value,
     }
+    await this.dataCache.setNodeInfo(nodeId, result)
+    return result
   }
 }
 

@@ -9,6 +9,7 @@ import {
   GraphView,
   useGraphList,
 } from "~/graph"
+import GraphDataCache from "~/graph/dataCache"
 import CrosshairIcon from "~/icons/CrosshairIcon"
 import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
@@ -25,7 +26,12 @@ export default function GraphPage() {
   onMount(async () => {
     if (!container) return
     const graphView = await GraphView.create(container)
-    const dataSource = new GraphDataSource(GRAPH_DATA_URL, params.graphId)
+    const dataCache = await GraphDataCache.create(params.graphId)
+    const dataSource = new GraphDataSource(
+      GRAPH_DATA_URL,
+      params.graphId,
+      dataCache
+    )
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(graphView, graphTiles)
