@@ -45,7 +45,7 @@ export default class EdgeView extends Container {
     this.line.closePath()
 
     this.line.fill({ color: 0xffffff })
-    this.line.stroke({ color: 0xffffff, width: 0.5 })
+    this.line.stroke({ color: 0xffffff, width: 0.4 })
     this.line.tint = 0xbfbfbf
 
     this.addChild(this.line)

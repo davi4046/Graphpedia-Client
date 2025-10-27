@@ -65,7 +65,7 @@ export default class NodeView extends Container {
     this.nodeShape.clear()
     this.nodeShape.ellipse(0, 0, this.radiusX, this.radiusY)
     this.nodeShape.fill({ color: 0xffffff })
-    this.nodeShape.stroke({ color: 0xbfbfbf, width: 0.5 })
+    this.nodeShape.stroke({ color: 0xbfbfbf, width: 0.4 })
 
     this.nodeShadow = new Sprite({
       texture: shadowTexture,
