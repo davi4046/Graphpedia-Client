@@ -120,10 +120,10 @@ export default class GraphEngine {
 
         this.renderedNodes.set(nodeId, nodeView)
 
-        const nodeTargets = this.nodeTargetsMap.get(nodeId) || new Set()
-        const nodeSources = this.nodeSourcesMap.get(nodeId) || new Set()
+        const targets = this.nodeTargetsMap.get(nodeId) || new Set()
+        const sources = this.nodeSourcesMap.get(nodeId) || new Set()
 
-        for (const targetId of nodeTargets) {
+        for (const targetId of targets) {
           if (!this.renderedNodes.has(targetId)) continue
           if (this.renderedEdges.get(nodeId, targetId)) continue
           const target = this.renderedNodes.get(targetId)
@@ -132,7 +132,7 @@ export default class GraphEngine {
           this.renderedEdges.set(nodeId, targetId, edgeView)
         }
 
-        for (const sourceId of nodeSources) {
+        for (const sourceId of sources) {
           if (!this.renderedNodes.has(sourceId)) continue
           if (this.renderedEdges.get(sourceId, nodeId)) continue
           const source = this.renderedNodes.get(sourceId)
@@ -144,22 +144,22 @@ export default class GraphEngine {
     }
 
     for (const [nodeId, nodeView] of this.renderedNodes) {
-      if (nodesInBounds.has(nodeId)) continue
+      if (nodesToRender.has(nodeId)) continue
 
       nodeView?.removeFromParent()
       this.renderedNodes.delete(nodeId)
 
-      const nodeTargets = this.nodeTargetsMap.get(nodeId) || new Set()
-      const nodeSources = this.nodeSourcesMap.get(nodeId) || new Set()
+      const targets = this.nodeTargetsMap.get(nodeId) || new Set()
+      const sources = this.nodeSourcesMap.get(nodeId) || new Set()
 
-      for (const targetId of nodeTargets) {
+      for (const targetId of targets) {
         if (!this.renderedNodes.has(targetId)) continue
         const edgeView = this.renderedEdges.get(nodeId, targetId)
         edgeView?.removeFromParent()
         this.renderedEdges.delete(nodeId, targetId)
       }
 
-      for (const sourceId of nodeSources) {
+      for (const sourceId of sources) {
         if (!this.renderedNodes.has(sourceId)) continue
         const edgeView = this.renderedEdges.get(sourceId, nodeId)
         edgeView?.removeFromParent()
