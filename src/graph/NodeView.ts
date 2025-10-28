@@ -182,11 +182,9 @@ class NodeTooltip {
     description: string | undefined,
     onHidden: () => void
   ) {
-    const content = html`
-      <p class="mb-0">
-        ${description ? description : `<i>No description available</i>`}
-      </p>
-    `
+    const content = description
+      ? html(description)
+      : "<i>No description available</i>"
 
     this.tippyInstance = tippy(target, {
       theme: "light-border",
