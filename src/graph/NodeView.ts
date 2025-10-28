@@ -10,6 +10,7 @@ import {
   Texture,
 } from "pixi.js"
 import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
+import notyf from "./notyfSetup"
 import { isEventFromCanvas } from "./pixiHelpers"
 
 declare global {
@@ -87,8 +88,8 @@ export default class NodeView extends Container {
     this.nodeShadow = new Sprite({
       texture: shadowTexture,
       scale: {
-        x: (this.radiusX * 2) / shadowTexture.width + 0.025,
-        y: (this.radiusY * 2) / shadowTexture.height + 0.05,
+        x: (this.radiusX * 2) / shadowTexture.width + 0.02,
+        y: (this.radiusY * 2) / shadowTexture.height + 0.04,
       },
       anchor: 0.5,
       x: 1,
@@ -213,32 +214,30 @@ class NodeTooltip {
 }
 
 class NodeContextMenu {
-  private tippyInstance: TippyInstance
-
   constructor(
     position: { x: number; y: number },
     url: string,
     wikidataUrl: string
   ) {
     const content = html`
-      <ul class="list-none m-0 p-0">
-        <li class="list-none">
-          <a
-            href="${url}"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block px-4 py-2 hover:bg-gray-100"
-            >View Node</a
-        </li>
-        <li class="list-none">
-          <a
-            href="${wikidataUrl}"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block px-4 py-2 hover:bg-gray-100"
-            >View on Wikidata</a
-        </li>
-      </ul>
+      <menu class="m-0 flex list-none flex-col items-stretch p-0">
+        <button
+          id="copy-node-url"
+          style="all: unset;"
+          class="cursor-pointer px-2 py-1 hover:bg-gray-100"
+        >
+          Copy Node URL
+        </button>
+        <a
+          href="${wikidataUrl}"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="all: unset;"
+          class="cursor-pointer px-2 py-1 hover:bg-gray-100"
+        >
+          View on Wikidata
+        </a>
+      </menu>
     `
 
     const element = document.createElement("div")
@@ -247,14 +246,27 @@ class NodeContextMenu {
     element.style.top = `${position.y}px`
     document.body.appendChild(element)
 
-    this.tippyInstance = tippy(element, {
+    tippy(element, {
       theme: "light-border",
       content: content,
       allowHTML: true,
+      placement: "right-start",
+      animation: false,
+      trigger: "manual",
       showOnCreate: true,
       interactive: true,
-      onHidden: () => {
-        this.tippyInstance.destroy()
+      onMount: (instance) => {
+        instance.popper.addEventListener("click", () => {
+          instance.hide()
+        })
+        const copyButton = instance.popper.querySelector("#copy-node-url")
+        copyButton?.addEventListener("click", () => {
+          navigator.clipboard.writeText(url)
+          notyf.success("Node URL copied to clipboard")
+        })
+      },
+      onHidden: (instance) => {
+        instance.destroy()
         document.body.removeChild(element)
       },
     })
