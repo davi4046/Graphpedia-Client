@@ -13,14 +13,6 @@ import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
 import notyf from "./notyfSetup"
 import { isEventFromCanvas } from "./pixiHelpers"
 
-declare global {
-  interface Window {
-    _handleContextMenu?: (event: MouseEvent) => void
-  }
-}
-
-let preventContextMenu = false
-
 if (typeof window !== "undefined") {
   BitmapFont.install({
     name: "NodeLabelFont",
@@ -30,6 +22,17 @@ if (typeof window !== "undefined") {
     },
     resolution: 4,
   })
+}
+
+declare global {
+  interface Window {
+    _handleContextMenu?: (event: MouseEvent) => void
+  }
+}
+
+let preventContextMenu = false
+
+if (typeof window !== "undefined") {
   window._handleContextMenu = (event) => {
     if (preventContextMenu) event.preventDefault()
   }
