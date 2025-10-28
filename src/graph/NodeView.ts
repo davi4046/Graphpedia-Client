@@ -11,7 +11,6 @@ import {
 } from "pixi.js"
 import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
 import { Sitelinks } from "./dataSource"
-import notyf from "./notyfSetup"
 import { isEventFromCanvas } from "./pixiHelpers"
 
 if (typeof window !== "undefined") {
@@ -305,7 +304,6 @@ class NodeContextMenu {
         const copyButton = instance.popper.querySelector("#copy-node-url")
         copyButton?.addEventListener("click", () => {
           navigator.clipboard.writeText(url)
-          notyf.success("Node URL copied to clipboard")
         })
       },
       onHidden: (instance) => {
