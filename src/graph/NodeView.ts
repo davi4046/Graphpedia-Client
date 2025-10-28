@@ -194,9 +194,9 @@ class NodeTooltip {
       : "<i>No description available</i>"
 
     this.tippyInstance = tippy(target, {
-      theme: "light-border",
       content: content,
       allowHTML: true,
+      theme: "light-border",
       sticky: true,
       plugins: [sticky],
       trigger: "manual",
@@ -288,15 +288,18 @@ class NodeContextMenu {
     document.body.appendChild(element)
 
     tippy(element, {
-      theme: "light-border",
       content: content,
       allowHTML: true,
+      maxWidth: 200,
+
+      theme: "light-border",
       placement: "right-start",
       animation: false,
+
       trigger: "manual",
       showOnCreate: true,
       interactive: true,
-      maxWidth: 200,
+
       onMount: (instance) => {
         instance.popper.addEventListener("click", () => {
           instance.hide()
@@ -306,6 +309,7 @@ class NodeContextMenu {
           navigator.clipboard.writeText(url)
         })
       },
+
       onHidden: (instance) => {
         instance.destroy()
         document.body.removeChild(element)
