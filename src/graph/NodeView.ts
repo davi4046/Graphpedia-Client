@@ -10,6 +10,7 @@ import {
   Texture,
 } from "pixi.js"
 import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
+import { Sitelinks } from "./dataSource"
 import notyf from "./notyfSetup"
 import { isEventFromCanvas } from "./pixiHelpers"
 
@@ -52,6 +53,7 @@ export interface NodeViewProps {
   url: string
   wikidataId: string
   wikidataUrl: string
+  sitelinks: Sitelinks
 }
 
 export default class NodeView extends Container {
@@ -117,8 +119,10 @@ export default class NodeView extends Container {
       }, 1)
       new NodeContextMenu(
         { x: event.global.x, y: event.global.y },
+        this.props.label ?? this.props.wikidataId,
         this.props.url,
-        this.props.wikidataUrl
+        this.props.wikidataUrl,
+        this.props.sitelinks
       )
       return
     }
@@ -219,9 +223,27 @@ class NodeTooltip {
 class NodeContextMenu {
   constructor(
     position: { x: number; y: number },
+    label: string,
     url: string,
-    wikidataUrl: string
+    wikidataUrl: string,
+    sitelinks: Sitelinks
   ) {
+    const sitelinkLabels: Record<keyof Sitelinks, string> = {
+      wikipedia: `"${label}" on Wikipedia`,
+      wikibooks: "Textbooks (Wikibooks)",
+      wikinews: "News articles (Wikinews)",
+      wikiquote: "Quotations (Wikiquote)",
+      wikisource: "Source texts (Wikisource)",
+      wikiversity: "Learning resources (Wikiversity)",
+      wikivoyage: "Travel guides (Wikivoyage)",
+      wiktionary: "Dictionary entries (Wiktionary)",
+      commons: "Media files (Commons)",
+    }
+
+    const hasSitelinks = Object.values(sitelinks).some(
+      (link) => link !== undefined
+    )
+
     const content = html`
       <menu class="m-0 flex list-none flex-col items-stretch p-0">
         <button
@@ -231,6 +253,23 @@ class NodeContextMenu {
         >
           Copy Node URL
         </button>
+        ${hasSitelinks ? `<hr class="my-0.5"/>` : ``}
+        ${Object.entries(sitelinks)
+          .filter(([_, link]) => link)
+          .map(
+            ([key, link]) => `
+              <a
+                href="${link}"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="all: unset;"
+                class="cursor-pointer px-2 py-1 hover:bg-gray-100"
+              >
+                ${sitelinkLabels[key as keyof Sitelinks]}
+              </a>
+            `
+          )}
+        <hr class="my-0.5" />
         <a
           href="${wikidataUrl}"
           target="_blank"
@@ -238,7 +277,7 @@ class NodeContextMenu {
           style="all: unset;"
           class="cursor-pointer px-2 py-1 hover:bg-gray-100"
         >
-          View on Wikidata
+          Source (Wikidata)
         </a>
       </menu>
     `
@@ -258,6 +297,7 @@ class NodeContextMenu {
       trigger: "manual",
       showOnCreate: true,
       interactive: true,
+      maxWidth: 200,
       onMount: (instance) => {
         instance.popper.addEventListener("click", () => {
           instance.hide()

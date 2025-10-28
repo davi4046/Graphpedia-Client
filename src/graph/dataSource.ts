@@ -27,9 +27,23 @@ export interface TileInfo {
   }[]
 }
 
+export type Sitelinks = Record<
+  | "wikipedia"
+  | "wikibooks"
+  | "wikinews"
+  | "wikiquote"
+  | "wikisource"
+  | "wikiversity"
+  | "wikivoyage"
+  | "wiktionary"
+  | "commons",
+  string | undefined
+>
+
 export interface NodeInfo {
   label?: string
   description?: string
+  sitelinks: Sitelinks
 }
 
 export default class GraphDataSource {
@@ -74,9 +88,20 @@ export default class GraphDataSource {
     const cached = await this.dataCache.getNodeInfo(nodeId)
     if (cached) return cached
     const item = await this.entities.fetch(`Q${nodeId}`)
-    const result = {
+    const result: NodeInfo = {
       label: item.labels?.en?.value,
       description: item.descriptions?.en?.value,
+      sitelinks: {
+        wikipedia: item.sitelinks?.enwiki?.url,
+        wikibooks: item.sitelinks?.enwikibooks?.url,
+        wikinews: item.sitelinks?.enwikinews?.url,
+        wikiquote: item.sitelinks?.enwikiquote?.url,
+        wikisource: item.sitelinks?.enwikisource?.url,
+        wikiversity: item.sitelinks?.enwikiversity?.url,
+        wikivoyage: item.sitelinks?.enwikivoyage?.url,
+        wiktionary: item.sitelinks?.enwiktionary?.url,
+        commons: item.sitelinks?.commonswiki?.url,
+      },
     }
     await this.dataCache.setNodeInfo(nodeId, result)
     return result
@@ -87,7 +112,7 @@ export async function fetchEntities(ids: string[]): Promise<Item[]> {
   const wbk = WBK({ instance: "https://www.wikidata.org" })
   const url = wbk.getEntities({
     ids: ids as EntityId[],
-    props: ["labels", "descriptions"],
+    props: ["labels", "descriptions", "sitelinks/urls"],
     languages: ["en"],
     format: "json",
   })

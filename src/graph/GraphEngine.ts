@@ -3,6 +3,7 @@ import RBush, { BBox } from "rbush"
 import EdgeView from "./EdgeView"
 import GraphView from "./GraphView"
 import NodeView from "./NodeView"
+import { NodeInfo } from "./dataSource"
 
 export interface GraphNode {
   readonly id: number
@@ -11,10 +12,7 @@ export interface GraphNode {
   readonly url: string
   readonly wikidataId: string
   readonly wikidataUrl: string
-  getDetails(): Promise<{
-    label?: string
-    description?: string
-  }>
+  getDetails(): Promise<NodeInfo>
 }
 
 export interface GraphEdge {
@@ -116,7 +114,7 @@ export default class GraphEngine {
 
       const node = this.nodes.get(nodeId)!
 
-      node.getDetails().then(({ label, description }) => {
+      node.getDetails().then(({ label, description, sitelinks }) => {
         if (!this.renderedNodes.has(nodeId)) return
 
         const nodeView = this.view.addNode({
@@ -124,6 +122,7 @@ export default class GraphEngine {
           y: node.y,
           label,
           description,
+          sitelinks,
           url: node.url,
           wikidataId: node.wikidataId,
           wikidataUrl: node.wikidataUrl,
