@@ -25,7 +25,10 @@ export default function GraphPage() {
   onMount(async () => {
     if (!container) return
     const graphView = await GraphView.create(container)
-    const dataSource = new GraphDataSource(GRAPH_DATA_URL, params.graphId)
+    const dataSource = await GraphDataSource.create(
+      GRAPH_DATA_URL,
+      params.graphId
+    )
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(graphView, graphTiles)

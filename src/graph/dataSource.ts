@@ -46,10 +46,18 @@ export interface NodeInfo {
 }
 
 export default class GraphDataSource {
-  constructor(
+  private constructor(
     private baseUrl: string,
-    readonly graphId: string
+    readonly graphId: string,
+    private graphVersion: string
   ) {}
+
+  static async create(baseUrl: string, graphId: string) {
+    const url = `${baseUrl}/graphs/${graphId}/version.txt`
+    const response = await fetch(url)
+    const version = await response.text()
+    return new GraphDataSource(baseUrl, graphId, version.trim())
+  }
 
   private entities = createBatcher({
     fetcher: fetchEntities,
@@ -61,7 +69,7 @@ export default class GraphDataSource {
   })
 
   async fetchGraphInfo(): Promise<GraphInfo> {
-    const url = `${this.baseUrl}/graphs/${this.graphId}/tiles_bboxes.bin.gz`
+    const url = `${this.baseUrl}/graphs/${this.graphId}/tiles_bboxes.bin.gz?v=${this.graphVersion}`
     const response = await fetch(url)
     const data = await response.arrayBuffer()
     const tiles = tileBBoxArrayParser.parse(new Uint8Array(data))
@@ -69,7 +77,7 @@ export default class GraphDataSource {
   }
 
   async fetchTileInfo(tileId: number): Promise<TileInfo> {
-    const url = `${this.baseUrl}/graphs/${this.graphId}/tiles/${tileId}.bin.gz`
+    const url = `${this.baseUrl}/graphs/${this.graphId}/tiles/${tileId}.bin.gz?v=${this.graphVersion}`
     const response = await fetch(url)
     const data = await response.arrayBuffer()
     const tileData = tileParser.parse(new Uint8Array(data))
