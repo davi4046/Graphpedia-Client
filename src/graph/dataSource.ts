@@ -80,13 +80,13 @@ export default class GraphDataSource {
     const url = `${this.baseUrl}/graphs/${this.graphId}/tiles/${tileId}.bin.gz?v=${this.graphVersion}`
     const response = await fetch(url)
     const data = await response.arrayBuffer()
-    const tileData = tileParser.parse(new Uint8Array(data))
-    return tileData
+    const tileInfo = tileParser.parse(new Uint8Array(data))
+    return tileInfo
   }
 
   async fetchNodeInfo(nodeId: number): Promise<NodeInfo> {
     const item = await this.entities.fetch(`Q${nodeId}`)
-    return {
+    const nodeInfo: NodeInfo = {
       label: item.labels?.en?.value,
       description: item.descriptions?.en?.value,
       sitelinks: {
@@ -101,6 +101,7 @@ export default class GraphDataSource {
         commons: item.sitelinks?.commonswiki?.url,
       },
     }
+    return nodeInfo
   }
 }
 
