@@ -9,6 +9,8 @@ type GraphViewEvents = {
 }
 
 export default class GraphView extends EventEmitter<GraphViewEvents> {
+  private static readonly DEFAULT_ZOOM = 2.5
+
   private constructor(
     private app: Application,
     private viewport: PIXIViewport.Viewport,
@@ -43,6 +45,12 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
       events: app.renderer.events,
       passiveWheel: false,
       allowPreserveDragOutside: true,
+    })
+
+    viewport.setZoom(GraphView.DEFAULT_ZOOM)
+    viewport.clampZoom({
+      minScale: GraphView.DEFAULT_ZOOM * 0.25,
+      maxScale: GraphView.DEFAULT_ZOOM * 4,
     })
 
     viewport.drag().pinch().wheel().decelerate()
@@ -98,16 +106,16 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
   }
 
   getZoom() {
-    return this.viewport.scale.x
+    return this.viewport.scale.x / GraphView.DEFAULT_ZOOM
   }
 
   setZoom(zoom: number) {
-    this.viewport.setZoom(zoom, true)
+    this.viewport.setZoom(GraphView.DEFAULT_ZOOM * zoom, true)
     this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
   }
 
   resetViewport() {
-    this.viewport.setZoom(1)
+    this.viewport.setZoom(GraphView.DEFAULT_ZOOM)
     this.viewport.moveCorner(0, 0)
     this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
   }
