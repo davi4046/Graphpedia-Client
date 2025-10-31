@@ -111,12 +111,12 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
 
   setZoom(zoom: number) {
     this.viewport.setZoom(GraphView.DEFAULT_ZOOM * zoom, true)
-    this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
+    this.emit("viewportMoved")
   }
 
   resetViewport() {
     this.viewport.setZoom(GraphView.DEFAULT_ZOOM)
     this.viewport.moveCorner(0, 0)
-    this.viewport.emit("moved", { viewport: this.viewport, type: "snap" })
+    this.emit("viewportMoved")
   }
 }
