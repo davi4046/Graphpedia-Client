@@ -1,3 +1,4 @@
+import { debounce } from "@solid-primitives/scheduled"
 import { Link, Title } from "@solidjs/meta"
 import { useParams } from "@solidjs/router"
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
@@ -13,6 +14,16 @@ import CrosshairIcon from "~/icons/CrosshairIcon"
 import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
 import ZoomOutIcon from "~/icons/ZoomOutIcon"
+
+function loadViewportState(graphView: GraphView, graphId: string) {
+  const saved = localStorage.getItem(`graph-viewport-${graphId}`)
+  if (saved) graphView.setViewport(JSON.parse(saved))
+}
+
+function saveViewportState(graphView: GraphView, graphId: string) {
+  const viewport = graphView.getViewport()
+  localStorage.setItem(`graph-viewport-${graphId}`, JSON.stringify(viewport))
+}
 
 export default function GraphPage() {
   const params = useParams()
@@ -33,8 +44,16 @@ export default function GraphPage() {
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(graphView, graphTiles)
 
-    const updateZoom = () => setZoom(graphView.getZoom())
-    graphView.on("viewportMoved", updateZoom)
+    loadViewportState(graphView, params.graphId)
+
+    const debouncedSave = debounce(() => {
+      saveViewportState(graphView, params.graphId)
+    }, 500)
+
+    graphView.on("viewportMoved", () => {
+      setZoom(graphView.getZoom())
+      debouncedSave()
+    })
 
     setGraphView(graphView)
   })

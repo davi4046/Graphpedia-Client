@@ -8,6 +8,12 @@ type GraphViewEvents = {
   viewportMoved: () => void
 }
 
+interface Viewport {
+  x: number
+  y: number
+  zoom: number
+}
+
 export default class GraphView extends EventEmitter<GraphViewEvents> {
   private static readonly DEFAULT_ZOOM = 2.5
 
@@ -111,6 +117,18 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
 
   setZoom(zoom: number) {
     this.viewport.setZoom(GraphView.DEFAULT_ZOOM * zoom, true)
+    this.emit("viewportMoved")
+  }
+
+  getViewport(): Viewport {
+    const { x, y } = this.viewport.corner
+    const zoom = this.getZoom()
+    return { x, y, zoom }
+  }
+
+  setViewport(viewport: Viewport) {
+    this.viewport.setZoom(GraphView.DEFAULT_ZOOM * viewport.zoom)
+    this.viewport.moveCorner(viewport.x, viewport.y)
     this.emit("viewportMoved")
   }
 
