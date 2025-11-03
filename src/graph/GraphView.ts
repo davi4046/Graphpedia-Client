@@ -2,7 +2,8 @@ import * as PIXIViewport from "pixi-viewport"
 import { Application, Container, EventEmitter, Texture } from "pixi.js"
 import EdgeView from "./EdgeView"
 import EllipticShadow from "./EllipticShadow"
-import NodeView, { NodeViewProps } from "./NodeView"
+import { NodeDetails } from "./GraphEngine"
+import NodeView from "./NodeView"
 
 type GraphViewEvents = {
   viewportMoved: () => void
@@ -99,8 +100,13 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     }
   }
 
-  addNode(props: NodeViewProps) {
-    const node = new NodeView(props, this.nodeShadowTexture)
+  addNode(positionX: number, positionY: number, details: NodeDetails) {
+    const node = new NodeView(
+      positionX,
+      positionY,
+      details,
+      this.nodeShadowTexture
+    )
     this.nodeContainer.addChild(node)
     return node
   }

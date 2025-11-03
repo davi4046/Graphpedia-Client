@@ -10,7 +10,7 @@ import {
   Texture,
 } from "pixi.js"
 import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
-import { Sitelinks } from "./dataSource"
+import { NodeDetails, Sitelinks } from "./GraphEngine"
 import { isEventFromCanvas } from "./pixiHelpers"
 
 if (typeof window !== "undefined") {
@@ -45,14 +45,14 @@ if (typeof window !== "undefined") {
 }
 
 export interface NodeViewProps {
-  x: number
-  y: number
-  label?: string
-  description?: string
-  url: string
-  wikidataId: string
-  wikidataUrl: string
-  sitelinks: Sitelinks
+  readonly label?: string
+  readonly description?: string
+  readonly x: number
+  readonly y: number
+  readonly url: string
+  readonly wikidataId: string
+  readonly wikidataUrl: string
+  readonly sitelinks: Sitelinks
 }
 
 export default class NodeView extends Container {
@@ -64,13 +64,15 @@ export default class NodeView extends Container {
   private tooltip?: NodeTooltip
 
   constructor(
-    private props: NodeViewProps,
+    positionX: number,
+    positionY: number,
+    private props: NodeDetails,
     shadowTexture: Texture
   ) {
-    super({ x: props.x, y: props.y, interactive: true })
+    super({ x: positionX, y: positionY, interactive: true })
 
     this.nodeLabel = new BitmapText({
-      text: props.label ?? props.wikidataId,
+      text: this.props.label ?? this.props.wikidataId,
       style: {
         fontFamily: "NodeLabelFont",
         fontSize: 5,
@@ -184,14 +186,8 @@ class NodeOverlay extends DOMContainer {
 class NodeTooltip {
   private tippyInstance: TippyInstance
 
-  constructor(
-    target: Element,
-    description: string | undefined,
-    onHidden: () => void
-  ) {
-    const content = description
-      ? html(description)
-      : "<i>No description available</i>"
+  constructor(target: Element, text: string | undefined, onHidden: () => void) {
+    const content = text ? html(text) : "<i>No description available</i>"
 
     this.tippyInstance = tippy(target, {
       content: content,

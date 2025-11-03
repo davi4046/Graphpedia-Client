@@ -1,26 +1,32 @@
 import { BBox } from "rbush"
-import GraphDataSource, { GraphInfo, NodeInfo, TileInfo } from "./dataSource"
-import { GraphEdge, GraphNode, GraphTile } from "./GraphEngine"
+import GraphDataSource, { TilesBBoxes } from "./dataSource"
+import {
+  GraphEdge,
+  GraphNode,
+  GraphTile,
+  NodeDetails,
+  TileContent,
+} from "./GraphEngine"
 
 export default class GraphDataAdapter {
   constructor(private dataSource: GraphDataSource) {}
 
-  private promise?: Promise<GraphInfo>
+  private promise?: ReturnType<GraphDataSource["fetchTilesBBoxes"]>
   private _tiles?: GraphTile[]
 
-  private async load(): Promise<GraphInfo> {
+  private async load(): Promise<TilesBBoxes> {
     if (!this.promise) {
-      this.promise = this.dataSource.fetchGraphInfo()
+      this.promise = this.dataSource.fetchTilesBBoxes()
     }
     return this.promise
   }
 
   async tiles(): Promise<GraphTile[]> {
-    const graphInfo = await this.load()
+    const tileBBoxes = await this.load()
 
     if (!this._tiles) {
-      this._tiles = graphInfo.tiles.map((tileInfo) => {
-        return new TileImpl(tileInfo.id, tileInfo.bbox, this.dataSource)
+      this._tiles = tileBBoxes.map(({ id, bbox }) => {
+        return new TileImpl(id, bbox, this.dataSource)
       })
     }
     return this._tiles
@@ -34,32 +40,23 @@ class TileImpl implements GraphTile {
     private dataSource: GraphDataSource
   ) {}
 
-  private promise?: Promise<TileInfo>
+  private promise?: ReturnType<GraphDataSource["fetchTile"]>
 
-  private async load(): Promise<TileInfo> {
+  private async load() {
     if (!this.promise) {
-      this.promise = this.dataSource.fetchTileInfo(this.id)
+      this.promise = this.dataSource.fetchTile(this.id)
     }
     return this.promise
   }
 
-  async getDetails(): Promise<{ nodes: GraphNode[]; edges: GraphEdge[] }> {
-    const tileInfo = await this.load()
-
+  async getContent(): Promise<TileContent> {
+    const tile = await this.load()
     return {
-      nodes: tileInfo.nodes.map((nodeData) => {
-        return new NodeImpl(
-          nodeData.id,
-          nodeData.x,
-          nodeData.y,
-          `https://www.graphpedia.org/graph/${this.dataSource.graphId}?item=Q${nodeData.id}`,
-          `Q${nodeData.id}`,
-          `https://www.wikidata.org/wiki/Q${nodeData.id}`,
-          this.dataSource
-        )
+      nodes: tile.nodes.map(({ id, x, y }) => {
+        return new NodeImpl(id, x, y, this.dataSource)
       }),
-      edges: tileInfo.edges.map((edgeData) => {
-        return new EdgeImpl(edgeData.sourceId, edgeData.targetId)
+      edges: tile.edges.map(({ sourceId, targetId }) => {
+        return new EdgeImpl(sourceId, targetId)
       }),
     }
   }
@@ -70,23 +67,38 @@ class NodeImpl implements GraphNode {
     public id: number,
     public x: number,
     public y: number,
-    public url: string,
-    public wikidataId: string,
-    public wikidataUrl: string,
     private dataSource: GraphDataSource
   ) {}
 
-  private promise?: Promise<NodeInfo>
+  private promise?: ReturnType<GraphDataSource["fetchItem"]>
 
-  private async load(): Promise<NodeInfo> {
+  private async load() {
     if (!this.promise) {
-      this.promise = this.dataSource.fetchNodeInfo(this.id)
+      this.promise = this.dataSource.fetchItem(this.id)
     }
     return this.promise
   }
 
-  async getDetails(): Promise<NodeInfo> {
-    return this.load()
+  async getDetails(): Promise<NodeDetails> {
+    const item = await this.load()
+    return {
+      label: item.labels?.en?.value,
+      description: item.descriptions?.en?.value,
+      url: `https://www.graphpedia.org/graph/${this.dataSource.graphId}?item=Q${this.id}`,
+      wikidataId: `Q${this.id}`,
+      wikidataUrl: `https://www.wikidata.org/wiki/Q${this.id}`,
+      sitelinks: {
+        wikipedia: item.sitelinks?.enwiki?.url,
+        wikibooks: item.sitelinks?.enwikibooks?.url,
+        wikinews: item.sitelinks?.enwikinews?.url,
+        wikiquote: item.sitelinks?.enwikiquote?.url,
+        wikisource: item.sitelinks?.enwikisource?.url,
+        wikiversity: item.sitelinks?.enwikiversity?.url,
+        wikivoyage: item.sitelinks?.enwikivoyage?.url,
+        wiktionary: item.sitelinks?.enwiktionary?.url,
+        commons: item.sitelinks?.commonswiki?.url,
+      },
+    }
   }
 }
 

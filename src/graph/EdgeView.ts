@@ -1,13 +1,6 @@
 import { Container, Graphics } from "pixi.js"
 import NodeView from "./NodeView"
 
-export interface EdgeViewOptions {
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-}
-
 export default class EdgeView extends Container {
   private line: Graphics
 

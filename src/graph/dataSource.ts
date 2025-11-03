@@ -7,14 +7,12 @@ import WBK, { EntityId, Item } from "wikibase-sdk"
 import { BBox } from "~/types/geometry"
 import { tileBBoxArrayParser, tileParser } from "./dataParsers"
 
-export interface GraphInfo {
-  tiles: {
-    id: number
-    bbox: BBox
-  }[]
-}
+export type TilesBBoxes = {
+  id: number
+  bbox: BBox
+}[]
 
-export interface TileInfo {
+export type Tile = {
   nodes: {
     id: number
     x: number
@@ -24,25 +22,6 @@ export interface TileInfo {
     sourceId: number
     targetId: number
   }[]
-}
-
-export type Sitelinks = Record<
-  | "wikipedia"
-  | "wikibooks"
-  | "wikinews"
-  | "wikiquote"
-  | "wikisource"
-  | "wikiversity"
-  | "wikivoyage"
-  | "wiktionary"
-  | "commons",
-  string | undefined
->
-
-export interface NodeInfo {
-  label?: string
-  description?: string
-  sitelinks: Sitelinks
 }
 
 export default class GraphDataSource {
@@ -68,44 +47,26 @@ export default class GraphDataSource {
     }),
   })
 
-  async fetchGraphInfo(): Promise<GraphInfo> {
+  async fetchTilesBBoxes(): Promise<TilesBBoxes> {
     const url = `${this.baseUrl}/graphs/${this.graphId}/tiles_bboxes.bin.gz?v=${this.graphVersion}`
     const response = await fetch(url)
     const data = await response.arrayBuffer()
-    const tiles = tileBBoxArrayParser.parse(new Uint8Array(data))
-    return { tiles }
+    return tileBBoxArrayParser.parse(new Uint8Array(data))
   }
 
-  async fetchTileInfo(tileId: number): Promise<TileInfo> {
+  async fetchTile(tileId: number): Promise<Tile> {
     const url = `${this.baseUrl}/graphs/${this.graphId}/tiles/${tileId}.bin.gz?v=${this.graphVersion}`
     const response = await fetch(url)
     const data = await response.arrayBuffer()
-    const tileInfo = tileParser.parse(new Uint8Array(data))
-    return tileInfo
+    return tileParser.parse(new Uint8Array(data))
   }
 
-  async fetchNodeInfo(nodeId: number): Promise<NodeInfo> {
-    const item = await this.entities.fetch(`Q${nodeId}`)
-    const nodeInfo: NodeInfo = {
-      label: item.labels?.en?.value,
-      description: item.descriptions?.en?.value,
-      sitelinks: {
-        wikipedia: item.sitelinks?.enwiki?.url,
-        wikibooks: item.sitelinks?.enwikibooks?.url,
-        wikinews: item.sitelinks?.enwikinews?.url,
-        wikiquote: item.sitelinks?.enwikiquote?.url,
-        wikisource: item.sitelinks?.enwikisource?.url,
-        wikiversity: item.sitelinks?.enwikiversity?.url,
-        wikivoyage: item.sitelinks?.enwikivoyage?.url,
-        wiktionary: item.sitelinks?.enwiktionary?.url,
-        commons: item.sitelinks?.commonswiki?.url,
-      },
-    }
-    return nodeInfo
+  async fetchItem(itemId: number): Promise<Item> {
+    return this.entities.fetch(`Q${itemId}`)
   }
 }
 
-export async function fetchEntities(ids: string[]): Promise<Item[]> {
+async function fetchEntities(ids: string[]): Promise<Item[]> {
   const wbk = WBK({ instance: "https://www.wikidata.org" })
   const url = wbk.getEntities({
     ids: ids as EntityId[],

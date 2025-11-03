@@ -3,16 +3,36 @@ import RBush, { BBox } from "rbush"
 import EdgeView from "./EdgeView"
 import GraphView from "./GraphView"
 import NodeView from "./NodeView"
-import { NodeInfo } from "./dataSource"
+
+export type Sitelinks = Readonly<
+  Record<
+    | "wikipedia"
+    | "wikibooks"
+    | "wikinews"
+    | "wikiquote"
+    | "wikisource"
+    | "wikiversity"
+    | "wikivoyage"
+    | "wiktionary"
+    | "commons",
+    string | undefined
+  >
+>
+
+export interface NodeDetails {
+  readonly label?: string
+  readonly description?: string
+  readonly url: string
+  readonly wikidataId: string
+  readonly wikidataUrl: string
+  readonly sitelinks: Sitelinks
+}
 
 export interface GraphNode {
   readonly id: number
   readonly x: number
   readonly y: number
-  readonly url: string
-  readonly wikidataId: string
-  readonly wikidataUrl: string
-  getDetails(): Promise<NodeInfo>
+  getDetails(): Promise<NodeDetails>
 }
 
 export interface GraphEdge {
@@ -20,13 +40,15 @@ export interface GraphEdge {
   readonly targetId: number
 }
 
+export interface TileContent {
+  readonly nodes: GraphNode[]
+  readonly edges: GraphEdge[]
+}
+
 export interface GraphTile {
   readonly id: number
   readonly bbox: BBox
-  getDetails(): Promise<{
-    nodes: GraphNode[]
-    edges: GraphEdge[]
-  }>
+  getContent(): Promise<TileContent>
 }
 
 export default class GraphEngine {
@@ -66,7 +88,7 @@ export default class GraphEngine {
       if (this.loadedTiles.has(tile.id)) continue
       this.loadedTiles.add(tile.id)
 
-      tile.getDetails().then(({ nodes, edges }) => {
+      tile.getContent().then(({ nodes, edges }) => {
         for (const node of nodes) {
           if (this.nodes.has(node.id)) continue
           this.nodes.set(node.id, node)
@@ -114,20 +136,10 @@ export default class GraphEngine {
 
       const node = this.nodes.get(nodeId)!
 
-      node.getDetails().then(({ label, description, sitelinks }) => {
+      node.getDetails().then((details) => {
         if (!this.renderedNodes.has(nodeId)) return
 
-        const nodeView = this.view.addNode({
-          x: node.x,
-          y: node.y,
-          label,
-          description,
-          sitelinks,
-          url: node.url,
-          wikidataId: node.wikidataId,
-          wikidataUrl: node.wikidataUrl,
-        })
-
+        const nodeView = this.view.addNode(node.x, node.y, details)
         this.renderedNodes.set(nodeId, nodeView)
 
         const targets = this.nodeTargetsMap.get(nodeId) || new Set()
