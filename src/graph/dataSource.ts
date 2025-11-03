@@ -5,11 +5,20 @@ import {
 } from "@yornaath/batshit"
 import WBK, { EntityId, Item } from "wikibase-sdk"
 import { BBox } from "~/types/geometry"
-import { tileBBoxArrayParser, tileParser } from "./dataParsers"
+import {
+  tileBBoxArrayParser,
+  tileEntitiesArrayParser,
+  tileParser,
+} from "./dataParsers"
 
 export type TilesBBoxes = {
   id: number
   bbox: BBox
+}[]
+
+export type TilesEntities = {
+  id: number
+  entityIds: number[]
 }[]
 
 export type Tile = {
@@ -52,6 +61,13 @@ export default class GraphDataSource {
     const response = await fetch(url)
     const data = await response.arrayBuffer()
     return tileBBoxArrayParser.parse(new Uint8Array(data))
+  }
+
+  async fetchTilesEntities(): Promise<TilesEntities> {
+    const url = `${this.baseUrl}/graphs/${this.graphId}/tiles_entities.bin.gz?v=${this.graphVersion}`
+    const response = await fetch(url)
+    const data = await response.arrayBuffer()
+    return tileEntitiesArrayParser.parse(new Uint8Array(data))
   }
 
   async fetchTile(tileId: number): Promise<Tile> {

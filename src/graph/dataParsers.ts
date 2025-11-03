@@ -50,5 +50,5 @@ export const tileEntitiesArrayParser = new Parser().array("", {
   type: tileEntitiesParser,
   readUntil: "eof",
   formatter: (entries: any[]) =>
-    entries.map((entry, index) => ({ tileId: index, ...entry })),
+    entries.map((entry, index) => ({ id: index, ...entry })),
 })
