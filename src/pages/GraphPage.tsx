@@ -7,6 +7,7 @@ import {
   GraphDataAdapter,
   GraphDataSource,
   GraphEngine,
+  GraphNodeLocator,
   GraphView,
   useGraphList,
 } from "~/graph"
@@ -43,6 +44,8 @@ export default function GraphPage() {
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(graphView, graphTiles)
+
+    const nodeLocator = await GraphNodeLocator.create(dataSource)
 
     loadViewportState(graphView, params.graphId)
 
