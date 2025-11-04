@@ -1,7 +1,7 @@
 import { debounce } from "@solid-primitives/scheduled"
 import { Link, Title } from "@solidjs/meta"
 import { useParams } from "@solidjs/router"
-import { createEffect, createSignal, onCleanup } from "solid-js"
+import { createEffect } from "solid-js"
 import { GRAPH_DATA_URL } from "~/config"
 import {
   GraphDataAdapter,
@@ -11,6 +11,7 @@ import {
   useGraphList,
 } from "~/graph"
 import useGraphView from "~/hooks/useGraphView"
+import useSignalPulse from "~/hooks/useSignalPulse"
 import useZoomLevels from "~/hooks/useZoomLevels"
 import CrosshairIcon from "~/icons/CrosshairIcon"
 import WikidataMonogram from "~/icons/WikidataMonogram"
@@ -61,16 +62,7 @@ export default function GraphPage() {
   const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
   const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
 
-  const [showZoomStatus, setShowZoomStatus] = createSignal(false)
-  let zoomTimeout: number | undefined
-
-  createEffect(() => {
-    zoom()
-    setShowZoomStatus(true)
-    clearTimeout(zoomTimeout)
-    zoomTimeout = window.setTimeout(() => setShowZoomStatus(false), 1200)
-    onCleanup(() => clearTimeout(zoomTimeout))
-  })
+  const showZoomStatus = useSignalPulse(zoom, 1200)
 
   return (
     <>
