@@ -11,6 +11,7 @@ import {
   useGraphList,
 } from "~/graph"
 import useGraphView from "~/hooks/useGraphView"
+import useZoomLevels from "~/hooks/useZoomLevels"
 import CrosshairIcon from "~/icons/CrosshairIcon"
 import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
@@ -58,12 +59,7 @@ export default function GraphPage() {
   })
 
   const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
-
-  const nextZoomIn = () =>
-    zoomLevels.find((level) => level > zoom()) ?? zoomLevels.at(-1)!
-
-  const nextZoomOut = () =>
-    [...zoomLevels].reverse().find((level) => level < zoom()) ?? zoomLevels[0]
+  const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
 
   const [showZoomStatus, setShowZoomStatus] = createSignal(false)
   let zoomTimeout: number | undefined
