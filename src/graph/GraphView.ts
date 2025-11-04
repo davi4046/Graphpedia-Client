@@ -26,7 +26,15 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     private nodeShadowTexture: Texture
   ) {
     super()
+
     this.viewport.on("moved", () => this.emit("viewportMoved"))
+
+    this.app.renderer.on("resize", () => {
+      const width = this.app.renderer.width
+      const height = this.app.renderer.height
+      this.viewport.resize(width, height)
+      this.emit("viewportMoved")
+    })
   }
 
   static async create(container: HTMLElement) {
