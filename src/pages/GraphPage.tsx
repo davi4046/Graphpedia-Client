@@ -1,16 +1,16 @@
 import { debounce } from "@solid-primitives/scheduled"
 import { Link, Title } from "@solidjs/meta"
 import { useParams } from "@solidjs/router"
-import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
+import { createEffect, createSignal, onCleanup } from "solid-js"
 import { GRAPH_DATA_URL } from "~/config"
 import {
   GraphDataAdapter,
   GraphDataSource,
   GraphEngine,
-  GraphNodeLocator,
   GraphView,
   useGraphList,
 } from "~/graph"
+import useGraphView from "~/hooks/useGraphView"
 import CrosshairIcon from "~/icons/CrosshairIcon"
 import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
@@ -28,46 +28,36 @@ function saveViewportState(graphView: GraphView, graphId: string) {
 
 export default function GraphPage() {
   const params = useParams()
+
   const graphList = useGraphList()
   const graphInfo = () => graphList()?.find((g) => g.id === params.graphId)
 
   let container: HTMLDivElement | undefined
-  const [graphView, setGraphView] = createSignal<GraphView>()
+  const { graphView, zoom } = useGraphView(() => container)
 
-  onMount(async () => {
-    if (!container) return
-    const graphView = await GraphView.create(container)
+  createEffect(async () => {
+    const view = graphView()
+    if (!view) return
+
     const dataSource = await GraphDataSource.create(
       GRAPH_DATA_URL,
       params.graphId
     )
+
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
-    const graphEngine = new GraphEngine(graphView, graphTiles)
+    const graphEngine = new GraphEngine(view, graphTiles)
 
-    const nodeLocator = await GraphNodeLocator.create(dataSource)
-
-    loadViewportState(graphView, params.graphId)
+    loadViewportState(view, params.graphId)
 
     const debouncedSave = debounce(() => {
-      saveViewportState(graphView, params.graphId)
+      saveViewportState(view, params.graphId)
     }, 500)
 
-    graphView.on("viewportMoved", () => {
-      setZoom(graphView.getZoom())
-      debouncedSave()
-    })
-
-    setGraphView(graphView)
-  })
-
-  onCleanup(() => {
-    graphView()?.destroy()
+    view.on("viewportMoved", debouncedSave)
   })
 
   const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
-
-  const [zoom, setZoom] = createSignal(1)
 
   const nextZoomIn = () =>
     zoomLevels.find((level) => level > zoom()) ?? zoomLevels.at(-1)!
