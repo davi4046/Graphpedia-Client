@@ -17,7 +17,7 @@ export default class GraphNodeLocator {
     return new GraphNodeLocator(dataSource, nodeTileMap)
   }
 
-  async findNode(nodeId: number): Promise<{ x: number; y: number } | null> {
+  async locateNode(nodeId: number): Promise<{ x: number; y: number } | null> {
     const tileId = this.nodeTileMap.get(nodeId)
     if (tileId === undefined) return null
     const tile = await this.dataSource.fetchTile(tileId)
