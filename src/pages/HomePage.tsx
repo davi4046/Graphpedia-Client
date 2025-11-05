@@ -1,5 +1,6 @@
 import { Link, Title } from "@solidjs/meta"
 import { For } from "solid-js"
+import Footer from "~/components/Footer"
 import Header from "~/components/Header"
 import useGraphList from "~/hooks/useGraphList"
 
@@ -52,9 +53,7 @@ export default function HomePage() {
           </details>
         </section>
       </main>
-      <footer>
-        <div>Footer</div>
-      </footer>
+      <Footer />
     </>
   )
 }

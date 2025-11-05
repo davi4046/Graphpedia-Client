@@ -4,6 +4,7 @@ import { useLocation, useSearchParams } from "@solidjs/router"
 import Fuse from "fuse.js"
 import { createEffect, createMemo, For } from "solid-js"
 import { createStore } from "solid-js/store"
+import Footer from "~/components/Footer"
 import Header from "~/components/Header"
 import useGraphList from "~/hooks/useGraphList"
 
@@ -301,9 +302,7 @@ export default function GraphListPage() {
           </ul>
         </nav>
       </main>
-      <footer>
-        <div>Footer</div>
-      </footer>
+      <Footer />
     </>
   )
 }
