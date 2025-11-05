@@ -3,6 +3,7 @@ import {
   keyResolver,
   windowedFiniteBatchScheduler,
 } from "@yornaath/batshit"
+import camelcaseKeys from "camelcase-keys"
 import WBK, { EntityId, Item } from "wikibase-sdk"
 import { BBox } from "~/types/geometry"
 import {
@@ -10,6 +11,8 @@ import {
   tileEntitiesArrayParser,
   tileParser,
 } from "./dataParsers"
+
+const GRAPH_DATA_URL = import.meta.env.PUBLIC_DATA_URL
 
 export type TilesBBoxes = {
   id: number
@@ -35,16 +38,16 @@ export type Tile = {
 
 export default class GraphDataSource {
   private constructor(
-    private baseUrl: string,
+    private dataUrl: string,
     readonly graphId: string,
-    private graphVersion: string
+    readonly graphVersion: string
   ) {}
 
-  static async create(baseUrl: string, graphId: string) {
-    const url = `${baseUrl}/graphs/${graphId}/version.txt`
+  static async create(graphId: string, dataUrl = GRAPH_DATA_URL) {
+    const url = `${dataUrl}/graphs/${graphId}/version.txt`
     const response = await fetch(url)
     const version = await response.text()
-    return new GraphDataSource(baseUrl, graphId, version.trim())
+    return new GraphDataSource(dataUrl, graphId, version.trim())
   }
 
   private entities = createBatcher({
@@ -57,21 +60,21 @@ export default class GraphDataSource {
   })
 
   async fetchTilesBBoxes(): Promise<TilesBBoxes> {
-    const url = `${this.baseUrl}/graphs/${this.graphId}/tiles_bboxes.bin.gz?v=${this.graphVersion}`
+    const url = `${this.dataUrl}/graphs/${this.graphId}/tiles_bboxes.bin.gz?v=${this.graphVersion}`
     const response = await fetch(url)
     const data = await response.arrayBuffer()
     return tileBBoxArrayParser.parse(new Uint8Array(data))
   }
 
   async fetchTilesEntities(): Promise<TilesEntities> {
-    const url = `${this.baseUrl}/graphs/${this.graphId}/tiles_entities.bin.gz?v=${this.graphVersion}`
+    const url = `${this.dataUrl}/graphs/${this.graphId}/tiles_entities.bin.gz?v=${this.graphVersion}`
     const response = await fetch(url)
     const data = await response.arrayBuffer()
     return tileEntitiesArrayParser.parse(new Uint8Array(data))
   }
 
   async fetchTile(tileId: number): Promise<Tile> {
-    const url = `${this.baseUrl}/graphs/${this.graphId}/tiles/${tileId}.bin.gz?v=${this.graphVersion}`
+    const url = `${this.dataUrl}/graphs/${this.graphId}/tiles/${tileId}.bin.gz?v=${this.graphVersion}`
     const response = await fetch(url)
     const data = await response.arrayBuffer()
     return tileParser.parse(new Uint8Array(data))
@@ -96,4 +99,29 @@ async function fetchEntities(ids: string[]): Promise<Item[]> {
   }
   const json = await response.json()
   return Object.values(json.entities) as Item[]
+}
+
+export type GraphEntry = {
+  id: string
+  label: string
+  description: string
+  aliases: string[]
+  tags: string[]
+  numNodes: number
+  numEdges: number
+}
+
+export async function fetchGraphEntries(
+  dataUrl = GRAPH_DATA_URL
+): Promise<GraphEntry[]> {
+  const url = `${dataUrl}/graphs_index.json.gz`
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`HTTP Error: ${response.statusText}`)
+  }
+
+  const raw = await response.json()
+  const arr = camelcaseKeys(raw) as GraphEntry[]
+  return arr
 }

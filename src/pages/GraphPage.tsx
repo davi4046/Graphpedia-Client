@@ -1,14 +1,13 @@
 import { Link, Title } from "@solidjs/meta"
 import { useParams, useSearchParams } from "@solidjs/router"
 import { createEffect } from "solid-js"
-import { GRAPH_DATA_URL } from "~/config"
 import {
   GraphDataAdapter,
   GraphDataSource,
   GraphEngine,
   GraphNodeLocator,
-  useGraphList,
 } from "~/graph"
+import useGraphList from "~/hooks/useGraphList"
 import useGraphView from "~/hooks/useGraphView"
 import useRestoreViewport from "~/hooks/useRestoreViewport"
 import useSignalPulse from "~/hooks/useSignalPulse"
@@ -55,11 +54,7 @@ export default function GraphPage() {
     const view = graphView()
     if (!view) return
 
-    const dataSource = await GraphDataSource.create(
-      GRAPH_DATA_URL,
-      params.graphId
-    )
-
+    const dataSource = await GraphDataSource.create(params.graphId)
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(view, graphTiles)
