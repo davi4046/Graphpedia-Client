@@ -1,4 +1,3 @@
-import { debounce } from "@solid-primitives/scheduled"
 import { Link, Title } from "@solidjs/meta"
 import { useParams } from "@solidjs/router"
 import { createEffect } from "solid-js"
@@ -7,27 +6,16 @@ import {
   GraphDataAdapter,
   GraphDataSource,
   GraphEngine,
-  GraphView,
   useGraphList,
 } from "~/graph"
 import useGraphView from "~/hooks/useGraphView"
+import useRestoreViewport from "~/hooks/useRestoreViewport"
 import useSignalPulse from "~/hooks/useSignalPulse"
 import useZoomLevels from "~/hooks/useZoomLevels"
 import CrosshairIcon from "~/icons/CrosshairIcon"
 import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
 import ZoomOutIcon from "~/icons/ZoomOutIcon"
-
-function loadViewportState(graphView: GraphView, graphId: string) {
-  const saved = localStorage.getItem(`graph-viewport-${graphId}`)
-  const state = saved ? JSON.parse(saved) : null
-  if (state) graphView.setViewportCorner(state.x, state.y, state.zoom)
-}
-
-function saveViewportState(graphView: GraphView, graphId: string) {
-  const state = graphView.getViewportCorner()
-  localStorage.setItem(`graph-viewport-${graphId}`, JSON.stringify(state))
-}
 
 export default function GraphPage() {
   const params = useParams()
@@ -37,6 +25,7 @@ export default function GraphPage() {
 
   let container: HTMLDivElement | undefined
   const { graphView, zoom } = useGraphView(() => container)
+  const { restoreViewport } = useRestoreViewport(graphView, params.graphId)
 
   createEffect(async () => {
     const view = graphView()
@@ -51,13 +40,7 @@ export default function GraphPage() {
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(view, graphTiles)
 
-    loadViewportState(view, params.graphId)
-
-    const debouncedSave = debounce(() => {
-      saveViewportState(view, params.graphId)
-    }, 500)
-
-    view.on("viewportMoved", debouncedSave)
+    restoreViewport()
   })
 
   const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
