@@ -1,11 +1,12 @@
 import { Link, Title } from "@solidjs/meta"
-import { useParams } from "@solidjs/router"
+import { useParams, useSearchParams } from "@solidjs/router"
 import { createEffect } from "solid-js"
 import { GRAPH_DATA_URL } from "~/config"
 import {
   GraphDataAdapter,
   GraphDataSource,
   GraphEngine,
+  GraphNodeLocator,
   useGraphList,
 } from "~/graph"
 import useGraphView from "~/hooks/useGraphView"
@@ -19,6 +20,11 @@ import ZoomOutIcon from "~/icons/ZoomOutIcon"
 
 export default function GraphPage() {
   const params = useParams()
+  const [searchParams] = useSearchParams()
+
+  const nodeId = searchParams.item
+    ? Number(searchParams.item.slice(1))
+    : undefined
 
   const graphList = useGraphList()
   const graphInfo = () => graphList()?.find((g) => g.id === params.graphId)
@@ -26,6 +32,18 @@ export default function GraphPage() {
   let container: HTMLDivElement | undefined
   const { graphView, zoom } = useGraphView(() => container)
   const { restoreViewport } = useRestoreViewport(graphView, params.graphId)
+
+  let nodePosition: { x: number; y: number } | null = null
+
+  const focusViewport = (position: { x: number; y: number }) => {
+    const view = graphView()
+    if (view) view.setViewportCenter(position.x, position.y, 2)
+  }
+
+  const resetViewport = () => {
+    const view = graphView()
+    if (view) view.setViewportCorner(0, 0, 1)
+  }
 
   createEffect(async () => {
     const view = graphView()
@@ -40,7 +58,16 @@ export default function GraphPage() {
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(view, graphTiles)
 
-    restoreViewport()
+    if (nodeId) {
+      const nodeLocator = await GraphNodeLocator.create(dataSource)
+      nodePosition = await nodeLocator.locateNode(nodeId)
+    }
+
+    if (nodePosition) {
+      focusViewport(nodePosition)
+    } else {
+      restoreViewport()
+    }
   })
 
   const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
@@ -89,7 +116,13 @@ export default function GraphPage() {
         class="pointer-events-none absolute right-2 bottom-2 flex flex-col gap-1"
       >
         <button
-          onClick={() => graphView()?.setViewportCorner(0, 0, 1)}
+          onClick={() => {
+            if (nodePosition) {
+              focusViewport(nodePosition)
+            } else {
+              resetViewport()
+            }
+          }}
           aria-controls="graph"
           aria-label="Reset view"
           data-tooltip="Reset view"
