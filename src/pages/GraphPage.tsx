@@ -167,8 +167,8 @@ export default function GraphPage() {
         role="status"
         aria-live="polite"
         aria-atomic="true"
-        class="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg bg-black/60 px-3 py-1 text-sm text-white transition-opacity duration-400"
         classList={{ "opacity-0": !showZoomStatus() }}
+        class="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg bg-black/60 px-3 py-1 text-sm text-white transition-opacity duration-400"
       >
         Zoom: {(zoom() * 100).toFixed(0)}%
       </div>
