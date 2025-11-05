@@ -236,15 +236,16 @@ export default function GraphListPage() {
                     <li>
                       <a
                         href={pageUrl(props.page)}
-                        class="flex h-10 w-10 justify-center whitespace-nowrap"
+                        aria-current={props["aria-current"]}
                         classList={{
                           "bg-gray-300": props["aria-current"],
                           "hover:bg-gray-200": !props["aria-current"],
                           "active:bg-gray-200": !props["aria-current"],
                         }}
-                        aria-current={props["aria-current"]}
-                        children={props.children}
-                      />
+                        class="flex h-10 w-10 justify-center whitespace-nowrap"
+                      >
+                        {props.children}
+                      </a>
                     </li>
                   )}
                 </For>
@@ -284,15 +285,16 @@ export default function GraphListPage() {
                 <li>
                   <a
                     href={pageUrl(props.page)}
-                    class="flex h-10 w-10 justify-center whitespace-nowrap"
+                    aria-current={props["aria-current"]}
                     classList={{
                       "bg-gray-300": props["aria-current"],
                       "hover:bg-gray-200": !props["aria-current"],
                       "active:bg-gray-200": !props["aria-current"],
                     }}
-                    aria-current={props["aria-current"]}
-                    children={props.children}
-                  />
+                    class="flex h-10 w-10 justify-center whitespace-nowrap"
+                  >
+                    {props.children}
+                  </a>
                 </li>
               )}
             </For>
