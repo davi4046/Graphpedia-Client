@@ -36,6 +36,7 @@ export default function GraphPage() {
   const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
   const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
   const showZoomStatus = useSignalPulse(zoom, 1200)
+  let zoomReady = false
 
   let nodePosition: { x: number; y: number } | null = null
 
@@ -72,6 +73,8 @@ export default function GraphPage() {
     } else {
       restoreViewport()
     }
+
+    zoomReady = true
   })
 
   return (
@@ -167,7 +170,7 @@ export default function GraphPage() {
         role="status"
         aria-live="polite"
         aria-atomic="true"
-        classList={{ "opacity-0": !showZoomStatus() }}
+        classList={{ "opacity-0": !showZoomStatus() || !zoomReady }}
         class="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg bg-black/60 px-3 py-1 text-sm text-white transition-opacity duration-400"
       >
         Zoom: {(zoom() * 100).toFixed(0)}%
