@@ -33,11 +33,6 @@ export default function GraphPage() {
   const { graphView, zoom } = useGraphView(() => container)
   const { restoreViewport } = useRestoreViewport(graphView, params.graphId)
 
-  const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
-  const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
-  const showZoomStatus = useSignalPulse(zoom, 1200)
-  let zoomReady = false
-
   let nodePosition: { x: number; y: number } | null = null
 
   const focusViewport = (position: { x: number; y: number }) => {
@@ -49,6 +44,12 @@ export default function GraphPage() {
     const view = graphView()
     if (view) view.setViewportCorner(0, 0, 1)
   }
+
+  const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
+  const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
+  const showZoomStatus = useSignalPulse(zoom, 1200)
+
+  let zoomReady = false
 
   createEffect(async () => {
     const view = graphView()
