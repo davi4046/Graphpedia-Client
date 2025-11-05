@@ -20,12 +20,13 @@ import ZoomOutIcon from "~/icons/ZoomOutIcon"
 
 function loadViewportState(graphView: GraphView, graphId: string) {
   const saved = localStorage.getItem(`graph-viewport-${graphId}`)
-  if (saved) graphView.setViewport(JSON.parse(saved))
+  const state = saved ? JSON.parse(saved) : null
+  if (state) graphView.setViewportCorner(state.x, state.y, state.zoom)
 }
 
 function saveViewportState(graphView: GraphView, graphId: string) {
-  const viewport = graphView.getViewport()
-  localStorage.setItem(`graph-viewport-${graphId}`, JSON.stringify(viewport))
+  const state = graphView.getViewportCorner()
+  localStorage.setItem(`graph-viewport-${graphId}`, JSON.stringify(state))
 }
 
 export default function GraphPage() {
@@ -105,7 +106,7 @@ export default function GraphPage() {
         class="pointer-events-none absolute right-2 bottom-2 flex flex-col gap-1"
       >
         <button
-          onClick={() => graphView()?.resetViewport()}
+          onClick={() => graphView()?.setViewportCorner(0, 0, 1)}
           aria-controls="graph"
           aria-label="Reset view"
           data-tooltip="Reset view"
