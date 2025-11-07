@@ -1,31 +1,24 @@
-import { A } from "@solidjs/router"
+import { Title } from "@solidjs/meta"
+import Footer from "~/components/Footer"
+import Header from "~/components/Header"
 
 export default function NotFound() {
   return (
-    <main class="text-center mx-auto text-gray-700 p-4">
-      <h1 class="max-6-xs text-6xl text-sky-700 font-thin uppercase my-16">
-        Not Found
-      </h1>
-      <p class="mt-8">
-        Visit{" "}
-        <a
-          href="https://solidjs.com"
-          target="_blank"
-          class="text-sky-600 hover:underline"
-        >
-          solidjs.com
-        </a>{" "}
-        to learn how to build Solid apps.
-      </p>
-      <p class="my-4">
-        <A href="/" class="text-sky-600 hover:underline">
-          Home
-        </A>
-        {" - "}
-        <A href="/about" class="text-sky-600 hover:underline">
-          About Page
-        </A>
-      </p>
-    </main>
+    <>
+      <Title>Page Not Found - Graphpedia</Title>
+      <Header />
+      <main class="flex flex-col gap-8 py-16 text-center">
+        <h1 class="text-6xl font-thin">Page Not Found</h1>
+        <p>It seems like the page you're looking for doesn't exist.</p>
+        <p>
+          <strong>Try one of these:</strong>
+        </p>
+        <p class="flex flex-col gap-2">
+          <a href="/">Go to homepage</a>
+          <a href="/graphs">Browse all graphs</a>
+        </p>
+      </main>
+      <Footer />
+    </>
   )
 }
