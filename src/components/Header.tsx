@@ -12,11 +12,11 @@ export default function Header() {
               />
               <picture>
                 <source
-                  srcset="graphpedia-wordmark-dark.svg"
+                  srcset="/graphpedia-wordmark-dark.svg"
                   media="(prefers-color-scheme: dark)"
                 />
                 <img
-                  src="graphpedia-wordmark-light.svg"
+                  src="/graphpedia-wordmark-light.svg"
                   alt=""
                   class="h-[1.8rem] w-auto"
                 />

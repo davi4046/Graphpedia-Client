@@ -6,11 +6,11 @@ export default function Footer() {
           <img src="/graphpedia.svg" alt="" class="h-14 w-14" />
           <picture>
             <source
-              srcset="graphpedia-wordmark-dark.svg"
+              srcset="/graphpedia-wordmark-dark.svg"
               media="(prefers-color-scheme: dark)"
             />
             <img
-              src="graphpedia-wordmark-light.svg"
+              src="/graphpedia-wordmark-light.svg"
               alt=""
               class="mt-0.5 w-14"
             />
