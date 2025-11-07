@@ -50,10 +50,28 @@ export default function Footer() {
           screenshots or links and help us spread the word about Graphpedia!
         </p>
         <p>Happy exploring!</p>
-        <p>
-          <strong>Contact: </strong>
-          <a href="mailto:contact@graphpedia.org">contact@graphpedia.org</a>
-        </p>
+        <ul>
+          <li>
+            <strong>Forum: </strong>
+            <a href="https://graphpedia.flarum.cloud/">
+              graphpedia.flarum.cloud
+            </a>{" "}
+            (bug reports, feature proposals, updates)
+          </li>
+          <li>
+            <strong>Contact: </strong>
+            <a href="mailto:contact@graphpedia.org">
+              contact@graphpedia.org
+            </a>{" "}
+            (for direct inquiries)
+          </li>
+          <li>
+            <strong>Credits: </strong>
+            <a href="https://www.svgbackgrounds.com/category/geometric/">
+              Geometric Backgrounds by SVGBackgrounds.com
+            </a>
+          </li>
+        </ul>
       </section>
     </footer>
   )
