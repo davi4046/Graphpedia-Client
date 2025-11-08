@@ -1,5 +1,5 @@
 import { Link, Title } from "@solidjs/meta"
-import { useParams, useSearchParams } from "@solidjs/router"
+import { useSearchParams } from "@solidjs/router"
 import { createEffect } from "solid-js"
 import {
   GraphDataAdapter,
@@ -7,7 +7,7 @@ import {
   GraphEngine,
   GraphNodeLocator,
 } from "~/graph"
-import useGraphList from "~/hooks/useGraphList"
+import { GraphEntry } from "~/graph/dataSource"
 import useGraphView from "~/hooks/useGraphView"
 import useRestoreViewport from "~/hooks/useRestoreViewport"
 import useSignalPulse from "~/hooks/useSignalPulse"
@@ -17,20 +17,20 @@ import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
 import ZoomOutIcon from "~/icons/ZoomOutIcon"
 
-export default function GraphPage() {
-  const params = useParams()
+type GraphPageProps = {
+  graph: GraphEntry
+}
+
+export default function GraphPage(props: GraphPageProps) {
   const [searchParams] = useSearchParams()
 
   const nodeId = searchParams.item
     ? Number(searchParams.item.slice(1))
     : undefined
 
-  const graphList = useGraphList()
-  const graphInfo = () => graphList()?.find((g) => g.id === params.graphId)
-
   let container: HTMLDivElement | undefined
   const { graphView, zoom } = useGraphView(() => container)
-  const { restoreViewport } = useRestoreViewport(graphView, params.graphId)
+  const { restoreViewport } = useRestoreViewport(graphView, props.graph.id)
 
   let nodePosition: { x: number; y: number } | null = null
 
@@ -54,7 +54,7 @@ export default function GraphPage() {
     const view = graphView()
     if (!view) return
 
-    const dataSource = await GraphDataSource.create(params.graphId)
+    const dataSource = await GraphDataSource.create(props.graph.id)
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(view, graphTiles)
@@ -75,8 +75,8 @@ export default function GraphPage() {
 
   return (
     <>
-      <Title>{`${graphInfo()?.label} - Graphpedia`}</Title>
-      <Link rel="canonical" href={`/graph/${params.graphId}`} />
+      <Title>{`${props.graph.label} - Graphpedia`}</Title>
+      <Link rel="canonical" href={`/graph/${props.graph.id}`} />
       <div
         ref={container}
         id="graph"
@@ -94,7 +94,7 @@ export default function GraphPage() {
         <img src="/graphpedia-wordmark-light.svg" alt="" class="mt-0.5 w-14" />
       </a>
       <div
-        data-tooltip={graphInfo()?.description}
+        data-tooltip={props.graph.description}
         data-placement="bottom"
         class="absolute top-0 left-1/2 -translate-x-1/2 border-x border-b border-gray-300 bg-white shadow-sm"
       >
@@ -103,10 +103,10 @@ export default function GraphPage() {
           data-template="title-tooltip"
           class="mb-0 px-1 text-lg font-semibold"
         >
-          {graphInfo()?.label}
+          {props.graph.label}
         </h1>
         <div id="graph-desc" class="sr-only">
-          {graphInfo()?.description}
+          {props.graph.description}
         </div>
       </div>
       <div
@@ -150,7 +150,7 @@ export default function GraphPage() {
           <ZoomOutIcon />
         </button>
         <a
-          href={`https://www.wikidata.org/wiki/Property:${params.graphId}`}
+          href={`https://www.wikidata.org/wiki/Property:${props.graph.id}`}
           target="_blank"
           rel="noopener noreferrer"
           role="button"

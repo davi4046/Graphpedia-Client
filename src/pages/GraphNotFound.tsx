@@ -1,10 +1,12 @@
 import { Title } from "@solidjs/meta"
+import { HttpStatusCode } from "@solidjs/start"
 import Footer from "~/components/Footer"
 import Header from "~/components/Header"
 
-export default function NotFound() {
+export default function GraphNotFound() {
   return (
     <>
+      <HttpStatusCode code={404} />
       <Title>Graph Not Found - Graphpedia</Title>
       <Header />
       <main class="flex flex-col gap-8 py-16 text-center">
