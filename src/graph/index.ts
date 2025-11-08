@@ -4,7 +4,7 @@ import GraphEngine from "./GraphEngine"
 import GraphView from "./GraphView"
 import GraphNodeLocator from "./nodeLocator"
 
-export { fetchGraphEntries } from "./dataSource"
+export { fetchGraphsIndex } from "./dataSource"
 export {
   GraphDataAdapter,
   GraphDataSource,

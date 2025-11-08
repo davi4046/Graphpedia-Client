@@ -1,11 +1,11 @@
 import { createResource } from "solid-js"
-import { fetchGraphEntries } from "~/graph"
+import { fetchGraphsIndex } from "~/graph"
 
-let cachedPromise: ReturnType<typeof fetchGraphEntries> | null = null
+let cachedPromise: ReturnType<typeof fetchGraphsIndex> | null = null
 
 export default function useGraphList() {
   if (!cachedPromise) {
-    cachedPromise = fetchGraphEntries()
+    cachedPromise = fetchGraphsIndex()
   }
   const [result] = createResource(() => cachedPromise!)
   return result
