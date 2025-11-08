@@ -101,7 +101,7 @@ async function fetchEntities(ids: string[]): Promise<Item[]> {
   return Object.values(json.entities) as Item[]
 }
 
-export type GraphsIndex = {
+export type GraphEntry = {
   id: string
   label: string
   description: string
@@ -109,11 +109,11 @@ export type GraphsIndex = {
   tags: string[]
   numNodes: number
   numEdges: number
-}[]
+}
 
 export async function fetchGraphsIndex(
   dataUrl = GRAPH_DATA_URL
-): Promise<GraphsIndex> {
+): Promise<GraphEntry[]> {
   const url = `${dataUrl}/graphs_index.json.gz`
   const response = await fetch(url)
 
@@ -122,6 +122,6 @@ export async function fetchGraphsIndex(
   }
 
   const raw = await response.json()
-  const arr = camelcaseKeys(raw) as GraphsIndex
+  const arr = camelcaseKeys(raw) as GraphEntry[]
   return arr
 }
