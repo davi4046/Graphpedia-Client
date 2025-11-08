@@ -27,11 +27,15 @@ export default function HomePage() {
           </div>
         </section>
         <section id="featured">
-          <h2>Featured Graph</h2>
+          <h2>Featured Graph: head of state</h2>
           <iframe
             src="/graph/P35"
             class="h-72 w-full border border-gray-300"
           ></iframe>
+          <div class="mt-2 mb-8 flex justify-between">
+            <a href="/graph/P35">graphpedia.org/graph/P35</a>
+            <a href="/graph/P35">View full page ↗</a>
+          </div>
         </section>
         <section id="graphs">
           <details open>
