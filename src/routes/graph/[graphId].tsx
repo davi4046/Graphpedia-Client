@@ -1,22 +1,18 @@
-import { createAsync, useParams } from "@solidjs/router"
-import { fetchGraphEntries } from "~/graph"
+import { useParams } from "@solidjs/router"
+import { Show } from "solid-js"
+import useGraphList from "~/hooks/useGraphList"
 import GraphNotFoundPage from "~/pages/GraphNotFoundPage"
 import GraphPage from "~/pages/GraphPage"
-
-const getGraphList = async () => {
-  "use server"
-  return fetchGraphEntries()
-}
 
 export default function GraphRoute() {
   const params = useParams()
 
-  const graphList = createAsync(getGraphList)
+  const graphList = useGraphList()
   const graphInfo = () => graphList()?.find((g) => g.id === params.graphId)
 
-  return graphInfo() ? (
-    <GraphPage graph={graphInfo()!} />
-  ) : (
-    <GraphNotFoundPage />
+  return (
+    <Show when={graphInfo()} fallback={<GraphNotFoundPage />}>
+      <GraphPage graph={graphInfo()!} />
+    </Show>
   )
 }
