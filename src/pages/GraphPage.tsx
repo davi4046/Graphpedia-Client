@@ -28,8 +28,6 @@ export default function GraphPage(props: GraphPageProps) {
   const { graphView, zoom } = useGraphView(() => container)
   const { restoreViewport } = useRestoreViewport(graphView, props.graph.id)
 
-  let nodePosition: { x: number; y: number } | null = null
-
   const focusViewport = (position: { x: number; y: number }) => {
     const view = graphView()
     if (view) view.setViewportCenter(position.x, position.y, 2)
@@ -43,6 +41,8 @@ export default function GraphPage(props: GraphPageProps) {
   const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
   const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
   const showZoomStatus = useSignalPulse(zoom, 1200)
+
+  let targetPosition: { x: number; y: number } | null = null
 
   let zoomReady = false
 
@@ -61,11 +61,11 @@ export default function GraphPage(props: GraphPageProps) {
 
     if (nodeId) {
       const nodeLocator = await GraphNodeLocator.create(dataSource)
-      nodePosition = await nodeLocator.locateNode(nodeId)
+      targetPosition = await nodeLocator.locateNode(nodeId)
     }
 
-    if (nodePosition) {
-      focusViewport(nodePosition)
+    if (targetPosition) {
+      focusViewport(targetPosition)
     } else {
       restoreViewport()
     }
@@ -115,8 +115,8 @@ export default function GraphPage(props: GraphPageProps) {
       >
         <button
           onClick={() => {
-            if (nodePosition) {
-              focusViewport(nodePosition)
+            if (targetPosition) {
+              focusViewport(targetPosition)
             } else {
               resetViewport()
             }
