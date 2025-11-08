@@ -24,10 +24,6 @@ type GraphPageProps = {
 export default function GraphPage(props: GraphPageProps) {
   const [searchParams] = useSearchParams()
 
-  const nodeId = searchParams.item
-    ? Number(searchParams.item.slice(1))
-    : undefined
-
   let container: HTMLDivElement | undefined
   const { graphView, zoom } = useGraphView(() => container)
   const { restoreViewport } = useRestoreViewport(graphView, props.graph.id)
@@ -58,6 +54,10 @@ export default function GraphPage(props: GraphPageProps) {
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(view, graphTiles)
+
+    const nodeId = searchParams.item
+      ? Number(searchParams.item.slice(1))
+      : undefined
 
     if (nodeId) {
       const nodeLocator = await GraphNodeLocator.create(dataSource)
