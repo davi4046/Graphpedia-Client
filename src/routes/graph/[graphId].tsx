@@ -6,8 +6,8 @@ import NotFoundPage from "~/pages/NotFoundPage"
 
 export default function GraphRoute() {
   const params = useParams()
-
   const graphList = useGraphList()
+
   const graphInfo = () => graphList()?.find((g) => g.id === params.graphId)
 
   return (
