@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router"
 import { Show } from "solid-js"
 import useGraphList from "~/hooks/useGraphList"
-import GraphNotFound from "~/pages/GraphNotFound"
+import GraphNotFoundPage from "~/pages/GraphNotFoundPage"
 import GraphPage from "~/pages/GraphPage"
 
 export default function GraphRoute() {
@@ -11,7 +11,7 @@ export default function GraphRoute() {
   const graphInfo = () => graphList()?.find((g) => g.id === params.graphId)
 
   return (
-    <Show when={graphInfo()} fallback={<GraphNotFound />}>
+    <Show when={graphInfo()} fallback={<GraphNotFoundPage />}>
       <GraphPage graph={graphInfo()!} />
     </Show>
   )

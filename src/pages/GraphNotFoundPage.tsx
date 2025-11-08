@@ -3,7 +3,7 @@ import { HttpStatusCode } from "@solidjs/start"
 import Footer from "~/components/Footer"
 import Header from "~/components/Header"
 
-export default function GraphNotFound() {
+export default function GraphNotFoundPage() {
   return (
     <>
       <HttpStatusCode code={404} />
