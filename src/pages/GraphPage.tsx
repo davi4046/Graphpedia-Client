@@ -1,4 +1,4 @@
-import { Link, Title } from "@solidjs/meta"
+import { Link, Meta, Title } from "@solidjs/meta"
 import { useSearchParams } from "@solidjs/router"
 import { createEffect } from "solid-js"
 import {
@@ -73,10 +73,28 @@ export default function GraphPage(props: GraphPageProps) {
     zoomReady = true
   })
 
+  // TODO: include queried item in meta description
+  // TODO: og:image
+
   return (
     <>
       <Title>{`${props.graph.label} - Graphpedia`}</Title>
+      <Meta name="title" content={props.graph.label} />
+      <Meta
+        name="description"
+        content={`Visual knowledge graph of Wikidata property ${props.graph.id} '${props.graph.label}' (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
+      />
       <Link rel="canonical" href={`/graph/${props.graph.id}`} />
+      <Meta property="og:type" content="website" />
+      <Meta
+        property="og:url"
+        content={`https://graphpedia.org/graph/${props.graph.id}`}
+      />
+      <Meta property="og:title" content={props.graph.label} />
+      <Meta
+        property="og:description"
+        content={`Visual knowledge graph of Wikidata property ${props.graph.id} '${props.graph.label}' (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
+      />
       <div
         ref={container}
         id="graph"
