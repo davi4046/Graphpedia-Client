@@ -5,10 +5,10 @@ export default function Footer() {
         <a href="/" aria-label="Graphpedia">
           <img src="/graphpedia.svg" alt="" class="h-14 w-14" />
           <picture>
-            <source
+            {/* <source
               srcset="/graphpedia-wordmark-dark.svg"
               media="(prefers-color-scheme: dark)"
-            />
+            /> */}
             <img
               src="/graphpedia-wordmark-light.svg"
               alt=""
