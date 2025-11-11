@@ -82,7 +82,7 @@ export default function GraphPage(props: GraphPageProps) {
       <Meta name="title" content={props.graph.label} />
       <Meta
         name="description"
-        content={`Visual knowledge graph of Wikidata property ${props.graph.id} '${props.graph.label}' (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
+        content={`Explore a visual knowledge graph of Wikidata property ${props.graph.id} '${props.graph.label}' (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
       />
       <Link rel="canonical" href={`/graph/${props.graph.id}`} />
       <Meta property="og:type" content="website" />
@@ -90,7 +90,7 @@ export default function GraphPage(props: GraphPageProps) {
       <Meta property="og:title" content={props.graph.label} />
       <Meta
         property="og:description"
-        content={`Visual knowledge graph of Wikidata property ${props.graph.id} '${props.graph.label}' (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
+        content={`Explore a visual knowledge graph of Wikidata property ${props.graph.id} '${props.graph.label}' (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
       />
       <div
         ref={container}
