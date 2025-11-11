@@ -24,7 +24,7 @@ export default function HomePage() {
       <Title>Graphpedia</Title>
       <Meta
         name="description"
-        content="Home to more than 1600 visual knowledge graphs based on Wikidata statements."
+        content="Explore how everything is connected with Graphpedia — home to more than 1600 visual knowledge graphs based on Wikidata statements."
       />
       <Link rel="canonical" href="/" />
       <Meta property="og:type" content="website" />
@@ -32,7 +32,7 @@ export default function HomePage() {
       <Meta property="og:title" content="Graphpedia" />
       <Meta
         property="og:description"
-        content="Home to more than 1600 visual knowledge graphs based on Wikidata statements."
+        content="Explore how everything is connected with Graphpedia — home to more than 1600 visual knowledge graphs based on Wikidata statements."
       />
       <Header />
       <main>
@@ -45,8 +45,14 @@ export default function HomePage() {
               <a href="https://www.wikidata.org/">Wikidata</a> statements.
             </p>
             <div class="flex gap-2">
-              <button onClick={scrollToGraphs}>Browse the list ↓</button>
-              <button class="secondary" onClick={goToRandomGraph}>
+              <button onClick={scrollToGraphs} title="Scroll to the graph list">
+                Browse the list ↓
+              </button>
+              <button
+                class="secondary"
+                onClick={goToRandomGraph}
+                title="Go to a random graph"
+              >
                 Take a chance 🎲
               </button>
             </div>
@@ -59,7 +65,7 @@ export default function HomePage() {
             class="h-72 w-full border border-gray-300"
           ></iframe>
           <div class="mt-2 mb-8 text-right">
-            <a href="/graph/P35">View full page ↗</a>
+            <a href="/graph/P35">Visit the graph ↗</a>
           </div>
         </section>
         <section id="graphs">
