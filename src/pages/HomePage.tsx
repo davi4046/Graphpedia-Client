@@ -8,6 +8,17 @@ import useGraphList from "~/hooks/useGraphList"
 export default function HomePage() {
   const graphList = useGraphList()
 
+  const scrollToGraphs = () => {
+    document.getElementById("graphs")?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const goToRandomGraph = () => {
+    const graphs = graphList()
+    if (!graphs || graphs.length === 0) return
+    const randomGraph = graphs[Math.floor(Math.random() * graphs.length)]
+    window.location.href = randomGraph.url
+  }
+
   return (
     <>
       <Title>Graphpedia</Title>
@@ -29,11 +40,16 @@ export default function HomePage() {
           <div class="bg-hero pointer-events-none absolute inset-0 -z-10 bg-repeat opacity-50"></div>
           <div class="flex flex-col items-center">
             <h1>Welcome to Graphpedia</h1>
-            <p>
+            <p class="text-center">
               home to more than 1600 visual knowledge graphs based on{" "}
               <a href="https://www.wikidata.org/">Wikidata</a> statements.
             </p>
-            <button class="outline">Browse the list ↓</button>
+            <div class="flex gap-2">
+              <button onClick={scrollToGraphs}>Browse the list ↓</button>
+              <button class="secondary" onClick={goToRandomGraph}>
+                Take a chance 🎲
+              </button>
+            </div>
           </div>
         </section>
         <section id="featured">
