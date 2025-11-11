@@ -7,7 +7,7 @@ import {
   GraphEngine,
   GraphNodeLocator,
 } from "~/graph"
-import { GraphEntry } from "~/graph/dataSource"
+import { GraphEntry } from "~/graph/graphsIndex"
 import useGraphView from "~/hooks/useGraphView"
 import useRestoreViewport from "~/hooks/useRestoreViewport"
 import useSignalPulse from "~/hooks/useSignalPulse"
@@ -86,10 +86,7 @@ export default function GraphPage(props: GraphPageProps) {
       />
       <Link rel="canonical" href={`/graph/${props.graph.id}`} />
       <Meta property="og:type" content="website" />
-      <Meta
-        property="og:url"
-        content={`https://graphpedia.org/graph/${props.graph.id}`}
-      />
+      <Meta property="og:url" content={props.graph.url} />
       <Meta property="og:title" content={props.graph.label} />
       <Meta
         property="og:description"
@@ -168,7 +165,7 @@ export default function GraphPage(props: GraphPageProps) {
           <ZoomOutIcon />
         </button>
         <a
-          href={`https://www.wikidata.org/wiki/Property:${props.graph.id}`}
+          href={props.graph.wikidataUrl}
           target="_blank"
           rel="noopener noreferrer"
           role="button"

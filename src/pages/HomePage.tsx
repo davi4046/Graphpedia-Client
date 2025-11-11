@@ -2,6 +2,7 @@ import { Link, Meta, Title } from "@solidjs/meta"
 import { For } from "solid-js"
 import Footer from "~/components/Footer"
 import Header from "~/components/Header"
+import { SITE_URL } from "~/config"
 import useGraphList from "~/hooks/useGraphList"
 
 export default function HomePage() {
@@ -16,7 +17,7 @@ export default function HomePage() {
       />
       <Link rel="canonical" href="/" />
       <Meta property="og:type" content="website" />
-      <Meta property="og:url" content="https://graphpedia.org/" />
+      <Meta property="og:url" content={SITE_URL} />
       <Meta property="og:title" content="Graphpedia" />
       <Meta
         property="og:description"

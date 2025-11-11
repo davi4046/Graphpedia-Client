@@ -1,4 +1,5 @@
 import { BBox } from "rbush"
+import { SITE_URL } from "~/config"
 import GraphDataSource, { TilesBBoxes } from "./dataSource"
 import {
   GraphEdge,
@@ -84,7 +85,7 @@ class NodeImpl implements GraphNode {
     return {
       label: item.labels?.en?.value,
       description: item.descriptions?.en?.value,
-      url: `https://www.graphpedia.org/graph/${this.dataSource.graphId}?item=Q${this.id}`,
+      url: `${SITE_URL}/graph/${this.dataSource.graphId}?item=Q${this.id}`,
       wikidataId: `Q${this.id}`,
       wikidataUrl: `https://www.wikidata.org/wiki/Q${this.id}`,
       sitelinks: {

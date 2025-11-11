@@ -3,16 +3,14 @@ import {
   keyResolver,
   windowedFiniteBatchScheduler,
 } from "@yornaath/batshit"
-import camelcaseKeys from "camelcase-keys"
 import WBK, { EntityId, Item } from "wikibase-sdk"
+import { GRAPH_DATA_URL } from "~/config"
 import { BBox } from "~/types/geometry"
 import {
   tileBBoxArrayParser,
   tileEntitiesArrayParser,
   tileParser,
 } from "./dataParsers"
-
-const GRAPH_DATA_URL = import.meta.env.PUBLIC_DATA_URL
 
 export type TilesBBoxes = {
   id: number
@@ -99,29 +97,4 @@ async function fetchEntities(ids: string[]): Promise<Item[]> {
   }
   const json = await response.json()
   return Object.values(json.entities) as Item[]
-}
-
-export type GraphEntry = {
-  id: string
-  label: string
-  description: string
-  aliases: string[]
-  tags: string[]
-  numNodes: number
-  numEdges: number
-}
-
-export async function fetchGraphsIndex(
-  dataUrl = GRAPH_DATA_URL
-): Promise<GraphEntry[]> {
-  const url = `${dataUrl}/graphs_index.json.gz`
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    throw new Error(`HTTP Error: ${response.statusText}`)
-  }
-
-  const raw = await response.json()
-  const arr = camelcaseKeys(raw) as GraphEntry[]
-  return arr
 }
