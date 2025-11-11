@@ -1,4 +1,4 @@
-import { Link, Title } from "@solidjs/meta"
+import { Link, Meta, Title } from "@solidjs/meta"
 import { For } from "solid-js"
 import Footer from "~/components/Footer"
 import Header from "~/components/Header"
@@ -10,7 +10,18 @@ export default function HomePage() {
   return (
     <>
       <Title>Graphpedia</Title>
+      <Meta
+        name="description"
+        content="Home to more than 1600 visual knowledge graphs based on Wikidata statements."
+      />
       <Link rel="canonical" href="/" />
+      <Meta property="og:type" content="website" />
+      <Meta property="og:url" content="https://graphpedia.org/" />
+      <Meta property="og:title" content="Graphpedia" />
+      <Meta
+        property="og:description"
+        content="Home to more than 1600 visual knowledge graphs based on Wikidata statements."
+      />
       <Header />
       <main>
         <section id="welcome" class="relative py-16">
