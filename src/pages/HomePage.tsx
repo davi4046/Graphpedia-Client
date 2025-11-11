@@ -32,9 +32,7 @@ export default function HomePage() {
               home to more than 1600 visual knowledge graphs based on{" "}
               <a href="https://www.wikidata.org/">Wikidata</a> statements.
             </p>
-            <a href="/graphs" role="button" class="outline">
-              Browse Graphs A&ndash;Z
-            </a>
+            <button class="outline">Browse the list ↓</button>
           </div>
         </section>
         <section id="featured">
