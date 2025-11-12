@@ -41,7 +41,7 @@ export default function HomePage() {
           <div class="flex flex-col items-center">
             <h1>Welcome to Graphpedia</h1>
             <p class="text-center">
-              home to more than 1600 visual knowledge graphs based on{" "}
+              home to more than 1,600 visual knowledge graphs based on{" "}
               <a href="https://www.wikidata.org/">Wikidata</a> statements.
             </p>
             <div class="flex gap-2">
