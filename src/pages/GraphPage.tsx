@@ -87,7 +87,7 @@ export default function GraphPage(props: GraphPageProps) {
       <Meta name="title" content={props.graph.label} />
       <Meta
         name="description"
-        content={`Wikidata property ${props.graph.id} '${props.graph.label}' (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
+        content={`Wikidata property ${props.graph.id} \u2018${props.graph.label}\u2019 (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
       />
       <Link rel="canonical" href={`/graph/${props.graph.id}`} />
       <Meta property="og:type" content="website" />
@@ -102,7 +102,7 @@ export default function GraphPage(props: GraphPageProps) {
       />
       <Meta
         property="og:description"
-        content={`Wikidata property ${props.graph.id} '${props.graph.label}' (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
+        content={`Wikidata property ${props.graph.id} \u2018${props.graph.label}\u2019 (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
       />
       <div
         ref={container}
