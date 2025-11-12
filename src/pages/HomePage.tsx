@@ -66,7 +66,7 @@ export default function HomePage() {
           ></iframe>
           <div class="mt-2 mb-8 text-right">
             <a href="/graph/P35" target="_blank" rel="noopener noreferrer">
-              (Click to open 'head of state' in full page)
+              (Click to open &lsquo;head of state&rsquo; in full page)
             </a>
           </div>
         </section>
