@@ -42,6 +42,16 @@ export default function GraphPage(props: GraphPageProps) {
   const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
   const showZoomStatus = useSignalPulse(zoom, 1200)
 
+  let itemStringId: string | undefined = undefined
+  let itemNumberId: number | undefined = undefined
+
+  if (searchParams.item) {
+    itemStringId = Array.isArray(searchParams.item)
+      ? searchParams.item[0]
+      : searchParams.item
+    itemNumberId = Number(itemStringId.slice(1))
+  }
+
   let targetPosition: { x: number; y: number } | null = null
 
   let zoomReady = false
@@ -55,13 +65,9 @@ export default function GraphPage(props: GraphPageProps) {
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(view, graphTiles)
 
-    const nodeId = searchParams.item
-      ? Number(searchParams.item.slice(1))
-      : undefined
-
-    if (nodeId) {
+    if (itemNumberId !== undefined && !isNaN(itemNumberId)) {
       const nodeLocator = await GraphNodeLocator.create(dataSource)
-      targetPosition = await nodeLocator.locateNode(nodeId)
+      targetPosition = await nodeLocator.locateNode(itemNumberId)
     }
 
     if (targetPosition) {
@@ -73,7 +79,6 @@ export default function GraphPage(props: GraphPageProps) {
     zoomReady = true
   })
 
-  // TODO: include queried item in meta description
   // TODO: og:image
 
   return (
@@ -87,7 +92,14 @@ export default function GraphPage(props: GraphPageProps) {
       <Link rel="canonical" href={`/graph/${props.graph.id}`} />
       <Meta property="og:type" content="website" />
       <Meta property="og:url" content={props.graph.url} />
-      <Meta property="og:title" content={props.graph.label} />
+      <Meta
+        property="og:title"
+        content={
+          itemStringId
+            ? `${itemStringId} in \u2018${props.graph.label}\u2019`
+            : props.graph.label
+        }
+      />
       <Meta
         property="og:description"
         content={`Wikidata property ${props.graph.id} '${props.graph.label}' (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
