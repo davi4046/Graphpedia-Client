@@ -65,7 +65,9 @@ export default function HomePage() {
             class="h-72 w-full border border-gray-300"
           ></iframe>
           <div class="mt-2 mb-8 text-right">
-            <a href="/graph/P35">Visit the graph ↗</a>
+            <a href="/graph/P35" target="_blank" rel="noopener noreferrer">
+              (Click to open 'head of state' in full page)
+            </a>
           </div>
         </section>
         <section id="graphs">
