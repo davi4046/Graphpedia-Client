@@ -66,12 +66,15 @@ export default function Footer() {
             (for direct inquiries)
           </li>
           <li>
-            <strong>Credits: </strong>
             <a href="https://www.svgbackgrounds.com/category/geometric/">
               Geometric Backgrounds by SVGBackgrounds.com
             </a>
           </li>
         </ul>
+        <p class="font-bold italic">
+          A special thanks to Stefan Hachul and Michael Jünger for their
+          contributions to graph drawing algorithms and software.
+        </p>
       </section>
     </footer>
   )
