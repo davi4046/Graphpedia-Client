@@ -10,9 +10,11 @@ import {
 import { GraphEntry } from "~/graph/graphsIndex"
 import { fetchItems } from "~/graph/wikidataAPI"
 import useGraphView from "~/hooks/useGraphView"
+import useIsFramed from "~/hooks/useIsFramed"
 import useRestoreViewport from "~/hooks/useRestoreViewport"
 import useSignalPulse from "~/hooks/useSignalPulse"
 import useZoomLevels from "~/hooks/useZoomLevels"
+import ArrowSquareOut from "~/icons/ArrowSquareOut"
 import CrosshairIcon from "~/icons/CrosshairIcon"
 import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
@@ -32,6 +34,7 @@ type GraphPageProps = {
 }
 
 export default function GraphPage(props: GraphPageProps) {
+  const isFramed = useIsFramed()
   const [searchParams] = useSearchParams()
 
   const targetItemId = createMemo(() => {
@@ -152,6 +155,22 @@ export default function GraphPage(props: GraphPageProps) {
           {props.graph.description}
         </div>
       </div>
+      {isFramed() && (
+        <div class="pointer-events-none absolute top-2 right-2">
+          <a
+            href={props.graph.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            role="button"
+            aria-label="Go to graph page"
+            data-tooltip="Go to graph page"
+            data-placement="left"
+            class="pointer-events-auto grid h-7 w-7 place-items-center border-0 bg-[var(--pico-primary)] p-0 [&>svg]:h-4.5 [&>svg]:w-4.5"
+          >
+            <ArrowSquareOut />
+          </a>
+        </div>
+      )}
       <div
         role="toolbar"
         class="pointer-events-none absolute right-2 bottom-2 flex flex-col gap-1"

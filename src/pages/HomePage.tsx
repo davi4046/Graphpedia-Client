@@ -62,13 +62,8 @@ export default function HomePage() {
           <h2>Featured Graph</h2>
           <iframe
             src="/graph/P35"
-            class="h-72 w-full border border-gray-300"
+            class="h-84 w-full border border-gray-300"
           ></iframe>
-          <div class="mt-2 mb-8 text-right">
-            <a href="/graph/P35">
-              (Click to open &lsquo;head of state&rsquo; in full page)
-            </a>
-          </div>
         </section>
         <section id="graphs">
           <details open>
