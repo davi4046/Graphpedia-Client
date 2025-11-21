@@ -1,5 +1,5 @@
 interface ImportMetaEnv {
-  readonly PUBLIC_APP_DOMAIN: string
+  readonly PUBLIC_SITE_URL: string
   readonly PUBLIC_DATA_URL: string
 }
 
