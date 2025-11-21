@@ -129,6 +129,7 @@ export default function GraphPage(props: GraphPageProps) {
       ></div>
       <a
         href="/"
+        target="_top"
         aria-label="Graphpedia"
         class="absolute top-0 left-0 bg-white shadow-sm"
       >
