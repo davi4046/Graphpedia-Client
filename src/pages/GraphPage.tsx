@@ -1,6 +1,6 @@
 import { Link, Meta, Title } from "@solidjs/meta"
-import { useSearchParams } from "@solidjs/router"
-import { createEffect } from "solid-js"
+import { createAsync, query, useSearchParams } from "@solidjs/router"
+import { createEffect, createMemo } from "solid-js"
 import {
   GraphDataAdapter,
   GraphDataSource,
@@ -8,6 +8,7 @@ import {
   GraphNodeLocator,
 } from "~/graph"
 import { GraphEntry } from "~/graph/graphsIndex"
+import { fetchItems } from "~/graph/wikidataAPI"
 import useGraphView from "~/hooks/useGraphView"
 import useRestoreViewport from "~/hooks/useRestoreViewport"
 import useSignalPulse from "~/hooks/useSignalPulse"
@@ -17,12 +18,36 @@ import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
 import ZoomOutIcon from "~/icons/ZoomOutIcon"
 
+const getItemLabel = query(async (itemId: string) => {
+  try {
+    const items = await fetchItems([itemId])
+    return items?.[0]?.labels?.en?.value
+  } catch (error) {
+    console.error("Error fetching item label:", error)
+  }
+}, "itemLabel")
+
 type GraphPageProps = {
   graph: GraphEntry
 }
 
 export default function GraphPage(props: GraphPageProps) {
   const [searchParams] = useSearchParams()
+
+  const targetItemId = createMemo(() => {
+    const item = searchParams.item
+    if (!item) return undefined
+    return Array.isArray(item) ? item[0] : item
+  })
+
+  const targetItemLabel = createAsync(
+    async () => {
+      const id = targetItemId()
+      if (!id) return undefined
+      return getItemLabel(id)
+    },
+    { deferStream: true }
+  )
 
   let container: HTMLDivElement | undefined
   const { graphView, zoom } = useGraphView(() => container)
@@ -42,18 +67,7 @@ export default function GraphPage(props: GraphPageProps) {
   const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
   const showZoomStatus = useSignalPulse(zoom, 1200)
 
-  let itemStringId: string | undefined = undefined
-  let itemNumberId: number | undefined = undefined
-
-  if (searchParams.item) {
-    itemStringId = Array.isArray(searchParams.item)
-      ? searchParams.item[0]
-      : searchParams.item
-    itemNumberId = Number(itemStringId.slice(1))
-  }
-
   let targetPosition: { x: number; y: number } | null = null
-
   let zoomReady = false
 
   createEffect(async () => {
@@ -65,9 +79,11 @@ export default function GraphPage(props: GraphPageProps) {
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(view, graphTiles)
 
-    if (itemNumberId !== undefined && !isNaN(itemNumberId)) {
+    const id = targetItemId()
+    if (id !== undefined) {
+      const targetNodeId = Number(id.slice(1))
       const nodeLocator = await GraphNodeLocator.create(dataSource)
-      targetPosition = await nodeLocator.locateNode(itemNumberId)
+      targetPosition = await nodeLocator.locateNode(targetNodeId)
     }
 
     if (targetPosition) {
@@ -78,8 +94,6 @@ export default function GraphPage(props: GraphPageProps) {
 
     zoomReady = true
   })
-
-  // TODO: og:image
 
   return (
     <>
@@ -94,9 +108,10 @@ export default function GraphPage(props: GraphPageProps) {
       <Meta property="og:url" content={props.graph.url} />
       <Meta
         property="og:title"
+        data-sm=""
         content={
-          itemStringId
-            ? `${itemStringId} in \u2018${props.graph.label}\u2019`
+          targetItemLabel()
+            ? `${targetItemLabel()} | ${props.graph.label}`
             : props.graph.label
         }
       />

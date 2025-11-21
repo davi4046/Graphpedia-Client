@@ -3,14 +3,15 @@ import {
   keyResolver,
   windowedFiniteBatchScheduler,
 } from "@yornaath/batshit"
-import WBK, { EntityId, Item } from "wikibase-sdk"
-import { DATA_URL, USER_AGENT } from "~/config"
+import { Item } from "wikibase-sdk"
+import { DATA_URL } from "~/config"
 import { BBox } from "~/types/geometry"
 import {
   tileBBoxArrayParser,
   tileEntitiesArrayParser,
   tileParser,
 } from "./dataParsers"
+import { fetchItems } from "./wikidataAPI"
 
 export type TilesBBoxes = {
   id: number
@@ -49,7 +50,7 @@ export default class GraphDataSource {
   }
 
   private entities = createBatcher({
-    fetcher: fetchEntities,
+    fetcher: fetchItems,
     resolver: keyResolver("id"),
     scheduler: windowedFiniteBatchScheduler({
       windowMs: 500,
@@ -81,24 +82,4 @@ export default class GraphDataSource {
   async fetchItem(itemId: number): Promise<Item> {
     return this.entities.fetch(`Q${itemId}`)
   }
-}
-
-async function fetchEntities(ids: string[]): Promise<Item[]> {
-  const wbk = WBK({ instance: "https://www.wikidata.org" })
-  const url = wbk.getEntities({
-    ids: ids as EntityId[],
-    props: ["labels", "descriptions", "sitelinks/urls"],
-    languages: ["en"],
-    format: "json",
-  })
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent": USER_AGENT,
-    },
-  })
-  if (!response.ok) {
-    throw new Error(`HTTP error: ${response.status}`)
-  }
-  const json = await response.json()
-  return Object.values(json.entities) as Item[]
 }
