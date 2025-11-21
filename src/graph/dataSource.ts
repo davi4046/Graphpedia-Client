@@ -4,7 +4,7 @@ import {
   windowedFiniteBatchScheduler,
 } from "@yornaath/batshit"
 import WBK, { EntityId, Item } from "wikibase-sdk"
-import { DATA_URL } from "~/config"
+import { DATA_URL, USER_AGENT } from "~/config"
 import { BBox } from "~/types/geometry"
 import {
   tileBBoxArrayParser,
@@ -91,7 +91,11 @@ async function fetchEntities(ids: string[]): Promise<Item[]> {
     languages: ["en"],
     format: "json",
   })
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": USER_AGENT,
+    },
+  })
   if (!response.ok) {
     throw new Error(`HTTP error: ${response.status}`)
   }
