@@ -38,13 +38,13 @@ export default function HomePage() {
       <main>
         <section id="welcome" class="relative py-16">
           <div class="bg-hero pointer-events-none absolute inset-0 -z-10 bg-repeat opacity-50"></div>
-          <div class="flex flex-col items-center">
+          <div class="text-center">
             <h1>Welcome to Graphpedia</h1>
-            <p class="text-center">
+            <p>
               home to more than 1,600 visual knowledge graphs based on{" "}
               <a href="https://www.wikidata.org/">Wikidata</a> statements.
             </p>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap justify-center gap-2">
               <button onClick={scrollToGraphs} title="Scroll to the graph list">
                 Browse the list ↓
               </button>
