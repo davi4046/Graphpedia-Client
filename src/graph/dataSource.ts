@@ -4,7 +4,7 @@ import {
   windowedFiniteBatchScheduler,
 } from "@yornaath/batshit"
 import WBK, { EntityId, Item } from "wikibase-sdk"
-import { GRAPH_DATA_URL } from "~/config"
+import { DATA_URL } from "~/config"
 import { BBox } from "~/types/geometry"
 import {
   tileBBoxArrayParser,
@@ -41,7 +41,7 @@ export default class GraphDataSource {
     readonly graphVersion: string
   ) {}
 
-  static async create(graphId: string, dataUrl = GRAPH_DATA_URL) {
+  static async create(graphId: string, dataUrl = DATA_URL) {
     const url = `${dataUrl}/graphs/${graphId}/version.txt`
     const response = await fetch(url)
     const version = await response.text()

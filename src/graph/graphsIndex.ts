@@ -1,4 +1,4 @@
-import { GRAPH_DATA_URL, SITE_URL } from "~/config"
+import { DATA_URL, SITE_URL } from "~/config"
 
 export type GraphEntry = {
   id: string
@@ -10,7 +10,7 @@ export type GraphEntry = {
 }
 
 export default async function fetchGraphsIndex(
-  dataUrl = GRAPH_DATA_URL
+  dataUrl = DATA_URL
 ): Promise<GraphEntry[]> {
   const url = `${dataUrl}/graphs_index.json.gz`
   const response = await fetch(url)
