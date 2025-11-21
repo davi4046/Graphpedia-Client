@@ -50,7 +50,7 @@ export default function Footer() {
           screenshots or links and help us spread the word about Graphpedia!
         </p>
         <p>Happy exploring!</p>
-        <ul>
+        <ul class="ml-3">
           <li>
             <strong>Forum: </strong>
             <a href="https://graphpedia.flarum.cloud/">
