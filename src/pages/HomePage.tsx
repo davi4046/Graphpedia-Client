@@ -19,6 +19,10 @@ export default function HomePage() {
     window.location.href = randomGraph.url
   }
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   return (
     <>
       <Title>Graphpedia</Title>
@@ -66,7 +70,7 @@ export default function HomePage() {
           ></iframe>
         </section>
         <section id="graphs">
-          <details open>
+          <details open class="relative">
             <summary role="button">All Graphs</summary>
             <ul class="flex flex-wrap justify-center gap-2">
               <For each={graphList()} fallback={<div>No graphs found</div>}>
@@ -82,6 +86,12 @@ export default function HomePage() {
                 )}
               </For>
             </ul>
+            <button
+              onClick={scrollToTop}
+              class="sticky right-4 bottom-4 z-50 ml-auto block"
+            >
+              Back to top ↑
+            </button>
           </details>
         </section>
       </main>
