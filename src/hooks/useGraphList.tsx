@@ -1,12 +1,11 @@
-import { createResource } from "solid-js"
+import { createAsync, query } from "@solidjs/router"
 import { fetchGraphsIndex } from "~/graph"
 
-let cachedPromise: ReturnType<typeof fetchGraphsIndex> | null = null
+const getGraphList = query(() => {
+  return fetchGraphsIndex()
+}, "graphList")
 
 export default function useGraphList() {
-  if (!cachedPromise) {
-    cachedPromise = fetchGraphsIndex()
-  }
-  const [result] = createResource(() => cachedPromise!)
-  return result
+  const graphList = createAsync(() => getGraphList(), { deferStream: true })
+  return graphList
 }
