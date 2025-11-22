@@ -24,6 +24,19 @@ export default function Header() {
             </a>
           </li>
         </ul>
+        <ul>
+          <li>
+            <a
+              href="https://graphpedia.flarum.cloud/"
+              target="_blank"
+              rel="noopener noreferrer"
+              role="button"
+              class="outline"
+            >
+              Forum 🏛️
+            </a>
+          </li>
+        </ul>
       </nav>
     </header>
   )

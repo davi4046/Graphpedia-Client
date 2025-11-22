@@ -53,7 +53,11 @@ export default function Footer() {
         <ul class="ml-3">
           <li>
             <strong>Forum: </strong>
-            <a href="https://graphpedia.flarum.cloud/">
+            <a
+              href="https://graphpedia.flarum.cloud/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               graphpedia.flarum.cloud
             </a>{" "}
             (bug reports, feature proposals, updates)
