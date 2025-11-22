@@ -1,4 +1,4 @@
-import { Link, Meta, Title } from "@solidjs/meta"
+import { Link, Meta, Style, Title } from "@solidjs/meta"
 import { createAsync, query, useSearchParams } from "@solidjs/router"
 import { createEffect, createMemo } from "solid-js"
 import {
@@ -125,6 +125,13 @@ export default function GraphPage(props: GraphPageProps) {
         property="og:description"
         content={`Wikidata property ${props.graph.id} \u2018${props.graph.label}\u2019 (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
       />
+      <Style>
+        {`
+          body {
+            overflow: hidden;
+          }
+        `}
+      </Style>
       <div
         ref={container}
         id="graph"
