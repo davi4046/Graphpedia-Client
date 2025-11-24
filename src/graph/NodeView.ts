@@ -107,26 +107,12 @@ export default class NodeView extends Container {
     this.addChild(this.nodeShape)
     this.addChild(this.nodeLabel)
 
-    this.on("pointertap", this.handlePointerTap)
+    this.on("click", this.handleClick)
+    this.on("rightup", this.handleRightUp)
   }
 
-  private handlePointerTap(event: FederatedPointerEvent) {
+  private handleClick(event: FederatedPointerEvent) {
     if (!isEventFromCanvas(event)) return
-
-    if (event.button === 2) {
-      preventContextMenu = true
-      setTimeout(() => {
-        preventContextMenu = false
-      }, 1)
-      new NodeContextMenu(
-        { x: event.global.x, y: event.global.y },
-        this.props.label ?? this.props.wikidataId,
-        this.props.url,
-        this.props.wikidataUrl,
-        this.props.sitelinks
-      )
-      return
-    }
 
     if (this.tooltip) return
 
@@ -146,6 +132,24 @@ export default class NodeView extends Container {
       )
       this.tooltip.show()
     })
+  }
+
+  private handleRightUp(event: FederatedPointerEvent) {
+    if (!isEventFromCanvas(event)) return
+
+    preventContextMenu = true
+
+    setTimeout(() => {
+      preventContextMenu = false
+    }, 1)
+
+    new NodeContextMenu(
+      { x: event.global.x, y: event.global.y },
+      this.props.label ?? this.props.wikidataId,
+      this.props.url,
+      this.props.wikidataUrl,
+      this.props.sitelinks
+    )
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
@@ -296,17 +300,19 @@ class NodeContextMenu {
       showOnCreate: true,
       interactive: true,
 
-      onMount: (instance) => {
+      onMount(instance) {
         instance.popper.addEventListener("click", () => {
           instance.hide()
         })
+
         const copyButton = instance.popper.querySelector("#copy-node-url")
+
         copyButton?.addEventListener("click", () => {
           navigator.clipboard.writeText(url)
         })
       },
 
-      onHidden: (instance) => {
+      onHidden(instance) {
         instance.destroy()
         document.body.removeChild(element)
       },
