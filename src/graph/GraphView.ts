@@ -42,6 +42,8 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
       resizeTo: container,
       preference: "webgpu",
       antialias: true,
+      resolution: window.devicePixelRatio || 1,
+      autoDensity: true,
     })
 
     container.appendChild(app.canvas)
