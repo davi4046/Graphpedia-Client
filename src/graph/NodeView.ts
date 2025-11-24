@@ -107,28 +107,46 @@ export default class NodeView extends Container {
     this.addChild(this.nodeShape)
     this.addChild(this.nodeLabel)
 
-    this.on("pointertap", this.handlePointerTap)
-  }
+    this.on("click", this.handleClick)
+    this.on("rightup", this.handleRightUp)
 
-  private handlePointerTap(event: FederatedPointerEvent) {
-    if (!isEventFromCanvas(event)) return
+    let isTouching = false
+    let isContextMenuOpen = false
 
-    if (event.button === 2) {
-      preventContextMenu = true
-      setTimeout(() => {
-        preventContextMenu = false
-      }, 1)
+    this.on("touchstart", () => {
+      isTouching = true
+      isContextMenuOpen = false
+    })
+    this.on("touchend", (event) => {
+      isTouching = false
+      if (!isContextMenuOpen) this.handleClick(event)
+    })
+
+    const handleContextMenu = (event: PointerEvent) => {
+      if (event.pointerType !== "touch") return
+      if (!isTouching) return
+
       new NodeContextMenu(
-        { x: event.global.x, y: event.global.y },
+        { x: event.x, y: event.y },
         this.props.label ?? this.props.wikidataId,
         this.props.url,
         this.props.wikidataUrl,
         this.props.sitelinks
       )
-      return
+
+      event.preventDefault()
+      isContextMenuOpen = true
     }
 
-    if (this.tooltip) return
+    document.addEventListener("contextmenu", handleContextMenu)
+
+    this.on("destroy", () => {
+      document.removeEventListener("contextmenu", handleContextMenu)
+    })
+  }
+
+  private handleClick(event: FederatedPointerEvent) {
+    if (!isEventFromCanvas(event) || this.tooltip) return
 
     const overlay = new NodeOverlay(this.radiusX * 2, this.radiusY * 2)
     this.addChild(overlay)
@@ -146,6 +164,24 @@ export default class NodeView extends Container {
       )
       this.tooltip.show()
     })
+  }
+
+  private handleRightUp(event: FederatedPointerEvent) {
+    if (!isEventFromCanvas(event)) return
+
+    preventContextMenu = true
+
+    setTimeout(() => {
+      preventContextMenu = false
+    }, 1)
+
+    new NodeContextMenu(
+      { x: event.global.x, y: event.global.y },
+      this.props.label ?? this.props.wikidataId,
+      this.props.url,
+      this.props.wikidataUrl,
+      this.props.sitelinks
+    )
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
@@ -244,7 +280,7 @@ class NodeContextMenu {
         <button
           id="copy-node-url"
           style="all: unset;"
-          class="cursor-pointer px-2 py-1 hover:bg-gray-100"
+          class="cursor-pointer px-2 py-1 hover:bg-gray-100 active:bg-gray-100"
         >
           Copy Node URL
         </button>
@@ -258,7 +294,7 @@ class NodeContextMenu {
                 target="_blank"
                 rel="noopener noreferrer"
                 style="all: unset;"
-                class="cursor-pointer px-2 py-1 hover:bg-gray-100"
+                class="cursor-pointer px-2 py-1 hover:bg-gray-100 active:bg-gray-100"
               >
                 ${sitelinkLabels[key as keyof Sitelinks]}
               </a>
@@ -270,7 +306,7 @@ class NodeContextMenu {
           target="_blank"
           rel="noopener noreferrer"
           style="all: unset;"
-          class="cursor-pointer px-2 py-1 hover:bg-gray-100"
+          class="cursor-pointer px-2 py-1 hover:bg-gray-100 active:bg-gray-100"
         >
           Source (Wikidata)
         </a>
@@ -282,6 +318,14 @@ class NodeContextMenu {
     element.style.left = `${position.x}px`
     element.style.top = `${position.y}px`
     document.body.appendChild(element)
+
+    let down = false
+
+    const registerDown = () => {
+      down = true
+    }
+
+    document.addEventListener("pointerdown", registerDown, { once: true })
 
     tippy(element, {
       content: content,
@@ -295,8 +339,9 @@ class NodeContextMenu {
       trigger: "manual",
       showOnCreate: true,
       interactive: true,
+      hideOnClick: false,
 
-      onMount: (instance) => {
+      onMount(instance) {
         instance.popper.addEventListener("click", () => {
           instance.hide()
         })
@@ -306,9 +351,16 @@ class NodeContextMenu {
         })
       },
 
-      onHidden: (instance) => {
+      onClickOutside(instance) {
+        if (down) {
+          instance.hide()
+        }
+      },
+
+      onHidden(instance) {
         instance.destroy()
         document.body.removeChild(element)
+        document.removeEventListener("pointerdown", registerDown)
       },
     })
   }
