@@ -109,6 +109,39 @@ export default class NodeView extends Container {
 
     this.on("click", this.handleClick)
     this.on("rightup", this.handleRightUp)
+
+    let isTouching = false
+    let isContextMenuOpen = false
+
+    this.on("touchstart", () => {
+      isTouching = true
+      isContextMenuOpen = false
+    })
+    this.on("touchend", (event) => {
+      isTouching = false
+      if (!isContextMenuOpen) this.handleClick(event)
+    })
+
+    const handleContextMenu = (event: PointerEvent) => {
+      if (event.pointerType !== "touch") return
+      if (!isTouching) return
+
+      const contextMenu = this.openContextMenu({
+        x: event.clientX,
+        y: event.clientY,
+      })
+
+      contextMenu.suppressNextHide = true
+
+      event.preventDefault()
+      isContextMenuOpen = true
+    }
+
+    document.addEventListener("contextmenu", handleContextMenu)
+
+    this.on("destroy", () => {
+      document.removeEventListener("contextmenu", handleContextMenu)
+    })
   }
 
   private handleClick(event: FederatedPointerEvent) {
@@ -143,8 +176,12 @@ export default class NodeView extends Container {
       preventContextMenu = false
     }, 1)
 
-    new NodeContextMenu(
-      { x: event.global.x, y: event.global.y },
+    this.openContextMenu({ x: event.globalX, y: event.globalY })
+  }
+
+  private openContextMenu(position: { x: number; y: number }) {
+    return new NodeContextMenu(
+      { x: position.x, y: position.y },
       this.props.label ?? this.props.wikidataId,
       this.props.url,
       this.props.wikidataUrl,
@@ -220,6 +257,8 @@ class NodeTooltip {
 }
 
 class NodeContextMenu {
+  public suppressNextHide: boolean = false
+
   constructor(
     position: { x: number; y: number },
     label: string,
@@ -315,6 +354,13 @@ class NodeContextMenu {
       onHidden(instance) {
         instance.destroy()
         document.body.removeChild(element)
+      },
+
+      onHide: () => {
+        if (this.suppressNextHide) {
+          this.suppressNextHide = false
+          return false
+        }
       },
     })
   }
