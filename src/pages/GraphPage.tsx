@@ -39,15 +39,15 @@ export default function GraphPage(props: GraphPageProps) {
   const isFramed = useIsFramed()
   const [searchParams] = useSearchParams()
 
-  const queryItemId = createMemo(() => {
+  const targetItemId = createMemo(() => {
     const item = searchParams.item
     if (!item) return undefined
     return Array.isArray(item) ? item[0] : item
   })
 
-  const queryItemLabel = createAsync(
+  const targetItemLabel = createAsync(
     async () => {
-      const id = queryItemId()
+      const id = targetItemId()
       if (!id) return undefined
       return getItemLabel(id)
     },
@@ -58,55 +58,44 @@ export default function GraphPage(props: GraphPageProps) {
   const { graphView, zoom } = useGraphView(() => container)
   const { restoreViewport } = useRestoreViewport(graphView, props.graph.id)
 
-  const focusViewport = (position: { x: number; y: number; zoom: number }) => {
+  const focusViewport = (position: { x: number; y: number }) => {
     const view = graphView()
-    if (view) view.setViewportCenter(position.x, position.y, position.zoom)
+    if (view) view.setViewportCenter(position.x, position.y, 2)
+  }
+
+  const resetViewport = () => {
+    const view = graphView()
+    if (view) view.setViewportCorner(tempInset, tempInset, 1)
   }
 
   const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
   const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
   const showZoomStatus = useSignalPulse(zoom, 1200)
 
-  let targetViewport: { x: number; y: number; zoom: number } | null = null
+  let targetPosition: { x: number; y: number } | null = null
   let zoomReady = false
 
   createEffect(async () => {
     const view = graphView()
     if (!view) return
+    view.setViewportCorner(tempInset, tempInset, 1)
 
     const dataSource = await GraphDataSource.create(props.graph.id)
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(view, graphTiles)
 
-    const getDefaultViewport = async () => {
-      const { nodes } = await graphTiles[0].getContent()
-      const arbitraryNode = nodes.length > 0 ? nodes[0] : null
-
-      if (arbitraryNode) {
-        return { x: arbitraryNode.x, y: arbitraryNode.y, zoom: 0.5 }
-      }
-      return { x: 0, y: 0, zoom: 1 }
-    }
-
-    const itemId = queryItemId()
-    if (itemId !== undefined) {
-      const nodeId = Number(itemId.slice(1))
+    const id = targetItemId()
+    if (id !== undefined) {
+      const targetNodeId = Number(id.slice(1))
       const nodeLocator = await GraphNodeLocator.create(dataSource)
-      const position = await nodeLocator.locateNode(nodeId)
-      if (position) {
-        targetViewport = { x: position.x, y: position.y, zoom: 2 }
-      }
+      targetPosition = await nodeLocator.locateNode(targetNodeId)
     }
 
-    if (targetViewport) {
-      focusViewport(targetViewport)
+    if (targetPosition) {
+      focusViewport(targetPosition)
     } else {
-      const restored = restoreViewport()
-      if (!restored) {
-        targetViewport = await getDefaultViewport()
-        focusViewport(targetViewport)
-      }
+      restoreViewport()
     }
 
     zoomReady = true
@@ -127,8 +116,8 @@ export default function GraphPage(props: GraphPageProps) {
         property="og:title"
         data-sm=""
         content={
-          queryItemLabel()
-            ? `${queryItemLabel()} | ${props.graph.label}`
+          targetItemLabel()
+            ? `${targetItemLabel()} | ${props.graph.label}`
             : props.graph.label
         }
       />
@@ -198,8 +187,10 @@ export default function GraphPage(props: GraphPageProps) {
       >
         <button
           onClick={() => {
-            if (targetViewport) {
-              focusViewport(targetViewport)
+            if (targetPosition) {
+              focusViewport(targetPosition)
+            } else {
+              resetViewport()
             }
           }}
           aria-controls="graph"
