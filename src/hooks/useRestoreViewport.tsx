@@ -10,7 +10,11 @@ function saveViewportState(graphView: GraphView, graphId: string) {
 function loadViewportState(graphView: GraphView, graphId: string) {
   const saved = localStorage.getItem(`graph-viewport-${graphId}`)
   const state = saved ? JSON.parse(saved) : null
-  if (state) graphView.setViewportCenter(state.x, state.y, state.zoom)
+  if (state) {
+    graphView.setViewportCenter(state.x, state.y, state.zoom)
+    return true
+  }
+  return false
 }
 
 export default function useRestoreViewport(
@@ -30,7 +34,10 @@ export default function useRestoreViewport(
 
   const restoreViewport = () => {
     const view = graphView()
-    if (view) loadViewportState(view, graphId)
+    if (view) {
+      const restored = loadViewportState(view, graphId)
+      return restored
+    }
   }
 
   return { restoreViewport }
