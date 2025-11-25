@@ -20,8 +20,6 @@ import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
 import ZoomOutIcon from "~/icons/ZoomOutIcon"
 
-const tempInset = 150 // Temporary inset to show more nodes on initial load
-
 const getItemLabel = query(async (itemId: string) => {
   try {
     const items = await fetchItems([itemId])
@@ -65,7 +63,7 @@ export default function GraphPage(props: GraphPageProps) {
 
   const resetViewport = () => {
     const view = graphView()
-    if (view) view.setViewportCorner(tempInset, tempInset, 1)
+    if (view) view.setViewportCorner(0, 0, 0.5)
   }
 
   const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
@@ -78,7 +76,7 @@ export default function GraphPage(props: GraphPageProps) {
   createEffect(async () => {
     const view = graphView()
     if (!view) return
-    view.setViewportCorner(tempInset, tempInset, 1)
+    view.setViewportCorner(0, 0, 0.5)
 
     const dataSource = await GraphDataSource.create(props.graph.id)
     const dataAdapter = new GraphDataAdapter(dataSource)
