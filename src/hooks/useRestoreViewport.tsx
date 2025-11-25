@@ -3,14 +3,14 @@ import { createEffect } from "solid-js"
 import { GraphView } from "~/graph"
 
 function saveViewportState(graphView: GraphView, graphId: string) {
-  const state = graphView.getViewportCorner()
+  const state = graphView.getViewportCenter()
   localStorage.setItem(`graph-viewport-${graphId}`, JSON.stringify(state))
 }
 
 function loadViewportState(graphView: GraphView, graphId: string) {
   const saved = localStorage.getItem(`graph-viewport-${graphId}`)
   const state = saved ? JSON.parse(saved) : null
-  if (state) graphView.setViewportCorner(state.x, state.y, state.zoom)
+  if (state) graphView.setViewportCenter(state.x, state.y, state.zoom)
 }
 
 export default function useRestoreViewport(
