@@ -36,6 +36,15 @@ export type Tile = {
 }
 
 export default class GraphDataSource {
+  private entities = createBatcher({
+    fetcher: fetchItems,
+    resolver: keyResolver("id"),
+    scheduler: windowedFiniteBatchScheduler({
+      windowMs: 500,
+      maxBatchSize: 50,
+    }),
+  })
+
   private constructor(
     private dataUrl: string,
     readonly graphId: string,
@@ -48,15 +57,6 @@ export default class GraphDataSource {
     const version = await response.text()
     return new GraphDataSource(dataUrl, graphId, version.trim())
   }
-
-  private entities = createBatcher({
-    fetcher: fetchItems,
-    resolver: keyResolver("id"),
-    scheduler: windowedFiniteBatchScheduler({
-      windowMs: 500,
-      maxBatchSize: 50,
-    }),
-  })
 
   async fetchTilesBBoxes(): Promise<TilesBBoxes> {
     const url = `${this.dataUrl}/graphs/${this.graphId}/tiles_bboxes.bin.gz?v=${this.graphVersion}`
