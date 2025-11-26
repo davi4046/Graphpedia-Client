@@ -243,6 +243,24 @@ export default function GraphPage(props: GraphPageProps) {
       >
         Zoom: {(zoom() * 100).toFixed(0)}%
       </div>
+      <div
+        id="layout-improvement-notice"
+        class="absolute bottom-0 left-0 flex items-center gap-2 bg-slate-600 px-3 py-2 text-white"
+      >
+        <span>
+          The layout of this graph will be improved soon. Until then, some nodes
+          are hidden to improve performance and readability.
+        </span>
+        <button
+          style="all: unset;"
+          onClick={() => {
+            document.getElementById("layout-improvement-notice")?.remove()
+          }}
+          class="cursor-pointer px-1 whitespace-nowrap underline"
+        >
+          Hide
+        </button>
+      </div>
     </>
   )
 }

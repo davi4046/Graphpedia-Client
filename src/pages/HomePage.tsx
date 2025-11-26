@@ -28,7 +28,7 @@ export default function HomePage() {
       <Title>Graphpedia</Title>
       <Meta
         name="description"
-        content="Graphpedia is an independent open knowledge project inspired by the Wikimedia movement. Dive into 1,600+ visual knowledge graphs based on Wikidata statements."
+        content="Home to more than 1,600 visual knowledge graphs based on Wikidata."
       />
       <Link rel="canonical" href="/" />
       <Meta property="og:type" content="website" />
@@ -36,7 +36,7 @@ export default function HomePage() {
       <Meta property="og:title" content="Graphpedia" />
       <Meta
         property="og:description"
-        content="Graphpedia is an independent open knowledge project inspired by the Wikimedia movement. Dive into 1,600+ visual knowledge graphs based on Wikidata statements."
+        content="Interactive knowledge graphs based on Wikidata."
       />
       <Header />
       <main>
