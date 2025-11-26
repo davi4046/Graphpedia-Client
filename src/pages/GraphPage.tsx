@@ -56,9 +56,9 @@ export default function GraphPage(props: GraphPageProps) {
   const { graphView, zoom } = useGraphView(() => container)
   const { restoreViewport } = useRestoreViewport(graphView, props.graph.id)
 
-  const focusViewport = (position: { x: number; y: number }) => {
+  const focusViewport = (point: { x: number; y: number }) => {
     const view = graphView()
-    if (view) view.setViewportCenter(position.x, position.y, 2)
+    if (view) view.setViewportCenter(point.x, point.y, 2)
   }
 
   const resetViewport = () => {
