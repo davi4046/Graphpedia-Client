@@ -58,13 +58,13 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
       allowPreserveDragOutside: true,
     })
 
+    viewport.drag().pinch().wheel().decelerate()
     viewport.setZoom(GraphView.DEFAULT_ZOOM)
     viewport.clampZoom({
       minScale: GraphView.DEFAULT_ZOOM * 0.25,
       maxScale: GraphView.DEFAULT_ZOOM * 4,
     })
 
-    viewport.drag().pinch().wheel().decelerate()
     app.stage.addChild(viewport)
 
     const edgeContainer = new Container()
