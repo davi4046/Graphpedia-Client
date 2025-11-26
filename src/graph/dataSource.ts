@@ -72,6 +72,12 @@ export default class GraphDataSource {
     return tileEntitiesArrayParser.parse(new Uint8Array(data))
   }
 
+  async fetchInitialCenter(): Promise<{ x: number; y: number }> {
+    const url = `${this.dataUrl}/graphs/${this.graphId}/client_initial_center.json?v=${this.graphVersion}`
+    const response = await fetch(url)
+    return response.json()
+  }
+
   async fetchTile(tileId: number): Promise<Tile> {
     const url = `${this.dataUrl}/graphs/${this.graphId}/tiles/${tileId}.bin.gz?v=${this.graphVersion}`
     const response = await fetch(url)

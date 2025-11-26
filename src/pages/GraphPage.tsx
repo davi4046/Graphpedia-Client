@@ -1,6 +1,6 @@
 import { Link, Meta, Style, Title } from "@solidjs/meta"
 import { createAsync, query, useSearchParams } from "@solidjs/router"
-import { createEffect, createMemo, onMount } from "solid-js"
+import { createEffect, createMemo, createSignal, onMount } from "solid-js"
 import tippy from "tippy.js"
 import {
   GraphDataAdapter,
@@ -56,6 +56,7 @@ export default function GraphPage(props: GraphPageProps) {
   let container: HTMLDivElement | undefined
   const { graphView, zoom } = useGraphView(() => container)
   const { restoreViewport } = useRestoreViewport(graphView, props.graph.id)
+  const [initCenter, setInitCenter] = createSignal<{ x: number; y: number }>()
 
   const focusViewport = (point: { x: number; y: number }) => {
     const view = graphView()
@@ -64,7 +65,13 @@ export default function GraphPage(props: GraphPageProps) {
 
   const resetViewport = () => {
     const view = graphView()
-    if (view) view.setViewportCorner(0, 0, 0.5)
+    if (!view) return
+    const center = initCenter()
+    if (center) {
+      view.setViewportCenter(center.x, center.y, 1)
+    } else {
+      view.setViewportCorner(0, 0, 1)
+    }
   }
 
   const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
@@ -77,12 +84,15 @@ export default function GraphPage(props: GraphPageProps) {
   createEffect(async () => {
     const view = graphView()
     if (!view) return
-    view.setViewportCorner(0, 0, 0.5)
 
     const dataSource = await GraphDataSource.create(props.graph.id)
     const dataAdapter = new GraphDataAdapter(dataSource)
     const graphTiles = await dataAdapter.tiles()
     const graphEngine = new GraphEngine(view, graphTiles)
+
+    const initialCenter = await dataSource.fetchInitialCenter()
+    view.setViewportCenter(initialCenter.x, initialCenter.y, 1)
+    setInitCenter(initialCenter)
 
     const id = targetItemId()
     if (id !== undefined) {
