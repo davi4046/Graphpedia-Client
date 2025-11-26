@@ -1,6 +1,7 @@
 import { Link, Meta, Style, Title } from "@solidjs/meta"
 import { createAsync, query, useSearchParams } from "@solidjs/router"
-import { createEffect, createMemo } from "solid-js"
+import { createEffect, createMemo, onMount } from "solid-js"
+import tippy from "tippy.js"
 import {
   GraphDataAdapter,
   GraphDataSource,
@@ -99,6 +100,15 @@ export default function GraphPage(props: GraphPageProps) {
     zoomReady = true
   })
 
+  onMount(() => {
+    tippy("#graph-title", {
+      content: props.graph.description,
+      placement: "bottom",
+      maxWidth: "none",
+      trigger: "mouseenter click",
+    })
+  })
+
   return (
     <>
       <Title>{`${props.graph.label} - Graphpedia`}</Title>
@@ -147,16 +157,8 @@ export default function GraphPage(props: GraphPageProps) {
         <img src="/graphpedia.svg" alt="" class="h-14 w-14" />
         <img src="/graphpedia-wordmark-light.svg" alt="" class="mt-0.5 w-14" />
       </a>
-      <div
-        data-tooltip={props.graph.description}
-        data-placement="bottom"
-        class="absolute top-0 left-1/2 -translate-x-1/2 border-x border-b border-gray-300 bg-white shadow-sm"
-      >
-        <h1
-          id="graph-title"
-          data-template="title-tooltip"
-          class="mb-0 px-1 text-lg font-semibold"
-        >
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 border-x border-b border-gray-300 bg-white shadow-sm select-none">
+        <h1 id="graph-title" class="mb-0 px-1 text-lg font-semibold">
           {props.graph.label}
         </h1>
         <div id="graph-desc" class="sr-only">
