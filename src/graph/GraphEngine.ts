@@ -91,6 +91,17 @@ export default class GraphEngine {
       tile.getContent().then(({ nodes, edges }) => {
         for (const node of nodes) {
           if (this.nodes.has(node.id)) continue
+
+          const hasOverlap =
+            this.nodeIndex.search(
+              node.x - 10,
+              node.y - 10,
+              node.x + 10,
+              node.y + 10
+            ).length > 0
+
+          if (hasOverlap) continue
+
           this.nodes.set(node.id, node)
           this.nodeIndex.insert(node)
         }
@@ -134,7 +145,8 @@ export default class GraphEngine {
       if (this.renderedNodes.has(nodeId)) continue
       this.renderedNodes.set(nodeId, undefined)
 
-      const node = this.nodes.get(nodeId)!
+      const node = this.nodes.get(nodeId)
+      if (!node) continue
 
       node.getDetails().then((details) => {
         if (!this.renderedNodes.has(nodeId)) return
