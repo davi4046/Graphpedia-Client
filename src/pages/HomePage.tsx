@@ -46,7 +46,7 @@ export default function HomePage() {
             <h1>Welcome to Graphpedia</h1>
             <p>
               home to more than 1,600 visual knowledge graphs based on{" "}
-              <a href="https://www.wikidata.org/">Wikidata</a> statements.
+              <a href="https://www.wikidata.org/">Wikidata</a>.
             </p>
             <div class="flex flex-wrap justify-center gap-2">
               <button onClick={scrollToGraphs} title="Scroll to the graph list">
