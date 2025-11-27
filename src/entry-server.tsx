@@ -15,12 +15,7 @@ export default createHandler(() => (
           {assets}
         </head>
         <body>
-          <div
-            id="app"
-            style="min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto;"
-          >
-            {children}
-          </div>
+          <div id="app">{children}</div>
           {scripts}
         </body>
       </html>
