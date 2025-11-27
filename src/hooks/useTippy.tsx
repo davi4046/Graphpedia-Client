@@ -1,21 +1,36 @@
-import { onCleanup, onMount } from "solid-js"
+import { Accessor, createSignal, onCleanup, onMount } from "solid-js"
 import tippy, { Instance, MultipleTargets, Props, SingleTarget } from "tippy.js"
+
+export default function useTippy(props: {
+  targets: SingleTarget
+  options?: Partial<Props>
+}): Accessor<Instance>
+
+export default function useTippy(props: {
+  targets: MultipleTargets
+  options?: Partial<Props>
+}): Accessor<Instance[]>
 
 export default function useTippy(props: {
   targets: SingleTarget | MultipleTargets
   options?: Partial<Props>
 }) {
-  onMount(() => {
-    const instances = tippy(props.targets as unknown as any, props.options) as
-      | Instance
-      | Instance[]
+  const [instances, setInstances] = createSignal<Instance | Instance[]>()
 
-    onCleanup(() => {
-      if (Array.isArray(instances)) {
-        instances.forEach((instance) => instance.destroy())
-      } else {
-        instances.destroy()
-      }
-    })
+  onMount(() => {
+    // @ts-ignore
+    const insts = tippy(props.targets, props.options)
+    setInstances(insts)
   })
+
+  onCleanup(() => {
+    const insts = instances()
+    if (Array.isArray(insts)) {
+      insts.forEach((inst) => inst.destroy())
+    } else {
+      insts?.destroy()
+    }
+  })
+
+  return instances
 }
