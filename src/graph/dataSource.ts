@@ -5,7 +5,7 @@ import {
 } from "@yornaath/batshit"
 import { Item } from "wikibase-sdk"
 import { DATA_URL } from "~/config"
-import { BBox } from "~/types/geometry"
+import { Box } from "~/types/geometry"
 import {
   tileBBoxArrayParser,
   tileEntitiesArrayParser,
@@ -15,7 +15,7 @@ import { fetchItems } from "./wikidataAPI"
 
 export type TilesBBoxes = {
   id: number
-  bbox: BBox
+  bbox: Box
 }[]
 
 export type TilesEntities = {
