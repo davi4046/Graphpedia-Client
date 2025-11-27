@@ -54,9 +54,14 @@ export default function GraphPage(props: GraphPageProps) {
   )
 
   let container: HTMLDivElement | undefined
+
   const { graphView, zoom } = useGraphView(() => container)
   const { restoreViewport } = useRestoreViewport(graphView, props.graph.id)
   const [initCenter, setInitCenter] = createSignal<{ x: number; y: number }>()
+
+  const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
+  const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
+  const showZoomStatus = useSignalPulse(zoom, 1200)
 
   const focusViewport = (point: { x: number; y: number }) => {
     const view = graphView()
@@ -73,10 +78,6 @@ export default function GraphPage(props: GraphPageProps) {
       view.setViewportCorner(0, 0, 1)
     }
   }
-
-  const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
-  const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
-  const showZoomStatus = useSignalPulse(zoom, 1200)
 
   let targetPosition: { x: number; y: number } | null = null
   let zoomReady = false
