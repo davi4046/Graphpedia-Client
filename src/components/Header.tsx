@@ -33,7 +33,7 @@ export default function Header() {
               role="button"
               class="outline"
             >
-              Forum
+              Forum✨
             </a>
           </li>
         </ul>
