@@ -1,7 +1,6 @@
 import { Link, Meta, Style, Title } from "@solidjs/meta"
 import { createAsync, query, useSearchParams } from "@solidjs/router"
-import { createEffect, createMemo, createSignal, onMount } from "solid-js"
-import tippy from "tippy.js"
+import { createEffect, createMemo, createSignal } from "solid-js"
 import {
   GraphDataAdapter,
   GraphDataSource,
@@ -14,6 +13,7 @@ import useGraphView from "~/hooks/useGraphView"
 import useIsFramed from "~/hooks/useIsFramed"
 import useRestoreViewport from "~/hooks/useRestoreViewport"
 import useSignalPulse from "~/hooks/useSignalPulse"
+import useTippy from "~/hooks/useTippy"
 import useZoomLevels from "~/hooks/useZoomLevels"
 import ArrowSquareOut from "~/icons/ArrowSquareOut"
 import CrosshairIcon from "~/icons/CrosshairIcon"
@@ -110,13 +110,14 @@ export default function GraphPage(props: GraphPageProps) {
     zoomReady = true
   })
 
-  onMount(() => {
-    tippy("#graph-title", {
+  useTippy({
+    targets: "#graph-title",
+    options: {
       content: props.graph.description,
       placement: "bottom",
       maxWidth: "none",
       trigger: "mouseenter click",
-    })
+    },
   })
 
   return (
