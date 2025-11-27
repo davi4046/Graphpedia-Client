@@ -245,6 +245,9 @@ export default function GraphPage(props: GraphPageProps) {
           <WikidataMonogram />
         </a>
       </div>
+      <div class="pointer-events-none absolute bottom-2 left-2 rounded-full bg-yellow-200/80 px-2 py-1 text-yellow-800">
+        Work in Progress 🚧
+      </div>
       <div
         role="status"
         aria-live="polite"
@@ -253,24 +256,6 @@ export default function GraphPage(props: GraphPageProps) {
         class="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg bg-black/60 px-3 py-1 text-sm text-white transition-opacity duration-400"
       >
         Zoom: {(zoom() * 100).toFixed(0)}%
-      </div>
-      <div
-        id="layout-improvement-notice"
-        class="absolute bottom-0 left-0 flex items-center gap-2 bg-slate-600 px-3 py-2 text-white"
-      >
-        <span>
-          The layout of this graph will be improved soon. Until then, some nodes
-          are hidden to improve performance and readability.
-        </span>
-        <button
-          style="all: unset;"
-          onClick={() => {
-            document.getElementById("layout-improvement-notice")?.remove()
-          }}
-          class="cursor-pointer px-1 whitespace-nowrap underline"
-        >
-          Hide
-        </button>
       </div>
     </>
   )
