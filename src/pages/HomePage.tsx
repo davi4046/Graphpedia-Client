@@ -39,7 +39,7 @@ export default function HomePage() {
         content="Interactive knowledge graphs based on Wikidata."
       />
       <Header />
-      <main>
+      <main class="pb-0">
         <section id="welcome" class="relative py-16">
           <div class="bg-hero pointer-events-none absolute inset-0 -z-10 bg-repeat opacity-50"></div>
           <div class="text-center">
