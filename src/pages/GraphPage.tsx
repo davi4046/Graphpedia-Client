@@ -147,7 +147,7 @@ export default function GraphPage(props: GraphPageProps) {
       />
       <Style>
         {`
-          body {
+          #app {
             overflow: hidden;
           }
         `}
