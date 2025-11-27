@@ -9,11 +9,12 @@ export default function NotFoundPage() {
       <HttpStatusCode code={404} />
       <Title>Not Found - Graphpedia</Title>
       <Header />
-      <main class="flex flex-col gap-8 py-16 text-center">
-        <h1 class="text-6xl font-thin">Not Found</h1>
-        <p>It seems like the page you're looking for doesn't exist.</p>
-        <div>
-          <a href="/">Homepage</a>
+      <main>
+        <div class="flex aspect-square h-full flex-col justify-center border-2 border-dashed border-gray-300 p-8 text-center sm:aspect-auto">
+          <h1>Not Found</h1>
+          <p class="mb-0">
+            It seems like the page you're looking for doesn't exist.
+          </p>
         </div>
       </main>
       <Footer />
