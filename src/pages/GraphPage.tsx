@@ -26,21 +26,18 @@ type GraphPageProps = {
 export default function GraphPage(props: GraphPageProps) {
   const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4] as const
 
-  const targetItemId = useSearchParam("item")
-  const targetItemLabel = useItemLabel(targetItemId)
-
-  const dataSource = useDataSource(props.graph.id)
-
-  const targetPosition = useNodePosition(dataSource, targetItemId)
-  const centerPosition = useInitialCenter(dataSource)
-
   let container: HTMLDivElement | undefined
 
   const { graphView, zoom } = useGraphView(() => container)
   const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, ZOOM_LEVELS)
   const showZoomStatus = useSignalPulse(zoom, 1200)
   const viewportSave = useViewportSave(graphView, props.graph.id)
+  const dataSource = useDataSource(props.graph.id)
   const graphEngine = useGraphEngine(graphView, dataSource)
+  const targetItemId = useSearchParam("item")
+  const targetItemLabel = useItemLabel(targetItemId)
+  const targetPosition = useNodePosition(dataSource, targetItemId)
+  const centerPosition = useInitialCenter(dataSource)
 
   const resetViewport = () => {
     const view = graphView()
