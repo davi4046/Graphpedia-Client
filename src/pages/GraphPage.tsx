@@ -1,5 +1,6 @@
 import { Link, Meta, Title } from "@solidjs/meta"
 import { createEffect } from "solid-js"
+import { SITE_URL } from "~/config"
 import { GraphEntry } from "~/graph/graphsIndex"
 import useDataSource from "~/hooks/useDataSource"
 import useGraphEngine from "~/hooks/useGraphEngine"
@@ -107,6 +108,7 @@ export default function GraphPage(props: GraphPageProps) {
       <Meta property="og:url" content={props.graph.url} />
       <Meta property="og:title" content={metaTitle()} />
       <Meta property="og:description" content={metaDescription()} />
+      <Meta property="og:image" content={`${SITE_URL}/og-image.png`} />
       <style>
         {`
           body {
