@@ -202,9 +202,11 @@ export default function GraphPage(props: GraphPageProps) {
           <WikidataMonogram />
         </a>
       </div>
-      <div class="pointer-events-none absolute bottom-2 left-2 rounded-full bg-yellow-200/80 px-2 py-1 text-yellow-800">
-        Work in Progress 🚧
-      </div>
+      {props.graph.workInProgress && (
+        <div class="pointer-events-none absolute bottom-2 left-2 rounded-full bg-yellow-200/80 px-2 py-1 text-yellow-800">
+          Work in Progress 🚧
+        </div>
+      )}
       <div
         role="status"
         aria-live="polite"

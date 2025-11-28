@@ -5,6 +5,7 @@ export type GraphEntry = {
   label: string
   description: string
   aliases: string[]
+  workInProgress: boolean
   url: string
   wikidataUrl: string
 }
@@ -26,6 +27,7 @@ export default async function fetchGraphsIndex(
     label: entry.label,
     description: entry.description,
     aliases: entry.aliases,
+    workInProgress: entry["work_in_progress"],
     url: `${SITE_URL}/graph/${entry.id}`,
     wikidataUrl: `https://www.wikidata.org/wiki/Property:${entry.id}`,
   }))
