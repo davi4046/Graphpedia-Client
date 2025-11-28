@@ -137,6 +137,7 @@ export default class GraphEngine {
       nodesToRender.add(nodeId)
       const targets = this.nodeTargetsMap.get(nodeId) || new Set()
       const sources = this.nodeSourcesMap.get(nodeId) || new Set()
+      if (targets.size + sources.size > 50) continue
       targets.forEach((targetId) => nodesToRender.add(targetId))
       sources.forEach((sourceId) => nodesToRender.add(sourceId))
     }
