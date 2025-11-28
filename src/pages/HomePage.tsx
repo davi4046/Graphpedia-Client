@@ -39,6 +39,7 @@ export default function HomePage() {
         property="og:description"
         content="Interactive knowledge graphs based on Wikidata."
       />
+      <Meta property="og:image" content={`${SITE_URL}/og-image.png`} />
       <Header />
       <main class="pb-0">
         <section id="welcome" class="relative py-16">
