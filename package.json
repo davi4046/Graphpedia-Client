@@ -26,11 +26,13 @@
   },
   "devDependencies": {
     "@pixi/devtools": "^2.0.1",
+    "@tailwindcss/postcss": "^4.1.17",
     "@tailwindcss/vite": "^4.0.7",
     "@types/common-tags": "^1.8.4",
     "@types/flatbush": "^3.3.0",
     "@types/pixi.js": "^4.8.9",
     "@types/rbush": "^4.0.0",
+    "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.2.0",
     "prettier-plugin-tailwindcss": "^0.6.14",
