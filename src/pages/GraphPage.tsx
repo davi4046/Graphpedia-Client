@@ -1,4 +1,3 @@
-import { Link, Meta, Style, Title } from "@solidjs/meta"
 import { createAsync, query, useSearchParams } from "@solidjs/router"
 import { createEffect, createMemo, createSignal } from "solid-js"
 import {
@@ -7,6 +6,7 @@ import {
   GraphEngine,
   GraphNodeLocator,
 } from "~/graph"
+import { Link, Meta, Title } from "@solidjs/meta"
 import { GraphEntry } from "~/graph/graphsIndex"
 import { fetchItems } from "~/graph/wikidataAPI"
 import useGraphView from "~/hooks/useGraphView"
@@ -145,13 +145,13 @@ export default function GraphPage(props: GraphPageProps) {
         property="og:description"
         content={`Wikidata property ${props.graph.id} \u2018${props.graph.label}\u2019 (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
       />
-      <Style>
+      <style>
         {`
-          #app {
+          body {
             overflow: hidden;
           }
         `}
-      </Style>
+      </style>
       <div
         ref={container}
         id="graph"
