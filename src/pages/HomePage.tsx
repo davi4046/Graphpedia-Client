@@ -26,11 +26,12 @@ export default function HomePage() {
   return (
     <>
       <Title>Graphpedia</Title>
+      <Link rel="canonical" href={SITE_URL} />
+      <Meta name="title" content="Graphpedia" />
       <Meta
         name="description"
         content="Home to more than 1,600 visual knowledge graphs based on Wikidata."
       />
-      <Link rel="canonical" href="/" />
       <Meta property="og:type" content="website" />
       <Meta property="og:url" content={SITE_URL} />
       <Meta property="og:title" content="Graphpedia" />

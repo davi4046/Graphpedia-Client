@@ -1,19 +1,17 @@
-import { createAsync, query, useSearchParams } from "@solidjs/router"
-import { createEffect, createMemo, createSignal } from "solid-js"
-import {
-  GraphDataAdapter,
-  GraphDataSource,
-  GraphEngine,
-  GraphNodeLocator,
-} from "~/graph"
 import { Link, Meta, Title } from "@solidjs/meta"
+import { createEffect } from "solid-js"
 import { GraphEntry } from "~/graph/graphsIndex"
-import { fetchItems } from "~/graph/wikidataAPI"
+import useDataSource from "~/hooks/useDataSource"
+import useGraphEngine from "~/hooks/useGraphEngine"
 import useGraphView from "~/hooks/useGraphView"
+import useInitialCenter from "~/hooks/useInitialCenter"
 import useIsFramed from "~/hooks/useIsFramed"
-import useRestoreViewport from "~/hooks/useRestoreViewport"
+import useItemLabel from "~/hooks/useItemLabel"
+import useNodePosition from "~/hooks/useNodePosition"
+import useSearchParam from "~/hooks/useSearchParam"
 import useSignalPulse from "~/hooks/useSignalPulse"
 import useTippy from "~/hooks/useTippy"
+import useViewportSave from "~/hooks/useViewportSave"
 import useZoomLevels from "~/hooks/useZoomLevels"
 import ArrowSquareOut from "~/icons/ArrowSquareOut"
 import CrosshairIcon from "~/icons/CrosshairIcon"
@@ -21,95 +19,76 @@ import WikidataMonogram from "~/icons/WikidataMonogram"
 import ZoomInIcon from "~/icons/ZoomInIcon"
 import ZoomOutIcon from "~/icons/ZoomOutIcon"
 
-const getItemLabel = query(async (itemId: string) => {
-  try {
-    const items = await fetchItems([itemId])
-    return items?.[0]?.labels?.en?.value
-  } catch (error) {
-    console.error("Error fetching item label:", error)
-  }
-}, "itemLabel")
-
 type GraphPageProps = {
   graph: GraphEntry
 }
 
 export default function GraphPage(props: GraphPageProps) {
-  const isFramed = useIsFramed()
-  const [searchParams] = useSearchParams()
+  const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4] as const
 
-  const targetItemId = createMemo(() => {
-    const item = searchParams.item
-    if (!item) return undefined
-    return Array.isArray(item) ? item[0] : item
-  })
+  const targetItemId = useSearchParam("item")
+  const targetItemLabel = useItemLabel(targetItemId)
 
-  const targetItemLabel = createAsync(
-    async () => {
-      const id = targetItemId()
-      if (!id) return undefined
-      return getItemLabel(id)
-    },
-    { deferStream: true }
-  )
+  const dataSource = useDataSource(props.graph.id)
+
+  const targetPosition = useNodePosition(dataSource, targetItemId)
+  const centerPosition = useInitialCenter(dataSource)
 
   let container: HTMLDivElement | undefined
 
   const { graphView, zoom } = useGraphView(() => container)
-  const { restoreViewport } = useRestoreViewport(graphView, props.graph.id)
-  const [initCenter, setInitCenter] = createSignal<{ x: number; y: number }>()
-
-  const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4]
-  const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, zoomLevels)
+  const { nextZoomIn, nextZoomOut } = useZoomLevels(zoom, ZOOM_LEVELS)
   const showZoomStatus = useSignalPulse(zoom, 1200)
-
-  const focusViewport = (point: { x: number; y: number }) => {
-    const view = graphView()
-    if (view) view.setViewportCenter(point.x, point.y, 2)
-  }
+  const viewportSave = useViewportSave(graphView, props.graph.id)
+  const graphEngine = useGraphEngine(graphView, dataSource)
 
   const resetViewport = () => {
     const view = graphView()
     if (!view) return
-    const center = initCenter()
-    if (center) {
-      view.setViewportCenter(center.x, center.y, 1)
-    } else {
-      view.setViewportCorner(0, 0, 1)
+
+    const targetPos = targetPosition()
+    const centerPos = centerPosition()
+
+    if (targetPos) {
+      view.setViewportCenter(targetPos.x, targetPos.y, 2)
+    } else if (centerPos) {
+      view.setViewportCenter(centerPos.x, centerPos.y, 1)
     }
   }
 
-  let targetPosition: { x: number; y: number } | null = null
   let zoomReady = false
 
-  createEffect(async () => {
+  createEffect(() => {
     const view = graphView()
     if (!view) return
 
-    const dataSource = await GraphDataSource.create(props.graph.id)
-    const dataAdapter = new GraphDataAdapter(dataSource)
-    const graphTiles = await dataAdapter.tiles()
-    const graphEngine = new GraphEngine(view, graphTiles)
+    const targetPos = targetPosition()
+    const savedView = viewportSave()
+    const centerPos = centerPosition()
 
-    const initialCenter = await dataSource.fetchInitialCenter()
-    view.setViewportCenter(initialCenter.x, initialCenter.y, 1)
-    setInitCenter(initialCenter)
-
-    const id = targetItemId()
-    if (id !== undefined) {
-      const targetNodeId = Number(id.slice(1))
-      const nodeLocator = await GraphNodeLocator.create(dataSource)
-      targetPosition = await nodeLocator.locateNode(targetNodeId)
-    }
-
-    if (targetPosition) {
-      focusViewport(targetPosition)
-    } else {
-      restoreViewport()
+    if (targetPos) {
+      view.setViewportCenter(targetPos.x, targetPos.y, 2)
+    } else if (savedView) {
+      view.setViewportCenter(savedView.x, savedView.y, savedView.zoom)
+    } else if (centerPos) {
+      view.setViewportCenter(centerPos.x, centerPos.y, 1)
     }
 
     zoomReady = true
   })
+
+  const metaTitle = () => {
+    if (targetItemLabel()) {
+      return `${targetItemLabel()} | ${props.graph.label}`
+    }
+    return props.graph.label
+  }
+
+  const metaDescription = () => {
+    return `Wikidata property ${props.graph.id} \u2018${props.graph.label}\u2019 (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`
+  }
+
+  const isFramed = useIsFramed()
 
   useTippy({
     targets: "#graph-title",
@@ -124,27 +103,13 @@ export default function GraphPage(props: GraphPageProps) {
   return (
     <>
       <Title>{`${props.graph.label} - Graphpedia`}</Title>
-      <Meta name="title" content={props.graph.label} />
-      <Meta
-        name="description"
-        content={`Wikidata property ${props.graph.id} \u2018${props.graph.label}\u2019 (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
-      />
-      <Link rel="canonical" href={`/graph/${props.graph.id}`} />
+      <Link rel="canonical" href={props.graph.url} />
+      <Meta name="title" content={metaTitle()} />
+      <Meta name="description" content={metaDescription()} />
       <Meta property="og:type" content="website" />
       <Meta property="og:url" content={props.graph.url} />
-      <Meta
-        property="og:title"
-        data-sm=""
-        content={
-          targetItemLabel()
-            ? `${targetItemLabel()} | ${props.graph.label}`
-            : props.graph.label
-        }
-      />
-      <Meta
-        property="og:description"
-        content={`Wikidata property ${props.graph.id} \u2018${props.graph.label}\u2019 (${props.graph.description}), also known as ${props.graph.aliases.join(", ")}.`}
-      />
+      <Meta property="og:title" content={metaTitle()} />
+      <Meta property="og:description" content={metaDescription()} />
       <style>
         {`
           body {
@@ -198,13 +163,7 @@ export default function GraphPage(props: GraphPageProps) {
         class="pointer-events-none absolute right-2 bottom-2 flex flex-col gap-1"
       >
         <button
-          onClick={() => {
-            if (targetPosition) {
-              focusViewport(targetPosition)
-            } else {
-              resetViewport()
-            }
-          }}
+          onClick={() => resetViewport()}
           aria-controls="graph"
           aria-label="Reset view"
           data-tooltip="Reset view"

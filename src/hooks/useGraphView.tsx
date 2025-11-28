@@ -1,8 +1,8 @@
-import { createSignal, onCleanup, onMount } from "solid-js"
+import { Accessor, createSignal, onCleanup, onMount } from "solid-js"
 import { GraphView } from "~/graph"
 
 export default function useGraphView(
-  containerRef: () => HTMLDivElement | undefined
+  containerRef: Accessor<HTMLElement | undefined>
 ) {
   const [graphView, setGraphView] = createSignal<GraphView>()
   const [zoom, setZoom] = createSignal<number>(1)

@@ -1,6 +1,6 @@
 export default function useZoomLevels(
   zoom: () => number,
-  zoomLevels: number[]
+  zoomLevels: readonly number[]
 ) {
   const nextZoomIn = () =>
     zoomLevels.find((level) => level > zoom()) ?? zoomLevels.at(-1)!

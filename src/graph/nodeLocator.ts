@@ -17,12 +17,14 @@ export default class GraphNodeLocator {
     return new GraphNodeLocator(dataSource, nodeTileMap)
   }
 
-  async locateNode(nodeId: number): Promise<{ x: number; y: number } | null> {
+  async locateNode(
+    nodeId: number
+  ): Promise<{ x: number; y: number } | undefined> {
     const tileId = this.nodeTileMap.get(nodeId)
-    if (tileId === undefined) return null
+    if (tileId === undefined) return undefined
     const tile = await this.dataSource.fetchTile(tileId)
     const node = tile.nodes.find((n) => n.id === nodeId)
-    if (!node) return null
+    if (!node) return undefined
     return { x: node.x, y: node.y }
   }
 }
