@@ -113,10 +113,7 @@ export default function GraphPage(props: GraphPageProps) {
       <Meta property="og:type" content="website" />
       <Meta property="og:url" content={props.graph.url} />
       <Meta property="og:title" content={metaTitle()} />
-      <Meta
-        property="og:description"
-        content="𝑰𝒏𝒕𝒆𝒓𝒂𝒄𝒕𝒊𝒗𝒆 𝒗𝒊𝒔𝒖𝒂𝒍 𝒌𝒏𝒐𝒘𝒍𝒆𝒅𝒈𝒆 𝒈𝒓𝒂𝒑𝒉"
-      />
+      <Meta property="og:description" content={metaDescription()} />
       <Meta property="og:image" content={`${SITE_URL}/og-graph.png`} />
       <style>
         {`
