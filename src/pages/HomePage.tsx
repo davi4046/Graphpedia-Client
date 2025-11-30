@@ -30,16 +30,16 @@ export default function HomePage() {
       <Meta name="title" content="Graphpedia" />
       <Meta
         name="description"
-        content="Home to more than 1,600 visual knowledge graphs based on Wikidata."
+        content="Home to 1,600+ interactive visual knowledge graphs based on Wikidata &ndash; Have fun exploring!"
       />
       <Meta property="og:type" content="website" />
       <Meta property="og:url" content={SITE_URL} />
       <Meta property="og:title" content="Graphpedia" />
       <Meta
         property="og:description"
-        content="Interactive knowledge graphs based on Wikidata."
+        content="1,600+ 𝒊𝒏𝒕𝒆𝒓𝒂𝒄𝒕𝒊𝒗𝒆 𝒗𝒊𝒔𝒖𝒂𝒍 𝒌𝒏𝒐𝒘𝒍𝒆𝒅𝒈𝒆 𝒈𝒓𝒂𝒑𝒉𝒔 – Have fun exploring!"
       />
-      <Meta property="og:image" content={`${SITE_URL}/og-image.png`} />
+      <Meta property="og:image" content={`${SITE_URL}/og-home.png`} />
       <Header />
       <main class="pb-0">
         <section id="welcome" class="relative py-16">
@@ -47,8 +47,8 @@ export default function HomePage() {
           <div class="text-center">
             <h1>Welcome to Graphpedia</h1>
             <p>
-              home to more than 1,600 visual knowledge graphs based on{" "}
-              <a href="https://www.wikidata.org/">Wikidata</a>.
+              home to 1,600+ interactive visual knowledge graphs &ndash; based
+              on <a href="https://www.wikidata.org/">Wikidata</a>.
             </p>
             <div class="flex flex-wrap justify-center gap-2">
               <button onClick={scrollToGraphs} title="Scroll to the graph list">
