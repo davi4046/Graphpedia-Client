@@ -65,7 +65,7 @@ export default function GraphPage(props: GraphPageProps) {
     const centerPos = centerPosition()
 
     if (targetPos) {
-      view.setViewportCenter(targetPos.x, targetPos.y, 2)
+      view.setViewportCenter(targetPos.x, targetPos.y, 1)
     } else if (savedView) {
       view.setViewportCenter(savedView.x, savedView.y, savedView.zoom)
     } else if (centerPos) {
