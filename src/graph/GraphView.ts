@@ -37,12 +37,15 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     // @ts-ignore
     globalThis.__PIXI_APP__ = app
 
+    const dpr = window.devicePixelRatio || 1
+    const resolution = dpr === 1 ? 2.5 : dpr
+
     await app.init({
       background: "white",
       resizeTo: container,
       preference: "webgpu",
       antialias: true,
-      resolution: window.devicePixelRatio || 1,
+      resolution: resolution,
       autoDensity: true,
     })
 
