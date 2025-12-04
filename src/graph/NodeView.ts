@@ -20,7 +20,7 @@ if (typeof window !== "undefined") {
       fontFamily: "Arial",
       fill: 0x000000,
     },
-    resolution: 4,
+    resolution: 2,
   })
 }
 
