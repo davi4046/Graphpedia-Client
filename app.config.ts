@@ -5,6 +5,9 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     envPrefix: ["PUBLIC_"],
+    server: {
+      allowedHosts: true,
+    },
   },
   server: {
     preset: "cloudflare-pages",
