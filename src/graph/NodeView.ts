@@ -11,7 +11,11 @@ import {
 } from "pixi.js"
 import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
 import { NodeDetails, Sitelinks } from "./GraphEngine"
-import { isEventFromCanvas } from "./pixiHelpers"
+import {
+  catchMouseContextMenu,
+  catchTouchContextMenu,
+  isEventFromCanvas,
+} from "./pixiHelpers"
 
 if (typeof window !== "undefined") {
   BitmapFont.install({
@@ -21,26 +25,6 @@ if (typeof window !== "undefined") {
       fill: 0x000000,
     },
     resolution: 2,
-  })
-}
-
-declare global {
-  interface Window {
-    _handleContextMenu?: (event: MouseEvent) => void
-  }
-}
-
-let preventContextMenu = false
-
-if (typeof window !== "undefined") {
-  window._handleContextMenu = (event) => {
-    if (preventContextMenu) event.preventDefault()
-  }
-  document.removeEventListener("contextmenu", window._handleContextMenu, {
-    capture: true,
-  })
-  document.addEventListener("contextmenu", window._handleContextMenu, {
-    capture: true,
   })
 }
 
@@ -108,39 +92,26 @@ export default class NodeView extends Container {
     this.addChild(this.nodeLabel)
 
     this.on("click", this.handleClick)
-    this.on("rightup", this.handleRightUp)
 
-    let isTouching = false
-    let isContextMenuOpen = false
-
-    this.on("touchstart", () => {
-      isTouching = true
-      isContextMenuOpen = false
-    })
-    this.on("touchend", (event) => {
-      isTouching = false
-      if (!isContextMenuOpen) this.handleClick(event)
+    catchMouseContextMenu(this, (event) => {
+      new NodeContextMenu(
+        { x: event.x, y: event.y },
+        this.props.label ?? this.props.wikidataId,
+        this.props.url,
+        this.props.wikidataUrl,
+        this.props.sitelinks
+      )
     })
 
-    const handleContextMenu = (event: PointerEvent) => {
-      if (event.pointerType !== "touch") return
-      if (!isTouching) return
-
-      const contextMenu = this.openContextMenu({
-        x: event.clientX,
-        y: event.clientY,
-      })
-
-      contextMenu.suppressNextHide = true
-
-      event.preventDefault()
-      isContextMenuOpen = true
-    }
-
-    document.addEventListener("contextmenu", handleContextMenu)
-
-    this.on("destroy", () => {
-      document.removeEventListener("contextmenu", handleContextMenu)
+    catchTouchContextMenu(this, (event) => {
+      new NodeContextMenu(
+        { x: event.x, y: event.y },
+        this.props.label ?? this.props.wikidataId,
+        this.props.url,
+        this.props.wikidataUrl,
+        this.props.sitelinks,
+        { ignoreFirstHide: true }
+      )
     })
   }
 
@@ -165,28 +136,6 @@ export default class NodeView extends Container {
       )
       this.tooltip.show()
     })
-  }
-
-  private handleRightUp(event: FederatedPointerEvent) {
-    if (!isEventFromCanvas(event)) return
-
-    preventContextMenu = true
-
-    setTimeout(() => {
-      preventContextMenu = false
-    }, 1)
-
-    this.openContextMenu({ x: event.globalX, y: event.globalY })
-  }
-
-  private openContextMenu(position: { x: number; y: number }) {
-    return new NodeContextMenu(
-      { x: position.x, y: position.y },
-      this.props.label ?? this.props.wikidataId,
-      this.props.url,
-      this.props.wikidataUrl,
-      this.props.sitelinks
-    )
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
@@ -257,15 +206,18 @@ class NodeTooltip {
 }
 
 class NodeContextMenu {
-  public suppressNextHide: boolean = false
-
   constructor(
     position: { x: number; y: number },
     label: string,
     url: string,
     wikidataUrl: string,
-    sitelinks: Sitelinks
+    sitelinks: Sitelinks,
+    options: {
+      ignoreFirstHide?: boolean
+    } = {}
   ) {
+    let ignoreNextHide = options.ignoreFirstHide ?? false
+
     const sitelinkLabels: Record<keyof Sitelinks, string> = {
       wikipedia: `"${label}" on Wikipedia`,
       wikibooks: "Textbooks (Wikibooks)",
@@ -357,8 +309,8 @@ class NodeContextMenu {
       },
 
       onHide: () => {
-        if (this.suppressNextHide) {
-          this.suppressNextHide = false
+        if (ignoreNextHide) {
+          ignoreNextHide = false
           return false
         }
       },
