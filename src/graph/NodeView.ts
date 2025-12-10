@@ -103,6 +103,17 @@ export default class NodeView extends Container {
       )
     })
 
+    let justOpenedContextMenu = false
+
+    this.on("touchstart", () => {
+      justOpenedContextMenu = false
+    })
+
+    this.on("touchend", (event) => {
+      if (justOpenedContextMenu) return
+      this.handleClick(event)
+    })
+
     catchTouchContextMenu(this, (event) => {
       new NodeContextMenu(
         { x: event.x, y: event.y },
@@ -112,6 +123,7 @@ export default class NodeView extends Container {
         this.props.sitelinks,
         { ignoreFirstHide: true }
       )
+      justOpenedContextMenu = true
     })
   }
 
