@@ -53,7 +53,7 @@ export default class NodeView extends Container {
     private props: NodeDetails,
     shadowTexture: Texture
   ) {
-    super({ x: positionX, y: positionY, interactive: true })
+    super({ x: positionX, y: positionY, interactive: true, cursor: "pointer" })
 
     this.nodeLabel = new BitmapText({
       text: this.props.label ?? this.props.wikidataId,
