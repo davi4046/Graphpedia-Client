@@ -24,7 +24,7 @@ export function isEventFromCanvas(event: FederatedPointerEvent) {
   return event.nativeEvent.target instanceof HTMLCanvasElement
 }
 
-export function catchMouseContextMenu(
+export function onContextMenuMouseEvent(
   container: Container,
   callback: (event: PointerEvent) => void
 ) {
@@ -41,7 +41,7 @@ export function catchMouseContextMenu(
   })
 }
 
-export function catchTouchContextMenu(
+export function onContextMenuTouchEvent(
   container: Container,
   callback: (event: PointerEvent) => void
 ) {

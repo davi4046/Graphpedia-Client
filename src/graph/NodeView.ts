@@ -12,9 +12,9 @@ import {
 import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
 import { NodeDetails, Sitelinks } from "./GraphEngine"
 import {
-  catchMouseContextMenu,
-  catchTouchContextMenu,
   isEventFromCanvas,
+  onContextMenuMouseEvent,
+  onContextMenuTouchEvent,
 } from "./pixiHelpers"
 
 if (typeof window !== "undefined") {
@@ -53,7 +53,7 @@ export default class NodeView extends Container {
     private props: NodeDetails,
     shadowTexture: Texture
   ) {
-    super({ x: positionX, y: positionY, interactive: true })
+    super({ x: positionX, y: positionY, interactive: true, cursor: "pointer" })
 
     this.nodeLabel = new BitmapText({
       text: this.props.label ?? this.props.wikidataId,
@@ -93,7 +93,7 @@ export default class NodeView extends Container {
 
     this.on("click", this.handleClick)
 
-    catchMouseContextMenu(this, (event) => {
+    onContextMenuMouseEvent(this, (event) => {
       new NodeContextMenu(
         { x: event.x, y: event.y },
         this.props.label ?? this.props.wikidataId,
@@ -114,7 +114,7 @@ export default class NodeView extends Container {
       this.handleClick(event)
     })
 
-    catchTouchContextMenu(this, (event) => {
+    onContextMenuTouchEvent(this, (event) => {
       new NodeContextMenu(
         { x: event.x, y: event.y },
         this.props.label ?? this.props.wikidataId,
