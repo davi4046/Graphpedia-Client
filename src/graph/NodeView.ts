@@ -9,7 +9,7 @@ import {
   Sprite,
   Texture,
 } from "pixi.js"
-import tippy, { Instance as TippyInstance, sticky } from "tippy.js"
+import tippy, { sticky, Instance as TippyInstance } from "tippy.js"
 import { NodeDetails, Sitelinks } from "./GraphEngine"
 import {
   isEventFromCanvas,
@@ -55,11 +55,16 @@ export default class NodeView extends Container {
   ) {
     super({ x: positionX, y: positionY, interactive: true, cursor: "pointer" })
 
+    const labelText = this.props.label
+      ? this.formatLabel(this.props.label)
+      : this.props.wikidataId
+
     this.nodeLabel = new BitmapText({
-      text: this.props.label ?? this.props.wikidataId,
+      text: labelText,
       style: {
         fontFamily: "NodeLabelFont",
         fontSize: 5,
+        align: "center",
       },
       anchor: 0.5,
       eventMode: "none",
@@ -125,6 +130,44 @@ export default class NodeView extends Container {
       )
       justOpenedContextMenu = true
     })
+  }
+
+  private formatLabel(label: string): string {
+    // Truncate extremely long labels
+    const truncated = label.length > 70 ? label.slice(0, 67) + "..." : label
+
+    if (truncated.length <= 35) {
+      return truncated
+    }
+
+    // Find the middle point
+    const middle = truncated.length / 2
+
+    // Find spaces before and after the middle
+    let beforeSpace = truncated.lastIndexOf(" ", middle)
+    let afterSpace = truncated.indexOf(" ", middle)
+
+    // If no spaces found, return original label
+    if (beforeSpace === -1 && afterSpace === -1) {
+      return truncated
+    }
+
+    // Choose the space closest to the middle
+    let splitIndex: number
+    if (beforeSpace === -1) {
+      splitIndex = afterSpace
+    } else if (afterSpace === -1) {
+      splitIndex = beforeSpace
+    } else {
+      const beforeDist = middle - beforeSpace
+      const afterDist = afterSpace - middle
+      splitIndex = beforeDist <= afterDist ? beforeSpace : afterSpace
+    }
+
+    // Split and insert line break
+    return (
+      truncated.slice(0, splitIndex) + "\n" + truncated.slice(splitIndex + 1)
+    )
   }
 
   private handleClick(event: FederatedPointerEvent) {
