@@ -64,18 +64,22 @@ class TileImpl implements GraphTile {
 }
 
 class NodeImpl implements GraphNode {
+  id: string
+
   constructor(
-    public id: number,
+    private _id: number,
     public x: number,
     public y: number,
     private dataSource: GraphDataSource
-  ) {}
+  ) {
+    this.id = _id.toString()
+  }
 
   private promise?: ReturnType<GraphDataSource["fetchItem"]>
 
   private async load() {
     if (!this.promise) {
-      this.promise = this.dataSource.fetchItem(this.id)
+      this.promise = this.dataSource.fetchItem(this._id)
     }
     return this.promise
   }
@@ -85,9 +89,9 @@ class NodeImpl implements GraphNode {
     return {
       label: item.labels?.en?.value,
       description: item.descriptions?.en?.value,
-      url: `${SITE_URL}/graph/${this.dataSource.graphId}?item=Q${this.id}`,
-      wikidataId: `Q${this.id}`,
-      wikidataUrl: `https://www.wikidata.org/wiki/Q${this.id}`,
+      url: `${SITE_URL}/graph/${this.dataSource.graphId}?item=Q${this._id}`,
+      wikidataId: `Q${this._id}`,
+      wikidataUrl: `https://www.wikidata.org/wiki/Q${this._id}`,
       sitelinks: {
         wikipedia: item.sitelinks?.enwiki?.url,
         wikibooks: item.sitelinks?.enwikibooks?.url,
@@ -104,8 +108,11 @@ class NodeImpl implements GraphNode {
 }
 
 class EdgeImpl implements GraphEdge {
-  constructor(
-    public sourceId: number,
-    public targetId: number
-  ) {}
+  sourceId: string
+  targetId: string
+
+  constructor(sourceId: number, targetId: number) {
+    this.sourceId = sourceId.toString()
+    this.targetId = targetId.toString()
+  }
 }

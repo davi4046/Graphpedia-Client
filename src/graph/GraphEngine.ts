@@ -29,15 +29,15 @@ export interface NodeDetails {
 }
 
 export interface GraphNode {
-  readonly id: number
+  readonly id: string
   readonly x: number
   readonly y: number
-  getDetails(): Promise<NodeDetails>
+  getDetails(): Promise<NodeDetails> // NodeDetails | NodeDetails[]
 }
 
 export interface GraphEdge {
-  readonly sourceId: number
-  readonly targetId: number
+  readonly sourceId: string
+  readonly targetId: string
 }
 
 export interface TileContent {
@@ -55,15 +55,15 @@ export default class GraphEngine {
   private tileIndex: SpatialTileIndex
   private loadedTiles = new Set<number>()
 
-  private nodes = new Map<number, GraphNode>()
-  private edges = new EdgeMap<GraphEdge>()
+  private nodes = new Map<string, GraphNode>()
+  private edges = new Map<string, GraphEdge>()
 
   private nodeIndex = new SpatialNodeIndex()
-  private nodeTargetsMap = new Map<number, Set<number>>()
-  private nodeSourcesMap = new Map<number, Set<number>>()
+  private nodeTargetsMap = new Map<string, Set<string>>()
+  private nodeSourcesMap = new Map<string, Set<string>>()
 
-  private renderedNodes = new Map<number, NodeView | undefined>()
-  private renderedEdges = new EdgeMap<EdgeView>()
+  private renderedNodes = new Map<string, NodeView | undefined>()
+  private renderedEdges = new Map<string, EdgeView>()
 
   constructor(
     private view: GraphView,
@@ -107,8 +107,8 @@ export default class GraphEngine {
         }
 
         for (const edge of edges) {
-          if (this.edges.get(edge.sourceId, edge.targetId)) continue
-          this.edges.set(edge.sourceId, edge.targetId, edge)
+          if (this.edges.get(`${edge.sourceId}-${edge.targetId}`)) continue
+          this.edges.set(`${edge.sourceId}-${edge.targetId}`, edge)
 
           if (!this.nodeTargetsMap.has(edge.sourceId)) {
             this.nodeTargetsMap.set(edge.sourceId, new Set())
@@ -131,7 +131,7 @@ export default class GraphEngine {
     const nodesInBounds = new Set(
       this.nodeIndex.search(minX - 45, minY - 8, maxX + 45, maxY + 8)
     )
-    const nodesToRender = new Set<number>()
+    const nodesToRender = new Set<string>()
 
     for (const nodeId of nodesInBounds) {
       nodesToRender.add(nodeId)
@@ -160,20 +160,20 @@ export default class GraphEngine {
 
         for (const targetId of targets) {
           if (!this.renderedNodes.has(targetId)) continue
-          if (this.renderedEdges.get(nodeId, targetId)) continue
+          if (this.renderedEdges.get(`${nodeId}-${targetId}`)) continue
           const target = this.renderedNodes.get(targetId)
           if (!target) continue
           const edgeView = this.view.addEdge(nodeView, target)
-          this.renderedEdges.set(nodeId, targetId, edgeView)
+          this.renderedEdges.set(`${nodeId}-${targetId}`, edgeView)
         }
 
         for (const sourceId of sources) {
           if (!this.renderedNodes.has(sourceId)) continue
-          if (this.renderedEdges.get(sourceId, nodeId)) continue
+          if (this.renderedEdges.get(`${sourceId}-${nodeId}`)) continue
           const source = this.renderedNodes.get(sourceId)
           if (!source) continue
           const edgeView = this.view.addEdge(source, nodeView)
-          this.renderedEdges.set(sourceId, nodeId, edgeView)
+          this.renderedEdges.set(`${sourceId}-${nodeId}`, edgeView)
         }
       })
     }
@@ -189,37 +189,18 @@ export default class GraphEngine {
 
       for (const targetId of targets) {
         if (!this.renderedNodes.has(targetId)) continue
-        const edgeView = this.renderedEdges.get(nodeId, targetId)
+        const edgeView = this.renderedEdges.get(`${nodeId}-${targetId}`)
         edgeView?.removeFromParent()
-        this.renderedEdges.delete(nodeId, targetId)
+        this.renderedEdges.delete(`${nodeId}-${targetId}`)
       }
 
       for (const sourceId of sources) {
         if (!this.renderedNodes.has(sourceId)) continue
-        const edgeView = this.renderedEdges.get(sourceId, nodeId)
+        const edgeView = this.renderedEdges.get(`${sourceId}-${nodeId}`)
         edgeView?.removeFromParent()
-        this.renderedEdges.delete(sourceId, nodeId)
+        this.renderedEdges.delete(`${sourceId}-${nodeId}`)
       }
     }
-  }
-}
-
-class EdgeMap<T> {
-  private map = new Map<number, Map<number, T>>()
-
-  set(sourceId: number, targetId: number, value: T) {
-    if (!this.map.has(sourceId)) {
-      this.map.set(sourceId, new Map())
-    }
-    this.map.get(sourceId)!.set(targetId, value)
-  }
-
-  get(sourceId: number, targetId: number): T | undefined {
-    return this.map.get(sourceId)?.get(targetId)
-  }
-
-  delete(sourceId: number, targetId: number) {
-    this.map.get(sourceId)?.delete(targetId)
   }
 }
 
@@ -254,7 +235,7 @@ class SpatialNodeIndex {
     minY: number
     maxX: number
     maxY: number
-    nodeId: number
+    nodeId: string
   }> = new RBush()
 
   insert(node: GraphNode) {
@@ -267,7 +248,7 @@ class SpatialNodeIndex {
     })
   }
 
-  search(minX: number, minY: number, maxX: number, maxY: number): number[] {
+  search(minX: number, minY: number, maxX: number, maxY: number): string[] {
     return this.index
       .search({ minX, minY, maxX, maxY })
       .map((bbox) => bbox.nodeId)
