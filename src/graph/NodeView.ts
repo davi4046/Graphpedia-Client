@@ -73,6 +73,7 @@ export default class NodeView extends Container {
     const bounds = this.nodeLabel.getLocalBounds()
     this.radiusX = (bounds.width + 4) / 2
     this.radiusY = (bounds.height + 4) / 2
+    this.radiusX = Math.max(this.radiusX, this.radiusY)
 
     this.nodeShape = new Graphics()
     this.nodeShape.clear()
