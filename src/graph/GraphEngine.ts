@@ -129,7 +129,7 @@ export default class GraphEngine {
   private render() {
     const { minX, minY, maxX, maxY } = this.view.getVisibleBounds()
     const nodesInBounds = new Set(
-      this.nodeIndex.search(minX - 24, minY - 8, maxX + 24, maxY + 8)
+      this.nodeIndex.search(minX - 45, minY - 8, maxX + 45, maxY + 8)
     )
     const nodesToRender = new Set<number>()
 
