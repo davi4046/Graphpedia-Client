@@ -52,14 +52,44 @@ class TileImpl implements GraphTile {
 
   async getContent(): Promise<TileContent> {
     const tile = await this.load()
-    return {
-      nodes: tile.nodes.map(({ id, x, y }) => {
-        return new NodeImpl(id, x, y, this.dataSource)
-      }),
-      edges: tile.edges.map(({ sourceId, targetId }) => {
-        return new EdgeImpl(sourceId, targetId)
-      }),
+
+    const nodes: GraphNode[] = []
+    const nodeIds = new Set<number>()
+
+    let nodeId = NaN
+    let nodeX = NaN
+    let nodeY = NaN
+    let itemIds: number[] = []
+
+    for (const { x, y, id } of tile.nodes) {
+      if (x !== nodeX || y !== nodeY) {
+        if (itemIds.length > 0) {
+          nodes.push(
+            new NodeImpl(nodeId, nodeX, nodeY, itemIds, this.dataSource)
+          )
+        }
+
+        nodeId = id
+        nodeX = x
+        nodeY = y
+        itemIds = []
+
+        nodeIds.add(id)
+      }
+
+      itemIds.push(id)
     }
+
+    if (itemIds.length > 0) {
+      nodes.push(new NodeImpl(nodeId, nodeX, nodeY, itemIds, this.dataSource))
+    }
+
+    const edges = tile.edges.flatMap(({ sourceId, targetId }) => {
+      if (!nodeIds.has(sourceId) || !nodeIds.has(targetId)) return []
+      return new EdgeImpl(sourceId, targetId)
+    })
+
+    return { nodes, edges }
   }
 }
 
@@ -68,26 +98,27 @@ class NodeImpl implements GraphNode {
     public id: number,
     public x: number,
     public y: number,
+    private itemIds: number[],
     private dataSource: GraphDataSource
   ) {}
 
-  private promise?: ReturnType<GraphDataSource["fetchItem"]>
+  private promises?: ReturnType<GraphDataSource["fetchItem"]>[]
 
   private async load() {
-    if (!this.promise) {
-      this.promise = this.dataSource.fetchItem(this.id)
+    if (!this.promises) {
+      this.promises = this.itemIds.map((id) => this.dataSource.fetchItem(id))
     }
-    return this.promise
+    return Promise.all(this.promises)
   }
 
-  async getDetails(): Promise<NodeDetails> {
-    const item = await this.load()
-    return {
+  async getDetails(): Promise<NodeDetails[]> {
+    const items = await this.load()
+    return items.map((item) => ({
       label: item.labels?.en?.value,
       description: item.descriptions?.en?.value,
-      url: `${SITE_URL}/graph/${this.dataSource.graphId}?item=Q${this.id}`,
-      wikidataId: `Q${this.id}`,
-      wikidataUrl: `https://www.wikidata.org/wiki/Q${this.id}`,
+      url: `${SITE_URL}/graph/${this.dataSource.graphId}?item=${item.id}`,
+      wikidataId: item.id,
+      wikidataUrl: `https://www.wikidata.org/wiki/${item.id}`,
       sitelinks: {
         wikipedia: item.sitelinks?.enwiki?.url,
         wikibooks: item.sitelinks?.enwikibooks?.url,
@@ -99,7 +130,7 @@ class NodeImpl implements GraphNode {
         wiktionary: item.sitelinks?.enwiktionary?.url,
         commons: item.sitelinks?.commonswiki?.url,
       },
-    }
+    }))
   }
 }
 

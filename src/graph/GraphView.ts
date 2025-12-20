@@ -107,11 +107,12 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     }
   }
 
-  addNode(positionX: number, positionY: number, details: NodeDetails) {
+  addNode(positionX: number, positionY: number, details: NodeDetails[]) {
+    // TODO: introduce group nodes when details.length > 1
     const node = new NodeView(
       positionX,
       positionY,
-      details,
+      details[0],
       this.nodeShadowTexture
     )
     this.nodeContainer.addChild(node)

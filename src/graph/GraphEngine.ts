@@ -32,7 +32,7 @@ export interface GraphNode {
   readonly id: number
   readonly x: number
   readonly y: number
-  getDetails(): Promise<NodeDetails>
+  getDetails(): Promise<NodeDetails[]>
 }
 
 export interface GraphEdge {
