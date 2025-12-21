@@ -27,95 +27,6 @@ if (typeof window !== "undefined") {
   })
 }
 
-class NodeLabel extends BitmapText {
-  constructor(props: { text: string }) {
-    super({
-      text: props.text,
-      style: {
-        fontFamily: "NodeLabelFont",
-        fontSize: 5,
-        align: "center",
-      },
-      anchor: 0.5,
-      eventMode: "none",
-    })
-  }
-}
-
-class NodeShape extends Graphics {
-  constructor(props: {
-    radiusX: number
-    radiusY: number
-    color: number
-    borderColor: number
-  }) {
-    super()
-    this.ellipse(0, 0, props.radiusX, props.radiusY)
-    this.fill({ color: props.color })
-    this.stroke({ color: props.borderColor, width: 0.4 })
-  }
-}
-
-class NodeShadow extends Sprite {
-  constructor(props: { radiusX: number; radiusY: number; texture: Texture }) {
-    super({
-      texture: props.texture,
-      scale: {
-        x: (props.radiusX * 2) / props.texture.width + 0.02,
-        y: (props.radiusY * 2) / props.texture.height + 0.04,
-      },
-      anchor: 0.5,
-      x: 1,
-      y: 1,
-      eventMode: "none",
-    })
-  }
-}
-
-class InteractionState {
-  suppressNextActivate = false
-}
-
-class ActivateBehavior {
-  constructor(
-    target: Container,
-    state: InteractionState,
-    handler: (event: PointerEvent) => void
-  ) {
-    target.on("click", (event) => {
-      if (!isEventFromCanvas(event)) return
-      handler(event)
-    })
-
-    target.on("touchstart", () => {
-      state.suppressNextActivate = false
-    })
-
-    target.on("touchend", (event) => {
-      if (state.suppressNextActivate) return
-      if (!isEventFromCanvas(event)) return
-      handler(event)
-    })
-  }
-}
-
-class ContextMenuBehavior {
-  constructor(
-    target: Container,
-    state: InteractionState,
-    handler: (event: PointerEvent) => void
-  ) {
-    onContextMenuMouseEvent(target, (event) => {
-      handler(event)
-    })
-
-    onContextMenuTouchEvent(target, (event) => {
-      state.suppressNextActivate = true
-      handler(event)
-    })
-  }
-}
-
 export default class NodeView extends Container {
   private radiusX: number
   private radiusY: number
@@ -236,6 +147,95 @@ export default class NodeView extends Container {
       x: this.x + dx * t,
       y: this.y + dy * t,
     }
+  }
+}
+
+class NodeLabel extends BitmapText {
+  constructor(props: { text: string }) {
+    super({
+      text: props.text,
+      style: {
+        fontFamily: "NodeLabelFont",
+        fontSize: 5,
+        align: "center",
+      },
+      anchor: 0.5,
+      eventMode: "none",
+    })
+  }
+}
+
+class NodeShape extends Graphics {
+  constructor(props: {
+    radiusX: number
+    radiusY: number
+    color: number
+    borderColor: number
+  }) {
+    super()
+    this.ellipse(0, 0, props.radiusX, props.radiusY)
+    this.fill({ color: props.color })
+    this.stroke({ color: props.borderColor, width: 0.4 })
+  }
+}
+
+class NodeShadow extends Sprite {
+  constructor(props: { radiusX: number; radiusY: number; texture: Texture }) {
+    super({
+      texture: props.texture,
+      scale: {
+        x: (props.radiusX * 2) / props.texture.width + 0.02,
+        y: (props.radiusY * 2) / props.texture.height + 0.04,
+      },
+      anchor: 0.5,
+      x: 1,
+      y: 1,
+      eventMode: "none",
+    })
+  }
+}
+
+class InteractionState {
+  suppressNextActivate = false
+}
+
+class ActivateBehavior {
+  constructor(
+    target: Container,
+    state: InteractionState,
+    handler: (event: PointerEvent) => void
+  ) {
+    target.on("click", (event) => {
+      if (!isEventFromCanvas(event)) return
+      handler(event)
+    })
+
+    target.on("touchstart", () => {
+      state.suppressNextActivate = false
+    })
+
+    target.on("touchend", (event) => {
+      if (state.suppressNextActivate) return
+      if (!isEventFromCanvas(event)) return
+      handler(event)
+    })
+  }
+}
+
+class ContextMenuBehavior {
+  constructor(
+    target: Container,
+    state: InteractionState,
+    handler: (event: PointerEvent) => void
+  ) {
+    onContextMenuMouseEvent(target, (event) => {
+      handler(event)
+    })
+
+    onContextMenuTouchEvent(target, (event) => {
+      state.suppressNextActivate = true
+      handler(event)
+    })
   }
 }
 
