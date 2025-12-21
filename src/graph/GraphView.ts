@@ -3,7 +3,7 @@ import { Application, Container, EventEmitter, Texture } from "pixi.js"
 import EdgeView from "./EdgeView"
 import EllipticShadow from "./EllipticShadow"
 import { NodeDetails } from "./GraphEngine"
-import NodeView from "./NodeView"
+import NodeView, { MultiItemNodeView, SingleItemNodeView } from "./NodeView"
 
 type GraphViewEvents = {
   viewportMoved: () => void
@@ -107,14 +107,11 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
     }
   }
 
-  addNode(positionX: number, positionY: number, details: NodeDetails[]) {
-    // TODO: introduce group nodes when details.length > 1
-    const node = new NodeView(
-      positionX,
-      positionY,
-      details[0],
-      this.nodeShadowTexture
-    )
+  addNode(x: number, y: number, items: NodeDetails[]) {
+    const node =
+      items.length > 1
+        ? new MultiItemNodeView(x, y, items, this.nodeShadowTexture)
+        : new SingleItemNodeView(x, y, items[0], this.nodeShadowTexture)
     this.nodeContainer.addChild(node)
     return node
   }

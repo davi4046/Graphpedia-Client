@@ -27,7 +27,14 @@ if (typeof window !== "undefined") {
   })
 }
 
-export default class NodeView extends Container {
+export default interface NodeView extends Container {
+  intersectBorderFromPoint(
+    fromX: number,
+    fromY: number
+  ): { x: number; y: number }
+}
+
+export class SingleItemNodeView extends Container implements NodeView {
   private radiusX: number
   private radiusY: number
   private overlay?: NodeOverlay
@@ -131,6 +138,60 @@ export default class NodeView extends Container {
     return (
       truncated.slice(0, splitIndex) + "\n" + truncated.slice(splitIndex + 1)
     )
+  }
+
+  intersectBorderFromPoint(fromX: number, fromY: number) {
+    const dx = fromX - this.x
+    const dy = fromY - this.y
+
+    const denom = Math.sqrt(
+      (dx * dx) / (this.radiusX * this.radiusX) +
+        (dy * dy) / (this.radiusY * this.radiusY)
+    )
+    const t = 1 / denom
+
+    return {
+      x: this.x + dx * t,
+      y: this.y + dy * t,
+    }
+  }
+}
+
+export class MultiItemNodeView extends Container implements NodeView {
+  private radiusX: number
+  private radiusY: number
+
+  constructor(
+    x: number,
+    y: number,
+    details: NodeDetails[],
+    shadowTexture: Texture
+  ) {
+    super({ x, y, interactive: true, cursor: "pointer" })
+
+    const label = new NodeLabel({ text: `${details.length} items` })
+
+    const { width, height } = label.getLocalBounds()
+    this.radiusX = (width + 4) / 2
+    this.radiusY = (height + 4) / 2
+    this.radiusX = Math.max(this.radiusX, this.radiusY)
+
+    const shape = new NodeShape({
+      radiusX: this.radiusX,
+      radiusY: this.radiusY,
+      color: 0xaaffff,
+      borderColor: 0x76cccc,
+    })
+
+    const shadow = new NodeShadow({
+      radiusX: this.radiusX,
+      radiusY: this.radiusY,
+      texture: shadowTexture,
+    })
+
+    this.addChild(shadow)
+    this.addChild(shape)
+    this.addChild(label)
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
