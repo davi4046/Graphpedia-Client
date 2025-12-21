@@ -8,7 +8,7 @@ import {
   Sprite,
   Texture,
 } from "pixi.js"
-import tippy, { sticky, Instance as TippyInstance } from "tippy.js"
+import tippy, { sticky } from "tippy.js"
 import { NodeDetails, Sitelinks } from "./GraphEngine"
 import {
   isEventFromCanvas,
@@ -119,7 +119,7 @@ class ContextMenuBehavior {
 export default class NodeView extends Container {
   private radiusX: number
   private radiusY: number
-  private tooltip?: NodeTooltip
+  private overlay?: NodeOverlay
 
   constructor(
     x: number,
@@ -160,7 +160,17 @@ export default class NodeView extends Container {
     const istate = new InteractionState()
 
     new ActivateBehavior(this, istate, () => {
-      this.handleClick()
+      if (this.overlay) return
+      this.overlay = new NodeOverlay(this.radiusX * 2, this.radiusY * 2)
+      this.addChild(this.overlay)
+
+      // Wait a frame to ensure the element is in the DOM
+      requestAnimationFrame(() => {
+        new NodeTooltip(this.overlay!.element, this.props.description, () => {
+          this.overlay?.destroy()
+          this.overlay = undefined
+        })
+      })
     })
 
     new ContextMenuBehavior(this, istate, (event) => {
@@ -212,27 +222,6 @@ export default class NodeView extends Container {
     )
   }
 
-  private handleClick() {
-    if (this.tooltip) return
-
-    const overlay = new NodeOverlay(this.radiusX * 2, this.radiusY * 2)
-    this.addChild(overlay)
-
-    // Wait a frame to ensure the element is in the DOM
-    requestAnimationFrame(() => {
-      this.tooltip = new NodeTooltip(
-        overlay.element,
-        this.props.description,
-        () => {
-          this.tooltip?.destroy()
-          this.tooltip = undefined
-          overlay.destroy()
-        }
-      )
-      this.tooltip.show()
-    })
-  }
-
   intersectBorderFromPoint(fromX: number, fromY: number) {
     const dx = fromX - this.x
     const dy = fromY - this.y
@@ -269,12 +258,10 @@ class NodeOverlay extends DOMContainer {
 }
 
 class NodeTooltip {
-  private tippyInstance: TippyInstance
-
   constructor(target: Element, text: string | undefined, onHidden: () => void) {
     const content = text ? html(text) : "<i>No description available</i>"
 
-    this.tippyInstance = tippy(target, {
+    tippy(target, {
       content: content,
       allowHTML: true,
       theme: "light-border",
@@ -282,21 +269,8 @@ class NodeTooltip {
       plugins: [sticky],
       trigger: "manual",
       onHidden: onHidden,
+      showOnCreate: true,
     })
-
-    this.tippyInstance.show()
-  }
-
-  show() {
-    this.tippyInstance.show()
-  }
-
-  hide() {
-    this.tippyInstance.hide()
-  }
-
-  destroy() {
-    this.tippyInstance.destroy()
   }
 }
 
