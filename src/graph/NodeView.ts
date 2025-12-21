@@ -4,7 +4,6 @@ import {
   BitmapText,
   Container,
   DOMContainer,
-  FederatedPointerEvent,
   Graphics,
   Sprite,
   Texture,
@@ -73,6 +72,50 @@ class NodeShadow extends Sprite {
   }
 }
 
+class InteractionState {
+  suppressNextActivate = false
+}
+
+class ActivateBehavior {
+  constructor(
+    target: Container,
+    state: InteractionState,
+    handler: (event: PointerEvent) => void
+  ) {
+    target.on("click", (event) => {
+      if (!isEventFromCanvas(event)) return
+      handler(event)
+    })
+
+    target.on("touchstart", () => {
+      state.suppressNextActivate = false
+    })
+
+    target.on("touchend", (event) => {
+      if (state.suppressNextActivate) return
+      if (!isEventFromCanvas(event)) return
+      handler(event)
+    })
+  }
+}
+
+class ContextMenuBehavior {
+  constructor(
+    target: Container,
+    state: InteractionState,
+    handler: (event: PointerEvent) => void
+  ) {
+    onContextMenuMouseEvent(target, (event) => {
+      handler(event)
+    })
+
+    onContextMenuTouchEvent(target, (event) => {
+      state.suppressNextActivate = true
+      handler(event)
+    })
+  }
+}
+
 export default class NodeView extends Container {
   private radiusX: number
   private radiusY: number
@@ -114,9 +157,13 @@ export default class NodeView extends Container {
     this.addChild(shape)
     this.addChild(label)
 
-    this.on("click", this.handleClick)
+    const istate = new InteractionState()
 
-    onContextMenuMouseEvent(this, (event) => {
+    new ActivateBehavior(this, istate, () => {
+      this.handleClick()
+    })
+
+    new ContextMenuBehavior(this, istate, (event) => {
       new NodeContextMenu(
         { x: event.x, y: event.y },
         this.props.label ?? this.props.wikidataId,
@@ -124,29 +171,6 @@ export default class NodeView extends Container {
         this.props.wikidataUrl,
         this.props.sitelinks
       )
-    })
-
-    let justOpenedContextMenu = false
-
-    this.on("touchstart", () => {
-      justOpenedContextMenu = false
-    })
-
-    this.on("touchend", (event) => {
-      if (justOpenedContextMenu) return
-      this.handleClick(event)
-    })
-
-    onContextMenuTouchEvent(this, (event) => {
-      new NodeContextMenu(
-        { x: event.x, y: event.y },
-        this.props.label ?? this.props.wikidataId,
-        this.props.url,
-        this.props.wikidataUrl,
-        this.props.sitelinks,
-        { ignoreFirstHide: true }
-      )
-      justOpenedContextMenu = true
     })
   }
 
@@ -188,9 +212,7 @@ export default class NodeView extends Container {
     )
   }
 
-  private handleClick(event: FederatedPointerEvent) {
-    if (!isEventFromCanvas(event)) return
-
+  private handleClick() {
     if (this.tooltip) return
 
     const overlay = new NodeOverlay(this.radiusX * 2, this.radiusY * 2)
