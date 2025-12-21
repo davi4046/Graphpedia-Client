@@ -9,7 +9,7 @@ import {
   Texture,
 } from "pixi.js"
 import tippy, { sticky, Instance as TippyInstance } from "tippy.js"
-import { NodeDetails, Sitelinks } from "./GraphEngine"
+import { NodeItem, Sitelinks } from "./GraphEngine"
 import {
   isEventFromCanvas,
   onContextMenuMouseEvent,
@@ -39,19 +39,12 @@ export class SingleItemNodeView extends Container implements NodeView {
   private radiusY: number
   private overlay?: NodeOverlay
 
-  constructor(
-    x: number,
-    y: number,
-    private props: NodeDetails,
-    shadowTexture: Texture
-  ) {
+  constructor(x: number, y: number, item: NodeItem, shadowTexture: Texture) {
     super({ x, y, interactive: true, cursor: "pointer" })
 
-    const labelText = this.props.label
-      ? this.formatLabel(this.props.label)
-      : this.props.wikidataId
-
-    const label = new NodeLabel({ text: labelText })
+    const label = new NodeLabel({
+      text: item.label ? this.formatLabel(item.label) : item.wikidataId,
+    })
 
     const { width, height } = label.getLocalBounds()
     this.radiusX = (width + 4) / 2
@@ -84,7 +77,7 @@ export class SingleItemNodeView extends Container implements NodeView {
 
       // Wait a frame to ensure the element is in the DOM
       requestAnimationFrame(() => {
-        new NodeTooltip(this.overlay!.element, this.props.description, () => {
+        new NodeTooltip(this.overlay!.element, item.description, () => {
           this.overlay?.destroy()
           this.overlay = undefined
         })
@@ -94,10 +87,10 @@ export class SingleItemNodeView extends Container implements NodeView {
     new ContextMenuBehavior(this, istate, (event) => {
       new NodeContextMenu(
         { x: event.x, y: event.y },
-        this.props.label ?? this.props.wikidataId,
-        this.props.url,
-        this.props.wikidataUrl,
-        this.props.sitelinks
+        item.label ?? item.wikidataId,
+        item.url,
+        item.wikidataUrl,
+        item.sitelinks
       )
     })
   }
@@ -164,12 +157,12 @@ export class MultiItemNodeView extends Container implements NodeView {
   constructor(
     x: number,
     y: number,
-    details: NodeDetails[],
+    items: NodeItem[],
     shadowTexture: Texture
   ) {
     super({ x, y, interactive: true, cursor: "pointer" })
 
-    const label = new NodeLabel({ text: `${details.length} items` })
+    const label = new NodeLabel({ text: `${items.length} items` })
 
     const { width, height } = label.getLocalBounds()
     this.radiusX = (width + 4) / 2

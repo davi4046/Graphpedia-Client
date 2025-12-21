@@ -19,7 +19,7 @@ export type Sitelinks = Readonly<
   >
 >
 
-export interface NodeDetails {
+export interface NodeItem {
   readonly label?: string
   readonly description?: string
   readonly url: string
@@ -32,7 +32,7 @@ export interface GraphNode {
   readonly id: number
   readonly x: number
   readonly y: number
-  getDetails(): Promise<NodeDetails[]>
+  getItems(): Promise<NodeItem[]>
 }
 
 export interface GraphEdge {
@@ -149,10 +149,10 @@ export default class GraphEngine {
       const node = this.nodes.get(nodeId)
       if (!node) continue
 
-      node.getDetails().then((details) => {
+      node.getItems().then((items) => {
         if (!this.renderedNodes.has(nodeId)) return
 
-        const nodeView = this.view.addNode(node.x, node.y, details)
+        const nodeView = this.view.addNode(node.x, node.y, items)
         this.renderedNodes.set(nodeId, nodeView)
 
         const targets = this.nodeTargetsMap.get(nodeId) || new Set()

@@ -5,7 +5,7 @@ import {
   GraphEdge,
   GraphNode,
   GraphTile,
-  NodeDetails,
+  NodeItem,
   TileContent,
 } from "./GraphEngine"
 
@@ -111,7 +111,7 @@ class NodeImpl implements GraphNode {
     return Promise.all(this.promises)
   }
 
-  async getDetails(): Promise<NodeDetails[]> {
+  async getItems(): Promise<NodeItem[]> {
     const items = await this.load()
     return items.map((item) => ({
       label: item.labels?.en?.value,
