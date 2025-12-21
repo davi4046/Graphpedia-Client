@@ -8,7 +8,7 @@ import {
   Sprite,
   Texture,
 } from "pixi.js"
-import tippy, { sticky } from "tippy.js"
+import tippy, { sticky, Instance as TippyInstance } from "tippy.js"
 import { NodeDetails, Sitelinks } from "./GraphEngine"
 import {
   isEventFromCanvas,
@@ -280,13 +280,8 @@ class NodeContextMenu {
     label: string,
     url: string,
     wikidataUrl: string,
-    sitelinks: Sitelinks,
-    options: {
-      ignoreFirstHide?: boolean
-    } = {}
+    sitelinks: Sitelinks
   ) {
-    let ignoreNextHide = options.ignoreFirstHide ?? false
-
     const sitelinkLabels: Record<keyof Sitelinks, string> = {
       wikipedia: `"${label}" on Wikipedia`,
       wikibooks: "Textbooks (Wikibooks)",
@@ -347,7 +342,15 @@ class NodeContextMenu {
     element.style.top = `${position.y}px`
     document.body.appendChild(element)
 
-    tippy(element, {
+    let instance: TippyInstance
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!instance.popper.contains(event.target as Node)) {
+        instance.hide()
+      }
+    }
+
+    instance = tippy(element, {
       content: content,
       allowHTML: true,
       maxWidth: 200,
@@ -359,29 +362,26 @@ class NodeContextMenu {
       trigger: "manual",
       showOnCreate: true,
       interactive: true,
+      hideOnClick: false,
 
       onMount(instance) {
-        instance.popper.addEventListener("click", () => {
-          instance.hide()
-        })
-
         const copyButton = instance.popper.querySelector("#copy-node-url")
 
         copyButton?.addEventListener("click", () => {
           navigator.clipboard.writeText(url)
         })
+
+        instance.popper.addEventListener("click", () => {
+          instance.hide()
+        })
+
+        document.addEventListener("pointerdown", handlePointerDown)
       },
 
       onHidden(instance) {
         instance.destroy()
         document.body.removeChild(element)
-      },
-
-      onHide: () => {
-        if (ignoreNextHide) {
-          ignoreNextHide = false
-          return false
-        }
+        document.removeEventListener("pointerdown", handlePointerDown)
       },
     })
   }
