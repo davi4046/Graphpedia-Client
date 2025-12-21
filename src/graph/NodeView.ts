@@ -28,39 +28,10 @@ if (typeof window !== "undefined") {
   })
 }
 
-export interface NodeViewProps {
-  readonly label?: string
-  readonly description?: string
-  readonly x: number
-  readonly y: number
-  readonly url: string
-  readonly wikidataId: string
-  readonly wikidataUrl: string
-  readonly sitelinks: Sitelinks
-}
-
-export default class NodeView extends Container {
-  private radiusX: number
-  private radiusY: number
-  private nodeLabel: BitmapText
-  private nodeShape: Graphics
-  private nodeShadow: Sprite
-  private tooltip?: NodeTooltip
-
-  constructor(
-    positionX: number,
-    positionY: number,
-    private props: NodeDetails,
-    shadowTexture: Texture
-  ) {
-    super({ x: positionX, y: positionY, interactive: true, cursor: "pointer" })
-
-    const labelText = this.props.label
-      ? this.formatLabel(this.props.label)
-      : this.props.wikidataId
-
-    this.nodeLabel = new BitmapText({
-      text: labelText,
+class NodeLabel extends BitmapText {
+  constructor(props: { text: string }) {
+    super({
+      text: props.text,
       style: {
         fontFamily: "NodeLabelFont",
         fontSize: 5,
@@ -69,33 +40,79 @@ export default class NodeView extends Container {
       anchor: 0.5,
       eventMode: "none",
     })
+  }
+}
 
-    const bounds = this.nodeLabel.getLocalBounds()
-    this.radiusX = (bounds.width + 4) / 2
-    this.radiusY = (bounds.height + 4) / 2
-    this.radiusX = Math.max(this.radiusX, this.radiusY)
+class NodeShape extends Graphics {
+  constructor(props: {
+    radiusX: number
+    radiusY: number
+    color: number
+    borderColor: number
+  }) {
+    super()
+    this.ellipse(0, 0, props.radiusX, props.radiusY)
+    this.fill({ color: props.color })
+    this.stroke({ color: props.borderColor, width: 0.4 })
+  }
+}
 
-    this.nodeShape = new Graphics()
-    this.nodeShape.clear()
-    this.nodeShape.ellipse(0, 0, this.radiusX, this.radiusY)
-    this.nodeShape.fill({ color: 0xffffff })
-    this.nodeShape.stroke({ color: 0xbfbfbf, width: 0.4 })
-
-    this.nodeShadow = new Sprite({
-      texture: shadowTexture,
+class NodeShadow extends Sprite {
+  constructor(props: { radiusX: number; radiusY: number; texture: Texture }) {
+    super({
+      texture: props.texture,
       scale: {
-        x: (this.radiusX * 2) / shadowTexture.width + 0.02,
-        y: (this.radiusY * 2) / shadowTexture.height + 0.04,
+        x: (props.radiusX * 2) / props.texture.width + 0.02,
+        y: (props.radiusY * 2) / props.texture.height + 0.04,
       },
       anchor: 0.5,
       x: 1,
       y: 1,
       eventMode: "none",
     })
+  }
+}
 
-    this.addChild(this.nodeShadow)
-    this.addChild(this.nodeShape)
-    this.addChild(this.nodeLabel)
+export default class NodeView extends Container {
+  private radiusX: number
+  private radiusY: number
+  private tooltip?: NodeTooltip
+
+  constructor(
+    x: number,
+    y: number,
+    private props: NodeDetails,
+    shadowTexture: Texture
+  ) {
+    super({ x, y, interactive: true, cursor: "pointer" })
+
+    const labelText = this.props.label
+      ? this.formatLabel(this.props.label)
+      : this.props.wikidataId
+
+    const label = new NodeLabel({ text: labelText })
+
+    const { width, height } = label.getLocalBounds()
+    this.radiusX = (width + 4) / 2
+    this.radiusY = (height + 4) / 2
+    this.radiusX = Math.max(this.radiusX, this.radiusY)
+
+    const shape = new NodeShape({
+      radiusX: this.radiusX,
+      radiusY: this.radiusY,
+      color: 0xffffff,
+      borderColor: 0xbfbfbf,
+    })
+
+    const shadow = new NodeShadow({
+      radiusX: this.radiusX,
+      radiusY: this.radiusY,
+      texture: shadowTexture,
+    })
+
+    this.addChild(shadow)
+    this.addChild(shape)
+    this.addChild(label)
 
     this.on("click", this.handleClick)
 
