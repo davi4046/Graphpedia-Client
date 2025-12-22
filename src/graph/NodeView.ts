@@ -54,8 +54,6 @@ export class SingleItemNodeView extends Container implements NodeView {
     const shape = new NodeShape({
       radiusX: this.radiusX,
       radiusY: this.radiusY,
-      color: 0xffffff,
-      borderColor: 0xbfbfbf,
     })
 
     const shadow = new NodeShadow({
@@ -172,8 +170,6 @@ export class MultiItemNodeView extends Container implements NodeView {
     const shape = new NodeShape({
       radiusX: this.radiusX,
       radiusY: this.radiusY,
-      color: 0xaaffff,
-      borderColor: 0x76cccc,
     })
 
     const shadow = new NodeShadow({
@@ -220,16 +216,11 @@ class NodeLabel extends BitmapText {
 }
 
 class NodeShape extends Graphics {
-  constructor(props: {
-    radiusX: number
-    radiusY: number
-    color: number
-    borderColor: number
-  }) {
+  constructor(props: { radiusX: number; radiusY: number }) {
     super()
     this.ellipse(0, 0, props.radiusX, props.radiusY)
-    this.fill({ color: props.color })
-    this.stroke({ color: props.borderColor, width: 0.4 })
+    this.fill({ color: 0xffffff })
+    this.stroke({ color: 0xbfbfbf, width: 0.4 })
   }
 }
 
