@@ -190,7 +190,7 @@ export class MultiItemNodeView extends Container implements NodeView {
     const istate = new InteractionState()
 
     new ActivateBehavior(this, istate, () => {
-      new MultiItemDialog()
+      new MultiItemDialog(items)
     })
   }
 
@@ -444,27 +444,22 @@ class NodeContextMenu {
 }
 
 class MultiItemDialog {
-  constructor() {
+  constructor(items: NodeItem[]) {
     const content = html`
       <dialog open>
-        <article>
-          <header>
+        <article class="overflow-hidden text-sm">
+          <header class="h-10">
             <button id="close-button" aria-label="Close" rel="prev"></button>
-            <p>
-              <strong>Elizabeth II</strong> as <strong>head of state</strong>
-            </p>
+            <p>Group (${items.length} items)</p>
           </header>
-          <div class="flex max-h-96 flex-wrap gap-2 overflow-y-auto">
-            <div class="rounded-full bg-gray-200 px-2 py-1">Some item</div>
-            <div class="rounded-full bg-gray-200 px-2 py-1">Another item</div>
-            <div class="rounded-full bg-gray-200 px-2 py-1">Denmark-Norway</div>
-            <div class="rounded-full bg-gray-200 px-2 py-1">A third item</div>
-            <div class="rounded-full bg-gray-200 px-2 py-1">
-              A very very very long item
-            </div>
-            <div class="rounded-full bg-gray-200 px-2 py-1">
-              Roskilde Municipality
-            </div>
+          <div class="flex max-h-64 flex-wrap gap-2 overflow-y-auto">
+            ${items.map(
+              (item) => `
+              <div class="rounded-full bg-gray-200 px-2 py-1">
+                ${item.label ?? item.wikidataId}
+              </div>
+            `
+            )}
           </div>
         </article>
       </dialog>
