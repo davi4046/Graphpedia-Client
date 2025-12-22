@@ -186,6 +186,12 @@ export class MultiItemNodeView extends Container implements NodeView {
     this.addChild(shadow)
     this.addChild(shape)
     this.addChild(label)
+
+    const istate = new InteractionState()
+
+    new ActivateBehavior(this, istate, () => {
+      new MultiItemDialog()
+    })
   }
 
   intersectBorderFromPoint(fromX: number, fromY: number) {
@@ -433,6 +439,57 @@ class NodeContextMenu {
         document.body.removeChild(element)
         document.removeEventListener("pointerdown", handlePointerDown)
       },
+    })
+  }
+}
+
+class MultiItemDialog {
+  constructor() {
+    const content = html`
+      <dialog open>
+        <article>
+          <header>
+            <button id="close-button" aria-label="Close" rel="prev"></button>
+            <p>
+              <strong>Elizabeth II</strong> as <strong>head of state</strong>
+            </p>
+          </header>
+          <div class="flex max-h-96 flex-wrap gap-2 overflow-y-auto">
+            <div class="rounded-full bg-gray-200 px-2 py-1">Some item</div>
+            <div class="rounded-full bg-gray-200 px-2 py-1">Another item</div>
+            <div class="rounded-full bg-gray-200 px-2 py-1">Denmark-Norway</div>
+            <div class="rounded-full bg-gray-200 px-2 py-1">A third item</div>
+            <div class="rounded-full bg-gray-200 px-2 py-1">
+              A very very very long item
+            </div>
+            <div class="rounded-full bg-gray-200 px-2 py-1">
+              Roskilde Municipality
+            </div>
+          </div>
+        </article>
+      </dialog>
+    `
+
+    const element = document.createElement("div")
+    element.innerHTML = content
+    document.body.appendChild(element)
+
+    const dialog = element.querySelector("dialog")!
+    const closeButton = dialog.querySelector("#close-button")!
+
+    const closeDialog = () => {
+      dialog.close()
+      document.body.removeChild(element)
+    }
+
+    closeButton.addEventListener("click", closeDialog)
+
+    const openedAt = Date.now()
+
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog && Date.now() - openedAt > 200) {
+        closeDialog()
+      }
     })
   }
 }
