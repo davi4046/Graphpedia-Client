@@ -18,9 +18,19 @@ import {
 
 if (typeof window !== "undefined") {
   BitmapFont.install({
-    name: "NodeLabelFont",
+    name: "NodeFont",
     style: {
       fontFamily: "Arial",
+      fill: 0x000000,
+    },
+    resolution: 2,
+  })
+
+  BitmapFont.install({
+    name: "NodeFontItalic",
+    style: {
+      fontFamily: "Arial",
+      fontStyle: "italic",
       fill: 0x000000,
     },
     resolution: 2,
@@ -152,15 +162,10 @@ export class MultiItemNodeView extends Container implements NodeView {
   private radiusX: number
   private radiusY: number
 
-  constructor(
-    x: number,
-    y: number,
-    items: NodeItem[],
-    shadowTexture: Texture
-  ) {
+  constructor(x: number, y: number, items: NodeItem[], shadowTexture: Texture) {
     super({ x, y, interactive: true, cursor: "pointer" })
 
-    const label = new NodeLabel({ text: `${items.length} items` })
+    const label = new NodeLabel({ text: `${items.length} items`, italic: true })
 
     const { width, height } = label.getLocalBounds()
     this.radiusX = (width + 4) / 2
@@ -201,11 +206,11 @@ export class MultiItemNodeView extends Container implements NodeView {
 }
 
 class NodeLabel extends BitmapText {
-  constructor(props: { text: string }) {
+  constructor(props: { text: string; italic?: boolean }) {
     super({
       text: props.text,
       style: {
-        fontFamily: "NodeLabelFont",
+        fontFamily: props.italic ? "NodeFontItalic" : "NodeFont",
         fontSize: 5,
         align: "center",
       },
