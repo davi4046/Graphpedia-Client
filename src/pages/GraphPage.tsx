@@ -89,7 +89,7 @@ export default function GraphPage(props: GraphPageProps) {
 
   const metaTitle = () => {
     return targetItemLabel()
-      ? `${targetItemLabel()} | ${props.graph.label} - Graphpedia`
+      ? `${targetItemLabel()} - ${props.graph.label} - Graphpedia`
       : `${props.graph.label} - Graphpedia`
   }
 
@@ -98,11 +98,17 @@ export default function GraphPage(props: GraphPageProps) {
       <Title>{`${props.graph.label} - Graphpedia`}</Title>
       <Link rel="canonical" href={props.graph.url} />
       <Meta name="title" content={metaTitle()} />
-      <Meta name="description" content={props.graph.description} />
+      <Meta
+        name="description"
+        content="Graphpedia: The Graph-Based Encyclopedia"
+      />
       <Meta property="og:type" content="website" />
       <Meta property="og:url" content={props.graph.url} />
       <Meta property="og:title" content={metaTitle()} />
-      <Meta property="og:description" content={props.graph.description} />
+      <Meta
+        property="og:description"
+        content="Graphpedia: The Graph-Based Encyclopedia"
+      />
       <Meta property="og:image" content={`${SITE_URL}/og-image.png`} />
       <style>
         {`
