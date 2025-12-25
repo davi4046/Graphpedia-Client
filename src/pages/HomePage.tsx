@@ -28,18 +28,12 @@ export default function HomePage() {
       <Title>Graphpedia</Title>
       <Link rel="canonical" href={SITE_URL} />
       <Meta name="title" content="Graphpedia" />
-      <Meta
-        name="description"
-        content="Learn about things and ideas as you explore Graphpedia, with 1,600+ visual knowledge graphs based on Wikidata."
-      />
+      <Meta name="description" content="The Graph-Based Encyclopedia" />
       <Meta property="og:type" content="website" />
       <Meta property="og:url" content={SITE_URL} />
       <Meta property="og:title" content="Graphpedia" />
-      <Meta
-        property="og:description"
-        content="Learn about things and ideas as you explore Graphpedia."
-      />
       <Meta property="og:image" content={`${SITE_URL}/og-home.png`} />
+      <Meta property="og:description" content="The Graph-Based Encyclopedia" />
       <Header />
       <main class="pb-0">
         <section id="welcome" class="relative py-16">
