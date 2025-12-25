@@ -27,12 +27,21 @@ export default function HomePage() {
     <>
       <Title>Graphpedia</Title>
       <Link rel="canonical" href={SITE_URL} />
-      <Meta name="title" content="Graphpedia" />
-      <Meta name="description" content="The Graph-Based Encyclopedia" />
+      <Meta name="title" content="Graphpedia: The Graph-Based Encyclopedia" />
+      <Meta
+        name="description"
+        content="Find a graph for anything, from people and places to culture, ideas, and events. Explore knowledge visually."
+      />
       <Meta property="og:type" content="website" />
       <Meta property="og:url" content={SITE_URL} />
-      <Meta property="og:title" content="Graphpedia" />
-      <Meta property="og:description" content="The Graph-Based Encyclopedia" />
+      <Meta
+        property="og:title"
+        content="Graphpedia: The Graph-Based Encyclopedia"
+      />
+      <Meta
+        property="og:description"
+        content="Find a graph for anything, from people and places to culture, ideas, and events. Explore knowledge visually."
+      />
       <Meta property="og:image" content={`${SITE_URL}/og-image.png`} />
       <Header />
       <main class="pb-0">
