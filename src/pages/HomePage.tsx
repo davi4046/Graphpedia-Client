@@ -32,8 +32,8 @@ export default function HomePage() {
       <Meta property="og:type" content="website" />
       <Meta property="og:url" content={SITE_URL} />
       <Meta property="og:title" content="Graphpedia" />
-      <Meta property="og:image" content={`${SITE_URL}/og-home.png`} />
       <Meta property="og:description" content="The Graph-Based Encyclopedia" />
+      <Meta property="og:image" content={`${SITE_URL}/og-image.png`} />
       <Header />
       <main class="pb-0">
         <section id="welcome" class="relative py-16">
