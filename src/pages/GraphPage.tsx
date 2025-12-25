@@ -88,20 +88,9 @@ export default function GraphPage(props: GraphPageProps) {
   })
 
   const metaTitle = () => {
-    if (targetItemLabel()) {
-      return `${targetItemLabel()} | ${props.graph.label} - Graphpedia`
-    }
-    return `${props.graph.label} - Graphpedia`
-  }
-
-  const metaDescription = () => {
-    const baseDescription = `Wikidata property ${props.graph.id} \u2018${props.graph.label}\u2019 (${props.graph.description})`
-    const aliasesText = `, also known as ${props.graph.aliases.join(", ")}`
-    if (props.graph.aliases.length === 0) {
-      return `${baseDescription}.`
-    } else {
-      return `${baseDescription}${aliasesText}.`
-    }
+    return targetItemLabel()
+      ? `${targetItemLabel()} | ${props.graph.label} - Graphpedia`
+      : `${props.graph.label} - Graphpedia`
   }
 
   return (
@@ -109,11 +98,11 @@ export default function GraphPage(props: GraphPageProps) {
       <Title>{`${props.graph.label} - Graphpedia`}</Title>
       <Link rel="canonical" href={props.graph.url} />
       <Meta name="title" content={metaTitle()} />
-      <Meta name="description" content={metaDescription()} />
+      <Meta name="description" content={props.graph.description} />
       <Meta property="og:type" content="website" />
       <Meta property="og:url" content={props.graph.url} />
       <Meta property="og:title" content={metaTitle()} />
-      <Meta property="og:description" content={metaDescription()} />
+      <Meta property="og:description" content={props.graph.description} />
       <Meta property="og:image" content={`${SITE_URL}/og-graph.png`} />
       <style>
         {`
