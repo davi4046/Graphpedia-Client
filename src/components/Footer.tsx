@@ -23,17 +23,6 @@ export default function Footer() {
           </a>
         </li>
         <li class="list-none">
-          <a
-            href="https://graphpedia.flarum.cloud/"
-            target="_blank"
-            rel="noopener noreferrer"
-            role="button"
-            class="outline"
-          >
-            Forum
-          </a>
-        </li>
-        <li class="list-none">
           <a href="mailto:contact@graphpedia.org" role="button" class="outline">
             Contact
           </a>
