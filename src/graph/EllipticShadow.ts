@@ -1,6 +1,6 @@
 import { BlurFilter, Graphics, Renderer, RenderTexture, Texture } from "pixi.js"
 
-export interface EllipticalShadowOptions {
+export interface EllipticShadowOptions {
   radiusX: number
   radiusY: number
   color: number
@@ -14,7 +14,7 @@ export default class EllipticShadow {
 
   private margin: number = 12
 
-  constructor(options: EllipticalShadowOptions) {
+  constructor(options: EllipticShadowOptions) {
     const centerX = options.radiusX + this.margin
     const centerY = options.radiusY + this.margin
 
