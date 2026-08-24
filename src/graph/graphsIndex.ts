@@ -17,15 +17,7 @@ export default async function fetchGraphsIndex(
   const response = await fetch(url)
 
   if (!response.ok) {
-    const errorDetails = {
-      status: response.status,
-      statusText: response.statusText,
-      url,
-      headers: Object.fromEntries(response.headers.entries()),
-    }
-    throw new Error(
-      `Failed to fetch graphs index: ${response.status} ${response.statusText} - URL: ${url} - Details: ${JSON.stringify(errorDetails)}`
-    )
+    throw new Error(`HTTP Error: ${response.statusText}`)
   }
 
   const entries = await response.json()
