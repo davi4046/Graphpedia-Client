@@ -80,7 +80,7 @@ export default class GraphView extends EventEmitter<GraphViewEvents> {
       radiusY: 32,
       color: 0x000000,
       alpha: 0.5,
-      blurStrength: 12,
+      blurStrength: 5,
       blurQuality: 5,
     }).renderTexture(app.renderer)
 
